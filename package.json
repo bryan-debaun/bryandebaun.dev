@@ -6,6 +6,7 @@
     "dev": "next dev",
     "content:dev": "contentlayer dev",
     "build": "contentlayer build && next build",
+    "test:content": "node scripts/check-content.js",
     "start": "next start",
     "lint": "eslint"
   },

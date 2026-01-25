@@ -8,12 +8,16 @@ export default function Blog() {
                 <p>No posts yet.</p>
             ) : (
                 <ul>
-                    {allPosts.map((post) => (
-                        <li key={post._id}>
-                            <a href={`/blog/${post.slug}`}>{post.title}</a>
-                            {post.description ? <span> — {post.description}</span> : null}
-                        </li>
-                    ))}
+                    {allPosts.map((post) => {
+                        const slugParts = post.slug.split('/')
+                        const shortSlug = slugParts[slugParts.length - 1]
+                        return (
+                            <li key={post._id}>
+                                <a href={`/blog/${shortSlug}`}>{post.title}</a>
+                                {post.description ? <span> — {post.description}</span> : null}
+                            </li>
+                        )
+                    })}
                 </ul>
             )}
         </div>
