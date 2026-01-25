@@ -14,6 +14,7 @@ handoffs:
   - label: "bryandebaun.dev Coder"
     agent: "bryandebaun.dev-coder"
     prompt: "Implementation complete; hand over changes for test coverage and execution."
+---
 
 # bryandebaun.dev Tester
 

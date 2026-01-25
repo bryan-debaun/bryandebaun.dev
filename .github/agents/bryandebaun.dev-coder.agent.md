@@ -26,6 +26,7 @@ handoffs:
   - label: "bryandebaun.dev Support"
     agent: "bryandebaun.dev-support"
     prompt: "Request clarification or explanation about implemented code or patterns."
+---
 
 # bryandebaun.dev Coding Agent
 

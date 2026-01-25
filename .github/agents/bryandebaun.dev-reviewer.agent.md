@@ -12,6 +12,7 @@ handoffs:
   - label: "bryandebaun.dev Coder"
     agent: "bryandebaun.dev-coder"
     prompt: "Return to PR review after requested changes are implemented."
+---
 
 # bryandebaun.dev Reviewer
 
