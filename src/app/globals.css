@@ -290,7 +290,7 @@ html.dark .site-footer {
 .dark .btn--primary:hover {
   color: var(--color-white);
   border-color: var(--color-norwegian-200-dark);
-  box-shadow: 0 10px 24px rgba(0,0,0,0.7);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
   filter: brightness(1.03);
 }
 
@@ -320,7 +320,17 @@ html.dark .site-footer {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
 }
 
-/* Accent main page headings (h1) in dark mode to tie into the Norwegian palette */
+/* Accent main page headings (h1) — light and dark modes */
+main h1,
+main .prose.prose-norwegian h1,
+main .prose h1 {
+  /* Make H1s pop on the soft Norwegian light background */
+  color: var(--color-norwegian-700);
+  font-weight: 600;
+  transition: color .15s ease-in-out, transform .12s ease;
+}
+
+/* Dark mode override (keeps the earlier palette choice) */
 html.dark main h1,
 html.dark main .prose.prose-norwegian h1,
 html.dark main .prose h1 {
