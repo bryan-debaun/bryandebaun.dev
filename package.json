@@ -9,8 +9,15 @@
     "build": "npm run run-content && next build",
     "test:content": "node scripts/check-content.js",
     "verify:local": "npm run run-content && npm run test:content && npm run build && npm run lint",
+    "test": "vitest --run",
     "start": "next start",
     "lint": "eslint"
+  },
+  "vitest": {
+    "globals": true,
+    "test": {
+      "environment": "node"
+    }
   },
   "dependencies": {
     "next": "16.1.4",
@@ -28,6 +35,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^1.6.1"
   }
 }

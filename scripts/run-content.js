@@ -66,4 +66,9 @@ async function main() {
     }
 }
 
-main()
+// Export for unit testing. When executed directly, run the CLI entrypoint.
+module.exports = { runContent, main }
+
+if (require.main === module) {
+    main()
+}
