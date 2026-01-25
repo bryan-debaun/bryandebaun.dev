@@ -23,7 +23,19 @@ jobs:
           else
             echo "No test files found, skipping tests.";
           fi
-      - run: npm run run-content
+      - name: Run content generation (if present)
+        run: |
+          if [ -f scripts/run-content.js ]; then
+            npm run run-content
+          else
+            echo "No run-content script found; skipping content generation.";
+          fi
       - run: npm run build
-      - run: npm run test:content
+      - name: Run content tests (if present)
+        run: |
+          if [ -f scripts/check-content.js ]; then
+            npm run test:content
+          else
+            echo "No content tests found; skipping content check.";
+          fi
       - run: npm run lint

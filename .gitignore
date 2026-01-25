@@ -42,6 +42,3 @@ next-env.d.ts
 
 # contentlayer
 /.contentlayer
-
-# local tooling scripts (untracked; used only for local verification)
-/scripts
