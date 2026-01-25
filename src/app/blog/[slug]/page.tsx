@@ -38,15 +38,13 @@ export default function PostPage({ params }: { params: { slug: string } }) {
     )
   }
 
-  const MDXComponent = getComponentFromCode(post.body.code)
-
   return (
     <article className="prose">
       <h1>{post.title}</h1>
       {post.date ? <p className="text-sm text-muted">{String(post.date)}</p> : null}
       <div>
-        {/* Render the compiled MDX component */}
-        <MDXComponent />
+        {/* Render the compiled MDX component using `RenderCompiledMDX` (declared outside render) */}
+        <RenderCompiledMDX code={post.body.code} />
       </div>
     </article>
   )
