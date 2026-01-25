@@ -210,18 +210,24 @@ html.dark .site-footer {
 /* Light-mode neutral button (keeps existing bordered look) */
 .btn {
   background: transparent;
+  color: var(--color-norwegian-700);
+  border: 1px solid var(--color-norwegian-300);
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, color .12s ease;
 }
 
 .btn:hover {
-  filter: brightness(0.98);
+  transform: translateY(-1px);
+  background: rgba(0, 0, 0, 0.03);
+  box-shadow: 0 6px 18px rgba(16, 143, 139, 0.04);
 }
 
 /* Neon outline variant for a poppy, minimal CTA */
 .btn--neon {
   background: transparent;
-  color: var(--color-fjord-neon);
-  border: 1px solid var(--color-fjord-neon);
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+  /* use the Fjord blue for light mode so the CTA shows up on pale backgrounds */
+  color: var(--color-fjord-600);
+  border: 1px solid var(--color-fjord-600);
+  text-shadow: none;
 }
 
 .dark .btn--neon {
@@ -241,7 +247,7 @@ html.dark .site-footer {
 }
 
 .btn--neon:focus-visible {
-  outline: 3px solid rgba(102, 240, 200, 0.14);
+  outline: 3px solid rgba(23, 111, 196, 0.12);
   outline-offset: 3px;
 }
 
