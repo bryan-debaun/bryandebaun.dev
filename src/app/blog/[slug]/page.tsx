@@ -46,7 +46,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
 
     if (!post) {
         return (
-            <div className="prose">
+            <div className="prose prose-norwegian dark:prose-invert">
                 <h2>Post not found</h2>
                 <p>No post exists at this slug.</p>
             </div>
@@ -54,7 +54,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
     }
 
     return (
-        <article className="prose">
+        <article className="prose prose-norwegian dark:prose-invert">
             <h1>{post.title}</h1>
             {post.date ? <p className="text-sm text-muted">{String(post.date)}</p> : null}
             <div>

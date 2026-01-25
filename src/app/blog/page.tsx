@@ -2,7 +2,7 @@ import { allPosts } from 'contentlayer/generated'
 
 export default function Blog() {
     return (
-        <div className="prose">
+        <div className="prose prose-norwegian dark:prose-invert">
             <h2>Blog</h2>
             {allPosts.length === 0 ? (
                 <p>No posts yet.</p>

@@ -18,8 +18,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-50 dark:bg-black`}>
         <header className="border-b bg-white/50 dark:bg-transparent sticky top-0 z-10">
           <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
-            <Link href="/" className="text-lg font-semibold">Bryan DeBaun</Link>
-            <nav className="flex gap-4 items-center">
+            <Link href="/" className="text-lg font-semibold prose prose-norwegian dark:prose-invert">Bryan DeBaun</Link>
+            <nav className="flex gap-4 items-center prose prose-norwegian dark:prose-invert">
               <Link href="/about" className="text-sm">About</Link>
               <Link href="/projects" className="text-sm">Projects</Link>
               <Link href="/blog" className="text-sm">Blog</Link>
