@@ -1,6 +1,16 @@
 import React from 'react'
 import { allPosts } from 'contentlayer/generated'
 
+// Cache compiled components to avoid recreating them during render
+const componentCache = new Map<string, React.ComponentType<any>>()
+function getComponentFromCode(code: string) {
+  if (componentCache.has(code)) return componentCache.get(code)!
+  // eslint-disable-next-line no-new-func
+  const Comp = new Function('React', `${code}; return Component`)(React)
+  componentCache.set(code, Comp)
+  return Comp
+}
+
 export async function generateStaticParams() {
   return allPosts.map((p) => {
     const parts = p.slug.split('/')
@@ -21,11 +31,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
     )
   }
 
-  // Create a React component from the compiled code in `post.body.code`.
-  // Safe to execute on the server during SSG; we avoid client-side eval.
-  // The compiled code returns a `Component` as the default export.
-  // eslint-disable-next-line no-new-func
-  const MDXComponent = new Function('React', `${post.body.code}; return Component`)(React)
+  const MDXComponent = getComponentFromCode(post.body.code)
 
   return (
     <article className="prose">
