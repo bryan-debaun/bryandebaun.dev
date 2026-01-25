@@ -3,7 +3,16 @@
 import { useEffect, useState } from "react";
 
 export default function DarkModeToggle() {
-    const [isDark, setIsDark] = useState<boolean>(false);
+    // Lazily initialize from localStorage and prefers-color-scheme to avoid calling setState in an effect
+    const [isDark, setIsDark] = useState<boolean>(() => {
+        try {
+            const stored = typeof localStorage !== 'undefined' ? localStorage.getItem("theme") : null;
+            const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            return stored ? stored === "dark" : !!prefersDark;
+        } catch {
+            return false;
+        }
+    });
 
     function applyTheme(isDark: boolean) {
         if (isDark) {
@@ -15,17 +24,14 @@ export default function DarkModeToggle() {
         }
     }
 
+    // Keep DOM in sync with state without calling setState inside the effect
     useEffect(() => {
         try {
-            const stored = localStorage.getItem("theme");
-            const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-            const initial = stored ? stored === "dark" : prefersDark;
-            setIsDark(initial);
-            applyTheme(initial);
-        } catch (e) {
+            applyTheme(isDark);
+        } catch {
             // ignore
         }
-    }, []);
+    }, [isDark]);
 
     function toggleTheme() {
         setIsDark((prev) => {
