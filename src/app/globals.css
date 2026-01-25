@@ -40,9 +40,8 @@
   --color-fjord-500: #1e88e5;
   --color-fjord-600: #176fc4;
   --color-fjord-700: #0f538f;
-}
-
-@utility prose-norwegian {
+  /* neon accent for dark mode (subtler) */
+  --color-fjord-neon: #e6fbf4;
   --tw-prose-body: var(--color-norwegian-700);
   --tw-prose-headings: var(--color-norwegian-900);
   --tw-prose-lead: var(--color-norwegian-600);
@@ -114,7 +113,15 @@ html.light {
 
 /* Preserve dark mode behavior */
 .dark .site-header {
-  background: transparent;
+  /* subtle translucent overlay for separation on dark backgrounds */
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--color-norwegian-300-dark);
+  /* tint header text slightly to our Norwegian light tone */
+  color: var(--color-norwegian-100);
+}
+
+.dark .site-header a {
+  color: inherit;
 }
 
 .dark .site-nav a {
@@ -124,6 +131,24 @@ html.light {
 /* Footer color follows the current foreground variable (works in dark mode) */
 .site-footer {
   color: var(--foreground);
+}
+
+/* Accent main page headings (h1) in dark mode to tie into the Norwegian palette */
+html.dark main h1,
+html.dark main .prose.prose-norwegian h1,
+html.dark main .prose h1 {
+  /* Ensure this overrides typography plugin defaults */
+  color: var(--color-norwegian-300-dark) !important;
+  transition: color .15s ease-in-out;
+}
+
+/* Accent basic paragraph text in dark mode with a neon Fjord tint */
+html.dark main p,
+html.dark main .prose.prose-norwegian p,
+html.dark main .prose p,
+html.dark p {
+  color: var(--color-fjord-neon) !important;
+  transition: color .15s ease-in-out;
 }
 
 /* Ensure the whole viewport, including the html element, uses the configured background */
