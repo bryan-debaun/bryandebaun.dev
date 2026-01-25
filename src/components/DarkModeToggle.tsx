@@ -5,13 +5,23 @@ import { useEffect, useState } from "react";
 export default function DarkModeToggle() {
     const [isDark, setIsDark] = useState<boolean>(false);
 
+    function applyTheme(isDark: boolean) {
+        if (isDark) {
+            document.documentElement.classList.add("dark");
+            document.documentElement.classList.remove("light");
+        } else {
+            document.documentElement.classList.add("light");
+            document.documentElement.classList.remove("dark");
+        }
+    }
+
     useEffect(() => {
         try {
             const stored = localStorage.getItem("theme");
             const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
             const initial = stored ? stored === "dark" : prefersDark;
             setIsDark(initial);
-            document.documentElement.classList.toggle("dark", initial);
+            applyTheme(initial);
         } catch (e) {
             // ignore
         }
@@ -22,8 +32,7 @@ export default function DarkModeToggle() {
             const next = !prev;
             try {
                 localStorage.setItem("theme", next ? "dark" : "light");
-                if (next) document.documentElement.classList.add("dark");
-                else document.documentElement.classList.remove("dark");
+                applyTheme(next);
             } catch { }
             return next;
         });

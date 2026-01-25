@@ -6,7 +6,7 @@
 
 /* Norwegian / Fjord color palette (sea greens + blues) */
 :root {
-  --background: #ffffff;
+  --background: var(--color-norwegian-100);
   --foreground: #171717;
   --color-white: #ffffff;
 
@@ -80,19 +80,27 @@
 }
 
 /* Also support toggling dark mode via the `.dark` class on <html> */
-.dark {
+html.dark {
   --background: #0a0a0a;
   --foreground: #ededed;
 }
 
-/* Header and nav — subtle Norwegian styling */
-.site-header {
-  background-color: var(--color-norwegian-50);
-  border-bottom: 1px solid var(--color-norwegian-200);
+/* Explicit light mode override so user choice wins over prefers-color-scheme */
+html.light {
+  --background: var(--color-norwegian-100);
+  --foreground: #171717;
 }
+
+/* Header and nav — accent Norwegian styling */
+.site-header {
+  background-color: var(--color-norwegian-100);
+  border-bottom: 1px solid var(--color-norwegian-300);
+}
+
 .site-nav a {
   color: var(--color-norwegian-700);
 }
+
 .site-nav a:hover {
   color: var(--color-fjord-600);
 }
@@ -101,8 +109,19 @@
 .dark .site-header {
   background: transparent;
 }
+
 .dark .site-nav a {
   color: var(--color-norwegian-100);
+}
+
+/* Footer color follows the current foreground variable (works in dark mode) */
+.site-footer {
+  color: var(--foreground);
+}
+
+/* Ensure the whole viewport, including the html element, uses the configured background */
+html {
+  background: var(--background);
 }
 
 body {

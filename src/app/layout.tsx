@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-50 dark:bg-black`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}>
         <header className="site-header border-b sticky top-0 z-10">
           <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
             <Link href="/" className="text-lg font-semibold prose prose-norwegian dark:prose-invert">Bryan DeBaun</Link>
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
-        <footer className="mx-auto max-w-5xl px-6 py-8 text-sm text-zinc-600">© {new Date().getFullYear()} Bryan DeBaun — Built with Next.js + Tailwind</footer>
+        <footer className="site-footer mx-auto max-w-5xl px-6 py-8 text-sm">© {new Date().getFullYear()} Bryan DeBaun — Built with Next.js + Tailwind</footer>
       </body>
     </html>
   );
