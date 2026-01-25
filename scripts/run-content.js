@@ -6,7 +6,7 @@ const path = require('path')
 
 function runContent() {
     return new Promise((resolve, reject) => {
-        const cp = spawn('npx', ['contentlayer', 'build', '--clearCache'], { shell: true })
+        const cp = spawn('npx', ['contentlayer2', 'build', '--clearCache'], { shell: true })
 
         let out = ''
         let err = ''

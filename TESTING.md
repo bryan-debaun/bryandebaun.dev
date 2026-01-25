@@ -2,10 +2,10 @@ Testing checklist for Contentlayer integration (branch: `feature/contentlayer`, 
 
 1) Local build & lint
    - Run: `npm ci && npm run build && npm run lint`
-   - Expect: `contentlayer build` generates documents in `.contentlayer/generated` and `next build` completes; `eslint` exits 0.
+   - Expect: `contentlayer2 build` generates documents in `.contentlayer/generated` and `next build` completes; `eslint` exits 0.
 
 2) Content generation
-   - Run: `npm run content:dev` (or `npx contentlayer dev`)
+   - Run: `npm run content:dev` (or `npx contentlayer2 dev`)
    - Expect: generated docs appear under `.contentlayer/generated/Post` and `allPosts` includes `hello-world`.
 
 3) App verification
@@ -17,7 +17,7 @@ Testing checklist for Contentlayer integration (branch: `feature/contentlayer`, 
 
 Known issues
 
-- Contentlayer CLI emits an upstream `TypeError: The "code" argument must be of type number` during `contentlayer build` after generating docs; generation still succeeds. Track/patch upstream as follow-up.
+- Contentlayer CLI emits an upstream `TypeError: The "code" argument must be of type number` during `contentlayer2 build` after generating docs; generation still succeeds. Track/patch upstream as follow-up.
 
 How to report failures
 

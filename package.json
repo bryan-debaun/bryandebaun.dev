@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "content:dev": "contentlayer dev",
+    "content:dev": "contentlayer2 dev",
     "run-content": "node scripts/run-content.js",
     "build": "npm run run-content && next build",
     "test:content": "node scripts/check-content.js",
@@ -24,7 +24,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "contentlayer": "^0.3.4",
+    "contentlayer2": "0.4.5",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4",
