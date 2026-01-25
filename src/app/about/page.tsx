@@ -3,7 +3,7 @@ export default function About() {
         <div className="prose">
             <h2>About</h2>
             <p>
-                I'm Bryan DeBaun — a Senior Software Engineer who focuses on web
+                I&apos;m Bryan DeBaun — a Senior Software Engineer who focuses on web
                 platforms, cloud-native systems, and developer tools. I enjoy building
                 reliable systems and clear developer experiences.
             </p>
