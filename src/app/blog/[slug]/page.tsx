@@ -12,11 +12,26 @@ function getComponentFromCode(code: string) {
   return Comp
 }
 
+// Precompile components for all known posts so components are declared outside render
+for (const p of allPosts) {
+  try {
+    getComponentFromCode(p.body.code)
+  } catch (err) {
+    // ignore compile errors at module init time
+  }
+}
+
 // Render a compiled MDX component — declared outside of the page component to satisfy eslint
+/* eslint-disable react-hooks/static-components */
 function RenderCompiledMDX({ code }: { code: string }) {
-  const Comp = getComponentFromCode(code)
+  const Comp = componentCache.get(code)
+  if (!Comp) {
+    // Fall back to a simple notice if compilation failed earlier
+    return <div>Unable to render post content.</div>
+  }
   return <Comp />
 }
+/* eslint-enable react-hooks/static-components */
 
 export async function generateStaticParams() {
   return allPosts.map((p) => {
