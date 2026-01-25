@@ -5,9 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "content:dev": "contentlayer dev",
-    "build": "contentlayer build && next build",
+    "run-content": "node scripts/run-content.js",
+    "build": "npm run run-content && next build",
     "test:content": "node scripts/check-content.js",
-    "verify:local": "npx contentlayer build --clearCache || true && npm run test:content && npm run build && npm run lint",
+    "verify:local": "npm run run-content && npm run test:content && npm run build && npm run lint",
     "start": "next start",
     "lint": "eslint"
   },
