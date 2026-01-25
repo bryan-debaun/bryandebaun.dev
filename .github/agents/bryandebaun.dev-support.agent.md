@@ -3,6 +3,8 @@ description: "Support agent for bryandebaun.dev - where to find docs, repro step
 name: "bryandebaun.dev Support"
 docsFolder: "docs"
 tools:
+  - execute/runInTerminal
+  - execute/runTests
   - read/readFile
   - read/listCodeUsages
   - search
