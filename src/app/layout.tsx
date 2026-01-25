@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="site-header border-b sticky top-0 z-10">
           <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
             <Link href="/" className="text-lg font-semibold prose prose-norwegian dark:prose-invert">Bryan DeBaun</Link>
-            <nav className="site-nav flex gap-4 items-center prose prose-norwegian dark:prose-invert">
+            <nav className="site-nav flex gap-6 items-center prose prose-norwegian dark:prose-invert">
               <Link href="/about" className="text-sm">About</Link>
               <Link href="/projects" className="text-sm">Projects</Link>
               <Link href="/blog" className="text-sm">Blog</Link>

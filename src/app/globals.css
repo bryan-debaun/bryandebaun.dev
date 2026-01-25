@@ -103,12 +103,47 @@ html.light {
   border-bottom: 1px solid var(--color-norwegian-300);
 }
 
-.site-nav a {
-  color: var(--color-norwegian-700);
+.site-nav a,
+.site-nav a * {
+  color: var(--color-norwegian-700) !important;
+  /* muted teal for better distinction */
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  font-weight: 600;
+  padding: 0.125rem 0.25rem;
+  padding-bottom: 0.25rem;
+  /* space for underline */
+  text-decoration: none;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em;
+}
+
+/* Animated underline */
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 0;
+  background: var(--color-fjord-600);
+  border-radius: 2px;
+  transition: width .18s ease-in-out;
+}
+
+.site-nav a:hover::after,
+.site-nav a:focus-visible::after {
+  width: 100%;
 }
 
 .site-nav a:hover {
   color: var(--color-fjord-600);
+}
+
+.site-nav a:focus-visible {
+  outline: 3px solid rgba(23, 111, 196, 0.12);
+  outline-offset: 3px;
 }
 
 /* Preserve dark mode behavior */
@@ -125,7 +160,15 @@ html.light {
 }
 
 .dark .site-nav a {
-  color: var(--color-norwegian-100);
+  color: var(--color-fjord-neon);
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+  transition: color .12s ease, text-shadow .12s ease;
+}
+
+.dark .site-nav a:hover {
+  color: var(--color-white);
+  text-shadow: none;
 }
 
 /* Footer color follows the Norwegian muted teal (light) and a soft mint in dark mode */
