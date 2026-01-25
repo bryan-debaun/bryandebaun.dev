@@ -44,4 +44,6 @@ next-env.d.ts
 /.contentlayer
 
 # handoffs docs
-docs/handoffs
+/docs/handoffs
+# PR bodies
+/.github/pr-bodies
