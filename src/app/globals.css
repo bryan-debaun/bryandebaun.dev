@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Allow toggling dark mode via the `.dark` class on the <html> element */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Norwegian / Fjord color palette (sea greens + blues) */
 :root {
   --background: #ffffff;
@@ -74,6 +77,12 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
+}
+
+/* Also support toggling dark mode via the `.dark` class on <html> */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 body {
