@@ -148,7 +148,7 @@ html.light {
 .dark .btn {
   background: var(--color-norwegian-400-dark);
   color: var(--color-white);
-  border: none !important;
+  border: 1px solid var(--color-norwegian-300-dark);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
   -webkit-font-smoothing: antialiased;
 }
@@ -156,6 +156,7 @@ html.light {
 .dark .btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+  border-color: var(--color-norwegian-200-dark);
 }
 
 /* Light-mode neutral button (keeps existing bordered look) */
@@ -165,6 +166,35 @@ html.light {
 
 .btn:hover {
   filter: brightness(0.98);
+}
+
+/* Neon outline variant for a poppy, minimal CTA */
+.btn--neon {
+  background: transparent;
+  color: var(--color-fjord-neon);
+  border: 1px solid var(--color-fjord-neon);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+.dark .btn--neon {
+  color: var(--color-fjord-neon);
+  border-color: var(--color-fjord-neon);
+  /* subtle neon fill to separate from page background */
+  background: rgba(230, 251, 244, 0.06);
+  /* soft mint fill */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.dark .btn--neon:hover {
+  background: rgba(230, 251, 244, 0.12);
+  color: var(--color-white);
+  border-color: var(--color-fjord-neon);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+}
+
+.btn--neon:focus-visible {
+  outline: 3px solid rgba(102, 240, 200, 0.14);
+  outline-offset: 3px;
 }
 
 /* Accent main page headings (h1) in dark mode to tie into the Norwegian palette */
