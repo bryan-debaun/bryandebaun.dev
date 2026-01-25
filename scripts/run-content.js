@@ -4,9 +4,9 @@ const { spawn } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 
-function runContent() {
+function runContentWithSpawn(spawnFn) {
     return new Promise((resolve, reject) => {
-        const cp = spawn('npx', ['contentlayer2', 'build', '--clearCache'], { shell: true })
+        const cp = spawnFn('npx', ['contentlayer2', 'build', '--clearCache'], { shell: true })
 
         let out = ''
         let err = ''
@@ -56,6 +56,10 @@ function runContent() {
     })
 }
 
+function runContent() {
+    return runContentWithSpawn(spawn)
+}
+
 async function main() {
     try {
         await runContent()
@@ -67,7 +71,7 @@ async function main() {
 }
 
 // Export for unit testing. When executed directly, run the CLI entrypoint.
-module.exports = { runContent, main }
+module.exports = { runContent, runContentWithSpawn, main }
 
 if (require.main === module) {
     main()
