@@ -128,9 +128,14 @@ html.light {
   color: var(--color-norwegian-100);
 }
 
-/* Footer color follows the current foreground variable (works in dark mode) */
+/* Footer color follows the Norwegian muted teal (light) and a soft mint in dark mode */
 .site-footer {
-  color: var(--foreground);
+  color: var(--color-norwegian-700);
+}
+
+html.dark .site-footer {
+  color: rgba(230, 247, 247, 0.85);
+  /* soft mint tint on dark background */
 }
 
 /* Button styles (accent solid in dark mode) */
