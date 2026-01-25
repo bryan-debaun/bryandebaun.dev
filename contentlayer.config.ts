@@ -6,7 +6,7 @@ export const Post = defineDocumentType(() => ({
   contentType: 'mdx',
   fields: {
     title: { type: 'string', required: true },
-    published: { type: 'string', required: false },
+    published: { type: 'boolean', default: true },
     date: { type: 'date', required: false },
     description: { type: 'string', required: false },
   },
@@ -21,4 +21,5 @@ export const Post = defineDocumentType(() => ({
 export default makeSource({
   contentDirPath: 'src/content',
   documentTypes: [Post],
+  disableImportAliasWarning: true,
 })
