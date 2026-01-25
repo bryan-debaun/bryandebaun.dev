@@ -11,7 +11,8 @@
     "verify:local": "npm run run-content && npm run test:content && npm run build && npm run lint",
     "test": "vitest --run",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "prepare": "husky install"
   },
   "vitest": {
     "globals": true,
@@ -42,6 +43,7 @@
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4",
     "typescript": "5.9.3",
-    "vitest": "^1.6.1"
+    "vitest": "^1.6.1",
+    "husky": "^9"
   }
 }

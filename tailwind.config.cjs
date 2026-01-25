@@ -14,5 +14,8 @@ module.exports = {
             },
         },
     },
+    // `require()` is used by Tailwind config (CJS) and triggers the
+    // @typescript-eslint/no-require-imports rule in our linter; disable it for this line.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     plugins: [require('@tailwindcss/typography')],
 };

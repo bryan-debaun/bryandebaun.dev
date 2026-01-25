@@ -44,10 +44,10 @@ next-env.d.ts
 /.contentlayer
 
 # handoffs docs
-/docs/handoffs
-# PR bodies
-/.github/pr-bodies
+/docs/handoffs/*.md
 
 # Agent-generated markdown (ignore to avoid clutter)
 /CONTRIBUTING.md
 /.github/pr-bodies/*.md
+*.md
+

@@ -13,8 +13,9 @@ export default function Button({ href, className = '', children, ...props }: But
 
     if (href) {
         // Render as a link for navigation
+        // Only pass className and children to next/link to avoid typing `any`
         return (
-            <Link href={href} className={classes} {...(props as any)}>
+            <Link href={href} className={classes}>
                 {children}
             </Link>
         )
