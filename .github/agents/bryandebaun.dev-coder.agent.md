@@ -48,6 +48,7 @@ Short, practical guidance for implementing changes in this repository. Use this 
 1. Ensure clean working state and up-to-date `main`.
 2. Establish a test baseline and record results.
 3. Create a feature branch (e.g., `feature/[short-desc]`) and push upstream.
+4. Local verification: run `npm ci` then `npm run verify:local` before pushing — this runs content generation, content checks, the production build, and lint. A Husky pre-push hook is available (if installed) to run this automatically; otherwise run the commands manually to mirror CI and reduce failures.
 
 ## Development workflow
 - Work on a feature branch; never commit directly to `main`.
