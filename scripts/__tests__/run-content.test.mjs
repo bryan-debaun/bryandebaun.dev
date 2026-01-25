@@ -21,7 +21,11 @@ function makeFakeProcess({ stdoutData = '', stderrData = '', closeCode = 0, emit
   process.nextTick(() => {
     if (stdoutData) cp.stdout.emit('data', Buffer.from(stdoutData))
     if (stderrData) cp.stderr.emit('data', Buffer.from(stderrData))
-    if (emitError) cp.emit('error', emitError)
+    if (emitError) {
+      cp.emit('error', emitError)
+      // do not emit close after error to simulate failing spawn
+      return
+    }
     cp.emit('close', closeCode)
   })
   return cp

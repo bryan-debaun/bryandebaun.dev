@@ -16,7 +16,8 @@
   "vitest": {
     "globals": true,
     "test": {
-      "environment": "node"
+      "environment": "node",
+      "threads": false
     }
   },
   "dependencies": {
