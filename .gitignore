@@ -47,3 +47,7 @@ next-env.d.ts
 /docs/handoffs
 # PR bodies
 /.github/pr-bodies
+
+# Agent-generated markdown (ignore to avoid clutter)
+/CONTRIBUTING.md
+/.github/pr-bodies/*.md
