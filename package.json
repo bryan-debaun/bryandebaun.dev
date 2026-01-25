@@ -4,9 +4,21 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "content:dev": "contentlayer2 dev",
+    "run-content": "node scripts/run-content.js",
+    "build": "npm run run-content && next build",
+    "test:content": "node scripts/check-content.js",
+    "verify:local": "npm run run-content && npm run test:content && npm run build && npm run lint",
+    "test": "vitest --run",
     "start": "next start",
     "lint": "eslint"
+  },
+  "vitest": {
+    "globals": true,
+    "test": {
+      "environment": "node",
+      "threads": false
+    }
   },
   "dependencies": {
     "next": "16.1.4",
@@ -14,13 +26,17 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@contentlayer/source-files": "^0.3.4",
+    "@mdx-js/mdx": "^3.1.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "contentlayer2": "0.4.5",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^1.6.1"
   }
 }
