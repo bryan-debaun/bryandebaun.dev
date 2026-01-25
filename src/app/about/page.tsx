@@ -1,6 +1,6 @@
 export default function About() {
     return (
-        <div className="prose">
+        <div className="prose prose-norwegian dark:prose-invert">
             <h2>About</h2>
             <p>
                 I&apos;m Bryan DeBaun — a Senior Software Engineer who focuses on web

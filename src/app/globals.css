@@ -1,22 +1,449 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
+/* Allow toggling dark mode via the `.dark` class on the <html> element */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Norwegian / Fjord color palette (sea greens + blues) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Default background / foreground (light mode) */
+  --background: var(--color-norwegian-100);
+  --foreground: var(--color-norwegian-700);
+  --color-white: #ffffff;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Norwegian sea/teal palette */
+  --color-norwegian-50: #f2fbfb;
+  --color-norwegian-100: #e6f7f7;
+  --color-norwegian-200: #bfeff0;
+  --color-norwegian-300: #99e7e7;
+  --color-norwegian-400: #40d7d0;
+  --color-norwegian-500: #00b9b3;
+  --color-norwegian-600: #00908a;
+  --color-norwegian-700: #00706d;
+  --color-norwegian-800: #00554f;
+  --color-norwegian-900: #003d3a;
+
+  /* Dark-mode variants for the Norwegian palette (accents/overlays on dark bg) */
+  --color-norwegian-50-dark: #062a29;
+  /* deep muted teal */
+  --color-norwegian-100-dark: #083634;
+  --color-norwegian-200-dark: #084c4a;
+  --color-norwegian-300-dark: #0b6b68;
+  --color-norwegian-400-dark: #108f8b;
+  --color-norwegian-500-dark: #19b3ac;
+
+  /* Semantic dark background/foreground */
+  --color-bg-dark: #0a0a0a;
+  --color-fg-dark: #ededed;
+
+  /* Fjord deep blues */
+  --color-fjord-500: #1e88e5;
+  --color-fjord-600: #176fc4;
+  --color-fjord-700: #0f538f;
+  /* neon accent for dark mode (subtler) */
+  --color-fjord-neon: #e6fbf4;
+  --tw-prose-body: var(--color-norwegian-700);
+  --tw-prose-headings: var(--color-norwegian-900);
+  --tw-prose-lead: var(--color-norwegian-600);
+  --tw-prose-links: var(--color-fjord-600);
+  --tw-prose-bold: var(--color-norwegian-900);
+  --tw-prose-counters: var(--color-norwegian-600);
+  --tw-prose-bullets: var(--color-norwegian-400);
+  --tw-prose-hr: var(--color-norwegian-300);
+  --tw-prose-quotes: var(--color-norwegian-900);
+  --tw-prose-quote-borders: var(--color-norwegian-300);
+  --tw-prose-captions: var(--color-norwegian-700);
+  --tw-prose-code: var(--color-fjord-600);
+  --tw-prose-pre-code: var(--color-norwegian-100);
+  --tw-prose-pre-bg: var(--color-norwegian-900);
+  --tw-prose-th-borders: var(--color-norwegian-300);
+  --tw-prose-td-borders: var(--color-norwegian-200);
+
+  /* invert / dark mode */
+  --tw-prose-invert-body: var(--color-norwegian-100);
+  --tw-prose-invert-headings: var(--color-white);
+  --tw-prose-invert-lead: var(--color-norwegian-300);
+  --tw-prose-invert-links: var(--color-white);
+  --tw-prose-invert-bold: var(--color-white);
+  --tw-prose-invert-counters: var(--color-norwegian-400);
+  --tw-prose-invert-bullets: var(--color-norwegian-600);
+  --tw-prose-invert-hr: var(--color-norwegian-700);
+  --tw-prose-invert-quotes: var(--color-norwegian-100);
+  --tw-prose-invert-quote-borders: var(--color-norwegian-700);
+  --tw-prose-invert-captions: var(--color-norwegian-400);
+  --tw-prose-invert-code: var(--color-white);
+  --tw-prose-invert-pre-code: var(--color-norwegian-300);
+  --tw-prose-invert-pre-bg: rgb(0 0 0 / 50%);
+  --tw-prose-invert-th-borders: var(--color-norwegian-600);
+  --tw-prose-invert-td-borders: var(--color-norwegian-700);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--color-norwegian-100);
+    --foreground: var(--color-fg-dark);
   }
+}
+
+/* Also support toggling dark mode via the `.dark` class on <html> */
+html.dark {
+  --background: var(--color-bg-dark);
+  --foreground: var(--color-fg-dark);
+}
+
+/* Explicit light mode override so user choice wins over prefers-color-scheme */
+html.light {
+  --background: var(--color-norwegian-100);
+  --foreground: var(--foreground);
+}
+
+/* Header and nav — accent Norwegian styling */
+.site-header {
+  background-color: var(--color-norwegian-50);
+  border-bottom: 1px solid var(--color-norwegian-300);
+  transition: background-color .15s ease, border-color .15s ease, color .12s ease;
+}
+
+.site-nav a,
+.site-nav a * {
+  color: var(--color-norwegian-700) !important;
+  /* muted teal for better distinction */
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  font-weight: 600;
+  padding: 0.125rem 0.25rem;
+  padding-bottom: 0.25rem;
+  /* space for underline */
+  text-decoration: none;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em;
+  transition: color .12s ease, text-shadow .12s ease, transform .12s ease;
+}
+
+/* Animated underline */
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  height: 2px;
+  width: 0;
+  background: var(--color-fjord-600);
+  border-radius: 2px;
+  transition: width .18s ease-in-out;
+}
+
+.site-nav a:hover::after,
+.site-nav a:focus-visible::after {
+  width: 100%;
+}
+
+.site-nav a:hover {
+  color: var(--color-fjord-600);
+}
+
+.site-nav a:focus-visible {
+  outline: 3px solid rgba(23, 111, 196, 0.12);
+  outline-offset: 3px;
+}
+
+/* Preserve dark mode behavior */
+.dark .site-header {
+  /* subtle translucent overlay for separation on dark backgrounds */
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--color-norwegian-300-dark);
+  /* tint header text slightly to our Norwegian light tone */
+  color: var(--color-norwegian-100);
+}
+
+.dark .site-header a {
+  color: inherit;
+}
+
+.dark .site-nav a {
+  color: var(--color-fjord-neon);
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+  transition: color .12s ease, text-shadow .12s ease;
+}
+
+.dark .site-nav a:hover {
+  color: var(--color-white);
+  text-shadow: none;
+}
+
+/* Footer color follows the Norwegian muted teal (light) and a soft mint in dark mode */
+.site-footer {
+  color: var(--color-norwegian-700);
+  transition: color .12s ease;
+}
+
+html.dark .site-footer {
+  color: rgba(230, 247, 247, 0.85);
+  /* soft mint tint on dark background */
+}
+
+/* Smooth transitions for typographic links and interactive text */
+.prose a,
+main a,
+.site-nav a {
+  transition: color .12s ease, background-color .12s ease, text-decoration-color .12s ease;
+}
+
+/* Button styles (accent solid in dark mode) */
+.btn {
+  text-decoration: none;
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, color .12s ease;
+}
+
+.btn:focus-visible {
+  outline: 3px solid rgba(16, 143, 139, 0.22);
+  outline-offset: 3px;
+}
+
+/* Dark-mode accent: solid teal button */
+.dark .btn {
+  background: var(--color-norwegian-400-dark);
+  color: var(--color-white);
+  border: 1px solid var(--color-norwegian-300-dark);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  -webkit-font-smoothing: antialiased;
+}
+
+.dark .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+  border-color: var(--color-norwegian-200-dark);
+}
+
+/* Light-mode neutral button (keeps existing bordered look) */
+.btn {
+  background: transparent;
+  color: var(--color-norwegian-700);
+  border: 1px solid var(--color-norwegian-300);
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, color .12s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  background: rgba(0, 0, 0, 0.03);
+  box-shadow: 0 6px 18px rgba(16, 143, 139, 0.04);
+}
+
+/* Neon outline variant for a poppy, minimal CTA */
+.btn--neon {
+  background: transparent;
+  /* use the Fjord blue for light mode so the CTA shows up on pale backgrounds */
+  color: var(--color-fjord-600);
+  border: 1px solid var(--color-fjord-600);
+  text-shadow: none;
+}
+
+.dark .btn--neon {
+  color: var(--color-fjord-neon);
+  border-color: var(--color-fjord-neon);
+  /* subtle neon fill to separate from page background */
+  background: rgba(230, 251, 244, 0.06);
+  /* soft mint fill */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.dark .btn--neon:hover {
+  background: rgba(230, 251, 244, 0.12);
+  color: var(--color-white);
+  border-color: var(--color-fjord-neon);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+}
+
+.btn--neon:focus-visible {
+  outline: 3px solid rgba(23, 111, 196, 0.12);
+  outline-offset: 3px;
+}
+
+/* Button tokens used for primary/outline variants */
+:root {
+  --btn-accent: var(--color-norwegian-400);
+  --btn-accent-strong: var(--color-norwegian-500);
+  --btn-accent-dark: var(--color-norwegian-400-dark);
+}
+
+/* Primary (filled) button for light mode */
+.btn--primary {
+  display: inline-block;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  color: var(--color-white);
+  background: linear-gradient(180deg, var(--btn-accent), var(--btn-accent-strong));
+  border: 1px solid var(--btn-accent);
+  box-shadow: 0 6px 18px rgba(16, 143, 139, 0.08);
+}
+
+.btn--primary:hover {
+  transform: translateY(-1px);
+  /* Use a stronger accent on hover and ensure the text stays white for readability */
+  background: linear-gradient(180deg, var(--btn-accent-strong), var(--btn-accent));
+  color: var(--color-white);
+  border-color: var(--btn-accent-strong);
+  box-shadow: 0 10px 24px rgba(16, 143, 139, 0.12);
+}
+
+.btn--primary:active {
+  transform: translateY(0);
+  background: var(--btn-accent-strong);
+  color: var(--color-white);
+  filter: none;
+}
+
+/* Dark-mode hover tweak: subtle brighten while maintaining white text */
+.dark .btn--primary:hover {
+  color: var(--color-white);
+  border-color: var(--color-norwegian-200-dark);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+  filter: brightness(1.03);
+}
+
+/* Outline / secondary CTA */
+.btn--outline {
+  background: transparent;
+  color: var(--btn-accent);
+  border: 1px solid var(--btn-accent);
+}
+
+.btn--outline:hover {
+  background: rgba(64, 215, 208, 0.06);
+}
+
+/* Focus and accessibility (uniform for variants) */
+.btn--primary:focus-visible,
+.btn--outline:focus-visible {
+  outline: 3px solid rgba(16, 143, 139, 0.12);
+  outline-offset: 3px;
+}
+
+/* Preserve dark-mode variants */
+.dark .btn--primary {
+  background: var(--btn-accent-dark);
+  color: var(--color-white);
+  border-color: var(--color-norwegian-300-dark);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+/* Accent main page headings (h1) — light and dark modes */
+main h1,
+main .prose.prose-norwegian h1,
+main .prose h1 {
+  /* Make H1s pop on the soft Norwegian light background */
+  color: var(--color-norwegian-700);
+  font-weight: 600;
+  transition: color .15s ease-in-out, transform .12s ease;
+}
+
+/* Subheadings (h2) — slightly less prominent than h1 */
+main h2,
+main .prose.prose-norwegian h2,
+main .prose h2 {
+  color: var(--color-norwegian-600);
+  font-weight: 500;
+  font-size: 1.375rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.6rem;
+  transition: color .12s ease, transform .12s ease;
+}
+
+/* Dark mode overrides for headings */
+html.dark main h1,
+html.dark main .prose.prose-norwegian h1,
+html.dark main .prose h1 {
+  /* Ensure this overrides typography plugin defaults */
+  color: var(--color-norwegian-300-dark) !important;
+  transition: color .15s ease-in-out;
+}
+
+html.dark main h2,
+html.dark main .prose.prose-norwegian h2,
+html.dark main .prose h2 {
+  color: var(--color-norwegian-200-dark);
+  font-weight: 500;
+  transition: color .12s ease;
+}
+
+/* Lists — markers and spacing tuned for both modes */
+main ul,
+main .prose ul,
+.prose ul {
+  margin-left: 1.25rem;
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+/* Ensure list items use the same readable paragraph color (light mode) */
+main li,
+main .prose li,
+.prose li {
+  color: var(--color-norwegian-700);
+  transition: color .12s ease;
+}
+
+/* Ensure paragraphs inside list items inherit properly */
+main li p,
+main .prose li p,
+.prose li p {
+  color: inherit;
+}
+
+/* Marker color (modern browsers support ::marker) */
+main li::marker,
+main .prose li::marker,
+.prose li::marker {
+  color: var(--color-norwegian-400);
+}
+
+/* Dark-mode list color + marker tweak */
+html.dark main li,
+html.dark main .prose li,
+html.dark .prose li {
+  color: var(--color-fjord-neon) !important;
+}
+
+html.dark main li::marker,
+html.dark main .prose li::marker,
+html.dark .prose li::marker {
+  color: var(--color-norwegian-400-dark);
+}
+
+/* Paragraph styles — light-mode judgement (muted but readable) */
+main p,
+main .prose.prose-norwegian p,
+main .prose p,
+p {
+  color: var(--color-norwegian-700);
+  transition: color .15s ease-in-out;
+  line-height: 1.75;
+}
+
+/* Lead / intro paragraph (judgemented for emphasis) */
+main p.lead,
+main .prose p.lead,
+.prose .lead {
+  color: var(--color-norwegian-600);
+  font-weight: 500;
+  font-size: 1.125rem;
+}
+
+/* Accent basic paragraph text in dark mode with a neon Fjord tint */
+html.dark main p,
+html.dark main .prose.prose-norwegian p,
+html.dark main .prose p,
+html.dark p {
+  color: var(--color-fjord-neon) !important;
+  transition: color .15s ease-in-out;
+}
+
+/* Ensure the whole viewport, including the html element, uses the configured background */
+html {
+  background: var(--background);
 }
 
 body {
