@@ -133,6 +133,40 @@ html.light {
   color: var(--foreground);
 }
 
+/* Button styles (accent solid in dark mode) */
+.btn {
+  text-decoration: none;
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, color .12s ease;
+}
+
+.btn:focus-visible {
+  outline: 3px solid rgba(16, 143, 139, 0.22);
+  outline-offset: 3px;
+}
+
+/* Dark-mode accent: solid teal button */
+.dark .btn {
+  background: var(--color-norwegian-400-dark);
+  color: var(--color-white);
+  border: none !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  -webkit-font-smoothing: antialiased;
+}
+
+.dark .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+}
+
+/* Light-mode neutral button (keeps existing bordered look) */
+.btn {
+  background: transparent;
+}
+
+.btn:hover {
+  filter: brightness(0.98);
+}
+
 /* Accent main page headings (h1) in dark mode to tie into the Norwegian palette */
 html.dark main h1,
 html.dark main .prose.prose-norwegian h1,
