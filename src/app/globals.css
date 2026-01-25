@@ -101,6 +101,7 @@ html.light {
 .site-header {
   background-color: var(--color-norwegian-50);
   border-bottom: 1px solid var(--color-norwegian-300);
+  transition: background-color .15s ease, border-color .15s ease, color .12s ease;
 }
 
 .site-nav a,
@@ -117,6 +118,7 @@ html.light {
   text-decoration: none;
   text-transform: uppercase !important;
   letter-spacing: 0.06em;
+  transition: color .12s ease, text-shadow .12s ease, transform .12s ease;
 }
 
 /* Animated underline */
@@ -174,11 +176,19 @@ html.light {
 /* Footer color follows the Norwegian muted teal (light) and a soft mint in dark mode */
 .site-footer {
   color: var(--color-norwegian-700);
+  transition: color .12s ease;
 }
 
 html.dark .site-footer {
   color: rgba(230, 247, 247, 0.85);
   /* soft mint tint on dark background */
+}
+
+/* Smooth transitions for typographic links and interactive text */
+.prose a,
+main a,
+.site-nav a {
+  transition: color .12s ease, background-color .12s ease, text-decoration-color .12s ease;
 }
 
 /* Button styles (accent solid in dark mode) */
@@ -337,6 +347,25 @@ html.dark main .prose h1 {
   /* Ensure this overrides typography plugin defaults */
   color: var(--color-norwegian-300-dark) !important;
   transition: color .15s ease-in-out;
+}
+
+/* Paragraph styles — light-mode judgement (muted but readable) */
+main p,
+main .prose.prose-norwegian p,
+main .prose p,
+p {
+  color: var(--color-norwegian-700);
+  transition: color .15s ease-in-out;
+  line-height: 1.75;
+}
+
+/* Lead / intro paragraph (judgemented for emphasis) */
+main p.lead,
+main .prose p.lead,
+.prose .lead {
+  color: var(--color-norwegian-600);
+  font-weight: 500;
+  font-size: 1.125rem;
 }
 
 /* Accent basic paragraph text in dark mode with a neon Fjord tint */
