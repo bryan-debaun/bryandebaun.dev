@@ -340,13 +340,77 @@ main .prose h1 {
   transition: color .15s ease-in-out, transform .12s ease;
 }
 
-/* Dark mode override (keeps the earlier palette choice) */
+/* Subheadings (h2) — slightly less prominent than h1 */
+main h2,
+main .prose.prose-norwegian h2,
+main .prose h2 {
+  color: var(--color-norwegian-600);
+  font-weight: 500;
+  font-size: 1.375rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.6rem;
+  transition: color .12s ease, transform .12s ease;
+}
+
+/* Dark mode overrides for headings */
 html.dark main h1,
 html.dark main .prose.prose-norwegian h1,
 html.dark main .prose h1 {
   /* Ensure this overrides typography plugin defaults */
   color: var(--color-norwegian-300-dark) !important;
   transition: color .15s ease-in-out;
+}
+
+html.dark main h2,
+html.dark main .prose.prose-norwegian h2,
+html.dark main .prose h2 {
+  color: var(--color-norwegian-200-dark);
+  font-weight: 500;
+  transition: color .12s ease;
+}
+
+/* Lists — markers and spacing tuned for both modes */
+main ul,
+main .prose ul,
+.prose ul {
+  margin-left: 1.25rem;
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+/* Ensure list items use the same readable paragraph color (light mode) */
+main li,
+main .prose li,
+.prose li {
+  color: var(--color-norwegian-700);
+  transition: color .12s ease;
+}
+
+/* Ensure paragraphs inside list items inherit properly */
+main li p,
+main .prose li p,
+.prose li p {
+  color: inherit;
+}
+
+/* Marker color (modern browsers support ::marker) */
+main li::marker,
+main .prose li::marker,
+.prose li::marker {
+  color: var(--color-norwegian-400);
+}
+
+/* Dark-mode list color + marker tweak */
+html.dark main li,
+html.dark main .prose li,
+html.dark .prose li {
+  color: var(--color-fjord-neon) !important;
+}
+
+html.dark main li::marker,
+html.dark main .prose li::marker,
+html.dark .prose li::marker {
+  color: var(--color-norwegian-400-dark);
 }
 
 /* Paragraph styles — light-mode judgement (muted but readable) */
