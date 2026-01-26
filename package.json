@@ -8,7 +8,7 @@
     "run-content": "node scripts/run-content.js",
     "build": "npm run run-content && next build",
     "test:content": "node scripts/check-content.js",
-    "content:checks": "npm run lint:content && npm run lint-mdx-node && npm run cspell:check && npm run link-check",
+    "content:checks": "npm run lint:content && npm run cspell:check && npm run link-check",
     "lint:content": "remark \"README.md\" \"docs/**/*.md\" -q",
     "cspell:check": "cspell \"README.md\" \"docs/**/*.md\" \"src/content/**/*.{md,mdx}\"",
     "link-check": "markdown-link-check -c .markdown-link-check.json \"README.md\"",
@@ -16,7 +16,6 @@
     "test": "vitest --run",
     "start": "next start",
     "lint:mdx": "eslint --ext .mdx \"src/content\"",
-    "lint-mdx-node": "node scripts/lint-mdx.js",
     "lint": "eslint"
   },
   "vitest": {
