@@ -14,6 +14,12 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     ".contentlayer/**",
   ]),
+  // MDX files: lint with eslint-plugin-mdx
+  {
+    files: ["**/*.mdx"],
+    plugins: ["mdx"],
+    extends: ["plugin:mdx/recommended"]
+  }
 ]);
 
 export default eslintConfig;
