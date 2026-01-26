@@ -1,0 +1,9 @@
+{
+    "timeout": 10000,
+    "retry": 3,
+    "ignorePatterns": [
+        "^https://localhost",
+        "^http://localhost",
+        "https://raw.githubusercontent.com"
+    ]
+}

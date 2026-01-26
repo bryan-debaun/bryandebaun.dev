@@ -1,0 +1,20 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "words": [
+        "MDX",
+        "Contentlayer",
+        "NextJS",
+        "vitest",
+        "MDXJS",
+        "bryandebaun",
+        "Bryan",
+        "Baun",
+        "Vercel"
+    ],
+    "ignorePaths": [
+        "node_modules/**",
+        ".next/**"
+    ],
+    "dictionaries": []
+}
