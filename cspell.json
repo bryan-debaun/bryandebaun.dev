@@ -10,7 +10,8 @@
         "bryandebaun",
         "Bryan",
         "Baun",
-        "Vercel"
+        "Vercel",
+        "remarkrc"
     ],
     "ignorePaths": [
         "node_modules/**",
