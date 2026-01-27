@@ -328,6 +328,8 @@ main a,
 
 /* Button styles (accent solid in dark mode) */
 .btn {
+  /* Buttons use the display font to match header navigation and brand */
+  font-family: var(--font-display);
   text-decoration: none;
   transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, color .12s ease;
 }
