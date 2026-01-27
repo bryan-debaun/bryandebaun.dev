@@ -13,6 +13,7 @@
     "cspell:check": "cspell \"README.md\" \"docs/**/*.md\" \"src/content/**/*.{md,mdx}\"",
     "link-check": "markdown-link-check -c .markdown-link-check.json \"README.md\"",
     "verify:local": "npm run run-content && npm run test:content && npm run content:checks && npm run build && npm run lint",
+    "icons:generate": "node scripts/generate-icons.js --src public/icons/omega-wolf.svg --out public/icons --sizes 16,32,48,96,180,192,512",
     "test": "vitest --run",
     "start": "next start",
     "lint:mdx": "eslint --ext .mdx \"src/content\"",
@@ -52,6 +53,7 @@
     "remark-mdx": "^3.1.1",
     "remark-mdx-frontmatter": "^5.2.0",
     "remark-preset-lint-recommended": "^7.0.1",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.1.18",
     "typescript": "5.9.3",
     "vitest": "^1.6.1"
