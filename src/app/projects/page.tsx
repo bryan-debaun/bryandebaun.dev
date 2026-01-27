@@ -1,5 +1,6 @@
 import type { Repo } from "../../lib/github"
 import { getShowcaseRepos } from "../../lib/github"
+import RepoCard from "../../components/RepoCard"
 
 const curatedFallback: Repo[] = [
     {
@@ -46,19 +47,16 @@ export default async function Projects() {
     return (
         <div className="prose prose-norwegian dark:prose-invert">
             <h2>Projects</h2>
-            <ul>
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {repos.map((r) => (
-                    <li key={r.name}>
-                        <a href={r.html_url} target="_blank" rel="noopener noreferrer">{r.name}</a>
-                        {r.description ? ` — ${r.description}` : ''}
-                        {r.homepage ? (
-                            <span>
-                                {' '}· <a href={r.homepage} target="_blank" rel="noopener noreferrer">site</a>
-                            </span>
-                        ) : null}
-                    </li>
+                    <div key={r.name}>
+                        {/* RepoCard shows repo name, description, and optional site */}
+                        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                        {/* @ts-ignore server component import is fine in this layout */}
+                        <RepoCard repo={r} />
+                    </div>
                 ))}
-            </ul>
+            </div>
         </div>
     )
 }
