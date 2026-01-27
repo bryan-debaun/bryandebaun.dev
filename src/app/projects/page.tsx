@@ -56,7 +56,7 @@ export default async function Projects() {
                                 rel="noopener noreferrer"
                                 aria-label={`${r.name} — ${r.description ?? 'Repository'}`}
                                 title={r.name}
-                                className="block w-full rounded-lg px-3 py-2 no-underline btn btn--primary uppercase text-xs overflow-hidden whitespace-nowrap truncate text-center"
+                                className="block w-full rounded-lg px-3 py-2 no-underline btn btn--primary uppercase text-xs overflow-hidden whitespace-nowrap truncate text-center shadow-[0_6px_18px_rgba(64,215,208,0.08)] hover:shadow-[0_10px_28px_rgba(64,215,208,0.14)] dark:shadow-[0_6px_18px_rgba(0,0,0,0.6)] dark:hover:shadow-[0_10px_28px_rgba(0,0,0,0.7)]"
                             >
                                 {r.name}
                             </a>

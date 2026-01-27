@@ -153,6 +153,12 @@ a:focus-visible {
   color: var(--color-fjord-600);
 }
 
+/* Prevent global underline on hover for site-nav links; keep the animated ::after underline */
+.site-nav a:hover,
+.site-nav a:focus-visible {
+  text-decoration: none;
+}
+
 .site-nav a:focus-visible {
   outline: 3px solid rgba(23, 111, 196, 0.12);
   outline-offset: 3px;
@@ -359,30 +365,26 @@ html.dark .btn--primary:hover {
   font-size: 0.8125rem;
   /* 13px for slightly larger text */
   /* use dual-background technique so the gradient border follows the button's rounded corners */
-  border: 2px solid transparent; /* increased thickness for more visible gradient */
+  border: 2px solid transparent;
+  /* increased thickness for more visible gradient */
   border-radius: 0.5rem;
   background-image: linear-gradient(180deg, var(--btn-accent), var(--btn-accent-strong)), linear-gradient(90deg, var(--color-norwegian-400), var(--color-fjord-600));
   background-origin: padding-box, border-box;
   background-clip: padding-box, border-box;
-  box-shadow: 0 6px 18px rgba(64, 215, 208, 0.08);
 }
 
 .projects-list .btn--primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 28px rgba(64, 215, 208, 0.14);
 }
 
 /* Dark-mode variant for project-list buttons (uses darker accent + neon tint) */
 .projects-list .dark .btn--primary,
 .projects-list html.dark .btn--primary {
   background-image: linear-gradient(180deg, var(--btn-accent-dark), var(--btn-accent-dark)), linear-gradient(90deg, var(--color-norwegian-300-dark), var(--color-fjord-neon));
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
 }
 
 .projects-list .dark .btn--primary:hover,
-.projects-list html.dark .btn--primary:hover {
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
-}
+.projects-list html.dark .btn--primary:hover {}
 
 /* Repo card: migrated to Tailwind utility classes in `src/components/RepoCard.tsx` for clearer intent and dark-mode parity.
    Motion remains "motion-safe" by using Tailwind's motion utilities and the global `prefers-reduced-motion` defaults.
