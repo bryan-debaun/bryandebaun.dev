@@ -52,11 +52,11 @@ export default function DarkModeToggle() {
                 }
             }}
             role="switch"
-            aria-checked={isDark}
+            aria-checked={Boolean(isDark)}
             aria-label="Toggle dark mode"
-            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            title={isDark === null ? "Toggle theme" : isDark ? "Switch to light mode" : "Switch to dark mode"}
             className="ml-3 rounded-full p-1 w-12 h-6 flex items-center cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-            style={{ backgroundColor: isDark ? 'var(--color-norwegian-400-dark)' : 'var(--color-norwegian-200)' }}
+            style={{ backgroundColor: Boolean(isDark) ? 'var(--color-norwegian-400-dark)' : 'var(--color-norwegian-200)' }}
         >
             <span className={`inline-block w-4 h-4 bg-white rounded-full transform transition-transform duration-200 ${isDark ? 'translate-x-6' : 'translate-x-0'}`} />
         </button>
