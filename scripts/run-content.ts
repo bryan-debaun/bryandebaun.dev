@@ -1,21 +1,21 @@
 #!/usr/bin/env node
-const { spawn } = require('child_process')
-const fs = require('fs')
-const path = require('path')
+import { spawn } from 'child_process'
+import fs from 'fs'
+import path from 'path'
 
-function runContentWithSpawn(spawnFn) {
+export function runContentWithSpawn(spawnFn: (cmd: string, args: string[], opts: any) => any): Promise<number> {
     return new Promise((resolve, reject) => {
         const cp = spawnFn('npx', ['contentlayer2', 'build', '--clearCache'], { shell: true })
 
         let out = ''
         let err = ''
-        cp.stdout.on('data', (d) => { out += d.toString(); process.stdout.write(d) })
-        cp.stderr.on('data', (d) => { err += d.toString(); process.stderr.write(d) })
+        cp.stdout.on('data', (d: Buffer) => { out += d.toString(); process.stdout.write(d) })
+        cp.stderr.on('data', (d: Buffer) => { err += d.toString(); process.stderr.write(d) })
 
-        cp.on('error', (e) => reject({ code: 1, error: e }))
-        cp.on('close', (code) => {
+        cp.on('error', (e: Error) => reject({ code: 1, error: e }))
+        cp.on('close', (code: number) => {
             const combined = out + '\n' + err
-            const generatedMatch = /Generated\s+(\d+)\s+documents in \\.contentlayer/i.exec(combined)
+            const generatedMatch = /Generated\s+(\d+)\s+documents in \\\.contentlayer/i.exec(combined)
             if (generatedMatch) {
                 const n = Number(generatedMatch[1])
                 if (n > 0) {
@@ -55,23 +55,21 @@ function runContentWithSpawn(spawnFn) {
     })
 }
 
-function runContent() {
+export function runContent(): Promise<number> {
     return runContentWithSpawn(spawn)
 }
 
-async function main() {
+export async function main(): Promise<void> {
     try {
         await runContent()
         process.exit(0)
-    } catch (e) {
+    } catch (e: any) {
         console.error('Content build wrapper: failing with', e)
         process.exit(typeof e.code === 'number' ? e.code : 1)
     }
 }
 
-// Export for unit testing. When executed directly, run the CLI entrypoint.
-module.exports = { runContent, runContentWithSpawn, main }
-
-if (require.main === module) {
+// When executed directly, run CLI entrypoint;
+if (process.argv[1] && (process.argv[1].endsWith('run-content.ts') || process.argv[1].endsWith('run-content.js'))) {
     main()
 }
