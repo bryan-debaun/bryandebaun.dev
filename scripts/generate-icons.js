@@ -45,10 +45,11 @@ if (!fs.existsSync(src)) {
 
 if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
-const base = path.basename(src, path.extname(src));
+const nameOverride = getArg('name', null);
+const base = nameOverride || path.basename(src, path.extname(src));
 
 async function generate() {
-    console.log('Generating icons for', src);
+    console.log('Generating icons for', src, '-> base name:', base);
     await Promise.all(sizes.map(async (s) => {
         const outPath = path.join(outDir, `${base}-${s}x${s}.png`);
         await sharp(src, { density: 300 })
