@@ -6,7 +6,6 @@ const componentCache = new Map<string, React.ComponentType<unknown>>()
 function getComponentFromCode(code: string) {
     if (componentCache.has(code)) return componentCache.get(code)!
     // Create the component once and cache it (server-side only)
-    // eslint-disable-next-line no-new-func
     const Comp = new Function('React', `${code}; return Component`)(React) as React.ComponentType<unknown>
     componentCache.set(code, Comp)
     return Comp
@@ -16,7 +15,7 @@ function getComponentFromCode(code: string) {
 for (const p of allPosts) {
     try {
         getComponentFromCode(p.body.code)
-    } catch (err) {
+    } catch {
         // ignore compile errors at module init time
     }
 }
