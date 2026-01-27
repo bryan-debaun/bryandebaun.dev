@@ -188,6 +188,20 @@ a:focus-visible {
   }
 }
 
+/* Ensure explicit light mode or prefers-color-scheme: light uses original (unfiltered) asset */
+@media (prefers-color-scheme: light) {
+  .site-logo {
+    filter: none;
+    transition: filter .12s ease;
+  }
+}
+
+/* Site-level toggle wins: when html has .light class, remove filter regardless of OS */
+html.light .site-logo {
+  filter: none !important;
+  transition: filter .12s ease;
+}
+
 .dark .site-logo {
   filter: invert(1) brightness(1.2) saturate(1.2);
   transition: filter .12s ease;
