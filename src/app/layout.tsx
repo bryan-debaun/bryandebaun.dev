@@ -12,13 +12,13 @@ export const metadata: Metadata = {
   description: "Personal portfolio and blog of Bryan DeBaun",
   icons: {
     icon: [
-      { url: "/icons/wolf.ico" },
-      { url: "/icons/wolf-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/icons/wolf-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/wolf-96x96.png", sizes: "96x96", type: "image/png" },
-      { url: "/icons/wolf-192x192.png", sizes: "192x192", type: "image/png" }
+      { url: "/icons/badge.ico" },
+      { url: "/icons/badge-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icons/badge-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/badge-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icons/badge-192x192.png", sizes: "192x192", type: "image/png" }
     ],
-    apple: "/icons/wolf-180x180.png",
+    apple: "/icons/badge-180x180.png",
   },
   manifest: "/icons/site.webmanifest",
 };
@@ -29,7 +29,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}>
         <header className="site-header border-b sticky top-0 z-10">
           <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
-            <Link href="/" className="text-lg font-semibold prose prose-norwegian dark:prose-invert">Bryan DeBaun</Link>
+            <Link href="/" className="inline-flex items-center gap-2">
+              <img src="/icons/wolf.svg" alt="Bryan DeBaun" className="site-logo w-12 h-12 md:w-16 md:h-16 object-contain" />
+              <span className="sr-only">Bryan DeBaun</span>
+            </Link>
             <nav className="site-nav flex gap-6 items-center prose prose-norwegian dark:prose-invert">
               <Link href="/about" className="text-sm">About</Link>
               <Link href="/projects" className="text-sm">Projects</Link>

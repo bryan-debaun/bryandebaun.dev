@@ -180,6 +180,19 @@ a:focus-visible {
   color: inherit;
 }
 
+/* Make the header logo readable in dark mode using a small invert filter (quick, reversible fix). */
+@media (prefers-color-scheme: dark) {
+  .site-logo {
+    filter: invert(1) brightness(1.2) saturate(1.2);
+    transition: filter .12s ease;
+  }
+}
+
+.dark .site-logo {
+  filter: invert(1) brightness(1.2) saturate(1.2);
+  transition: filter .12s ease;
+}
+
 .dark .site-nav a {
   color: var(--color-fjord-neon);
   font-weight: 700;
@@ -395,7 +408,7 @@ html.dark .btn--primary:hover {
   background-image: none !important;
   border-color: rgba(16, 143, 139, 0.10) !important;
   color: var(--color-white) !important;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.6) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6) !important;
 }
 
 .projects-list html.dark .btn--primary:hover,
@@ -405,7 +418,7 @@ html.dark .btn--primary:hover {
   /* keep the attractive hover gradient in dark mode */
   background-image: linear-gradient(180deg, var(--btn-accent-strong), var(--btn-accent)) !important;
   color: var(--color-white) !important;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.7) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7) !important;
 }
 
 /* Optional glass variant for Projects buttons */
