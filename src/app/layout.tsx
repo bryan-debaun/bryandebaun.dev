@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import Image from "next/image";
 import DarkModeToggle from "../components/DarkModeToggle";
 import "./globals.css";
 
@@ -29,9 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}>
         <header className="site-header border-b sticky top-0 z-10">
           <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
-            <Link href="/" className="inline-flex items-center gap-2">
-              <img src="/icons/wolf.svg" alt="Bryan DeBaun" className="site-logo w-12 h-12 md:w-16 md:h-16 object-contain" />
-              <span className="sr-only">Bryan DeBaun</span>
+            <Link href="/" className="inline-flex items-center gap-2" aria-label="Home — Bryan DeBaun">
+              <Image src="/icons/wolf.svg" alt="" className="site-logo w-12 h-12 md:w-16 md:h-16 object-contain" width={64} height={64} priority />
+              <span className="text-lg font-semibold tracking-wide">BAD</span>
             </Link>
             <nav className="site-nav flex gap-6 items-center prose prose-norwegian dark:prose-invert">
               <Link href="/about" className="text-sm">About</Link>
