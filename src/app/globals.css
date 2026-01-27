@@ -78,6 +78,68 @@
   --tw-prose-invert-td-borders: var(--color-norwegian-700);
 }
 
+/* Typography tokens (fonts + type scale) — tokens are defined in `src/styles/tokens.css` */
+@import "../styles/tokens.css";
+
+:root {
+  /* Map next/font variables into semantic tokens used by the site */
+  --font-body: var(--font-inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial);
+  --font-display: var(--font-orbitron, "Orbitron", system-ui);
+  --fs-hero: 2.25rem;
+  --fs-h1: 1.75rem;
+  --fs-h2: 1.25rem;
+  --fs-h3: 1.125rem;
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+  --leading-tight: 1.15;
+  --leading-normal: 1.5;
+}
+
+/* Apply the tokens */
+body {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--leading-normal);
+  color: var(--foreground);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: var(--tw-prose-headings);
+}
+
+h1 {
+  font-size: var(--fs-hero);
+  line-height: var(--leading-tight);
+}
+
+h2 {
+  font-size: var(--fs-h1);
+}
+
+h3 {
+  font-size: var(--fs-h2);
+}
+
+h4 {
+  font-size: var(--fs-h3);
+}
+
+small,
+.text-sm {
+  font-size: var(--fs-small);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: var(--color-norwegian-100);
@@ -118,8 +180,21 @@ html.light {
   outline-offset: 3px;
 }
 
+/* Brand text: use display font (Orbitron) for visual identity */
+.site-brand {
+  font-family: var(--font-display);
+  /* keep letter-spacing visually consistent with existing typography */
+  letter-spacing: 0.06em;
+}
+
+.site-nav {
+  /* Treat nav as header objects: use the display font (Orbitron) to match headings */
+  font-family: var(--font-display);
+}
+
 .site-nav a,
 .site-nav a * {
+  font-family: inherit;
   color: var(--color-norwegian-700) !important;
   /* muted teal for better distinction */
   position: relative;
@@ -235,8 +310,16 @@ html.light .site-logo {
 
 /* Footer color follows the Norwegian muted teal (light) and a soft mint in dark mode */
 .site-footer {
+  /* Use body font (Inter) for footer text for better legibility */
+  font-family: var(--font-body);
   color: var(--color-norwegian-700);
   transition: color .12s ease;
+}
+
+/* Ensure emphasized footer text (e.g., .font-semibold spans) use the body font explicitly */
+.site-footer .font-semibold,
+.site-footer strong {
+  font-family: var(--font-body);
 }
 
 html.dark .site-footer {
@@ -253,6 +336,8 @@ main a,
 
 /* Button styles (accent solid in dark mode) */
 .btn {
+  /* Buttons use the display font to match header navigation and brand */
+  font-family: var(--font-display);
   text-decoration: none;
   transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, color .12s ease;
 }
@@ -734,5 +819,9 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Ensure body-level tokens resolve to the next/font-injected variables so var() looks up correctly */
+  --font-body: var(--font-inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial);
+  --font-display: var(--font-orbitron, "Orbitron", system-ui, -apple-system);
+  /* Use the typography token so next/font/our tokens control the font-family */
+  font-family: var(--font-body);
 }
