@@ -104,6 +104,20 @@ html.light {
   transition: background-color .15s ease, border-color .15s ease, color .12s ease;
 }
 
+/* Brand link: do not underline on hover/focus (logo + initials) */
+.site-header .inline-flex,
+.site-header .inline-flex:hover,
+.site-header .inline-flex:focus,
+.site-header .inline-flex:focus-visible {
+  text-decoration: none;
+}
+
+.site-header .inline-flex:focus-visible {
+  /* keep accessibility focus visible but without underline */
+  outline: 3px solid rgba(23, 111, 196, 0.12);
+  outline-offset: 3px;
+}
+
 .site-nav a,
 .site-nav a * {
   color: var(--color-norwegian-700) !important;
@@ -178,6 +192,33 @@ a:focus-visible {
 
 .dark .site-header a {
   color: inherit;
+}
+
+/* Make the header logo readable in dark mode using a small invert filter (quick, reversible fix). */
+@media (prefers-color-scheme: dark) {
+  .site-logo {
+    filter: invert(1) brightness(1.2) saturate(1.2);
+    transition: filter .12s ease;
+  }
+}
+
+/* Ensure explicit light mode or prefers-color-scheme: light uses original (unfiltered) asset */
+@media (prefers-color-scheme: light) {
+  .site-logo {
+    filter: none;
+    transition: filter .12s ease;
+  }
+}
+
+/* Site-level toggle wins: when html has .light class, remove filter regardless of OS */
+html.light .site-logo {
+  filter: none !important;
+  transition: filter .12s ease;
+}
+
+.dark .site-logo {
+  filter: invert(1) brightness(1.2) saturate(1.2);
+  transition: filter .12s ease;
 }
 
 .dark .site-nav a {
@@ -395,7 +436,7 @@ html.dark .btn--primary:hover {
   background-image: none !important;
   border-color: rgba(16, 143, 139, 0.10) !important;
   color: var(--color-white) !important;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.6) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6) !important;
 }
 
 .projects-list html.dark .btn--primary:hover,
@@ -405,7 +446,7 @@ html.dark .btn--primary:hover {
   /* keep the attractive hover gradient in dark mode */
   background-image: linear-gradient(180deg, var(--btn-accent-strong), var(--btn-accent)) !important;
   color: var(--color-white) !important;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.7) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7) !important;
 }
 
 /* Optional glass variant for Projects buttons */
