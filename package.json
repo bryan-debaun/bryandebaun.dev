@@ -5,17 +5,17 @@
   "scripts": {
     "dev": "next dev",
     "content:dev": "contentlayer2 dev",
-    "run-content": "node scripts/run-content.js",
+    "run-content": "tsx scripts/run-content.ts",
     "build": "npm run run-content && next build",
-    "test:content": "node scripts/check-content.js",
+    "test:content": "tsx scripts/check-content.ts",
     "content:checks": "npm run verify:icons && npm run lint:content && npm run cspell:check && npm run link-check",
     "lint:content": "remark \"README.md\" \"docs/**/*.md\" -q",
     "cspell:check": "cspell \"README.md\" \"docs/**/*..md\" \"src/content/**/*.{md,mdx}\"",
     "link-check": "markdown-link-check -c .markdown-link-check.json \"README.md\"",
-    "verify:icons": "node scripts/verify-manifest-icons.js",
+    "verify:icons": "tsx scripts/verify-manifest-icons.ts",
     "verify:local": "npm run run-content && npm run test:content && npm run content:checks && npm run build && npm run lint",
-    "icons:generate": "node scripts/generate-icons.js --src public/icons/omega-wolf.svg --out public/icons --sizes 16,32,48,96,180,192,512",
-    "icons:generate:omega": "node scripts/generate-icons.js --src public/icons/omega.svg --out public/icons --sizes 16,32,48,96,180,192,512 --name omega",
+    "icons:generate": "tsx scripts/generate-icons.ts --src public/icons/omega-wolf.svg --out public/icons --sizes 16,32,48,96,180,192,512",
+    "icons:generate:omega": "tsx scripts/generate-icons.ts --src public/icons/omega.svg --out public/icons --sizes 16,32,48,96,180,192,512 --name omega",
     "test": "vitest --run",
     "start": "next start",
     "lint:mdx": "eslint --ext .mdx \"src/content\"",
@@ -58,6 +58,7 @@
     "sharp": "^0.34.5",
     "tailwindcss": "^4.1.18",
     "typescript": "5.9.3",
-    "vitest": "^1.6.1"
+    "vitest": "^1.6.1",
+    "tsx": "^4.18.0"
   }
 }

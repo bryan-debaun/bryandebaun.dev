@@ -8,7 +8,7 @@ beforeEach(() => {
 describe('check-content main', () => {
     it('exits with code 1 when index is missing', async () => {
         vi.spyOn(fs, 'existsSync').mockReturnValue(false)
-        const mod = await import('../check-content.js')
+        const mod = await import('../check-content.ts')
         const { main } = mod.default || mod
         const exit = vi.spyOn(process, 'exit').mockImplementation((code) => { throw new Error('exited ' + code) })
         expect(() => main()).toThrow('exited 1')
@@ -18,7 +18,7 @@ describe('check-content main', () => {
     it('exits with code 1 when index empty', async () => {
         vi.spyOn(fs, 'existsSync').mockReturnValue(true)
         vi.spyOn(fs, 'readFileSync').mockReturnValue('[]')
-        const mod = await import('../check-content.js')
+        const mod = await import('../check-content.ts')
         const { main } = mod.default || mod
         const exit = vi.spyOn(process, 'exit').mockImplementation((code) => { throw new Error('exited ' + code) })
         expect(() => main()).toThrow('exited 1')
@@ -29,7 +29,7 @@ describe('check-content main', () => {
         vi.spyOn(fs, 'existsSync').mockReturnValue(true)
         vi.spyOn(fs, 'readFileSync').mockReturnValue('[{}]')
         const log = vi.spyOn(console, 'log').mockImplementation(() => { })
-        const mod = await import('../check-content.js')
+        const mod = await import('../check-content.ts')
         const { main } = mod.default || mod
         main()
         expect(log).toHaveBeenCalledWith('Content check passed: 1 posts')

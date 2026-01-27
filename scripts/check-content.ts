@@ -1,9 +1,9 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
 
-function main() {
+export function main(): void {
     try {
-        const idxPath = path.join(__dirname, '..', '.contentlayer', 'generated', 'Post', '_index.json')
+        const idxPath = path.join(process.cwd(), '.contentlayer', 'generated', 'Post', '_index.json')
         if (!fs.existsSync(idxPath)) {
             console.error('No generated content index found — failing content check')
             process.exit(1)
@@ -21,8 +21,7 @@ function main() {
     }
 }
 
-module.exports = { main }
-
-if (require.main === module) {
+// When executed directly (CLI), run main(). Tests import this module and call `main()` themselves.
+if (process.argv[1] && (process.argv[1].endsWith('check-content.ts') || process.argv[1].endsWith('check-content.js'))) {
     main()
 }

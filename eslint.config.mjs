@@ -24,7 +24,7 @@ const eslintConfig = defineConfig([
   },
   // Allow CommonJS `require()` in scripts: they run with Node directly and using CJS is acceptable.
   {
-    files: ["scripts/**/*.{js,cjs,mjs}"],
+    files: ["scripts/**/*.{ts,js,cjs,mjs}"],
     languageOptions: {
       sourceType: "script",
       globals: {

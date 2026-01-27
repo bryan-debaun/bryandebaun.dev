@@ -37,7 +37,7 @@ describe('runContent', () => {
         const cp = createManualProcess()
         vi.spyOn(fs, 'existsSync').mockReturnValue(true)
         vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify([{}]))
-        const mod = await import('../run-content.js')
+        const mod = await import('../run-content.ts')
         const { runContentWithSpawn } = mod.default || mod
         const p = runContentWithSpawn(() => cp)
         cp._emitClose(0)
@@ -47,7 +47,7 @@ describe('runContent', () => {
     it('rejects when no docs and non-zero exit', async () => {
         const cp = createManualProcess()
         vi.spyOn(fs, 'existsSync').mockReturnValue(false)
-        const mod = await import('../run-content.js')
+        const mod = await import('../run-content.ts')
         const { runContentWithSpawn } = mod.default || mod
         const p = runContentWithSpawn(() => cp)
         cp._emitClose(2)
@@ -57,7 +57,7 @@ describe('runContent', () => {
     it('rejects on spawn error', async () => {
         const err = new Error('spawn failed')
         const cp = createManualProcess()
-        const mod = await import('../run-content.js')
+        const mod = await import('../run-content.ts')
         const { runContentWithSpawn } = mod.default || mod
         const p = runContentWithSpawn(() => cp)
         cp._emitError(err)
