@@ -21,6 +21,23 @@ const eslintConfig = defineConfig([
   {
     ...mdx.configs.flat,
     files: ["src/content/**/*.{md,mdx}"]
+  },
+  // Allow CommonJS `require()` in scripts: they run with Node directly and using CJS is acceptable.
+  {
+    files: ["scripts/**/*.{js,cjs,mjs}"],
+    languageOptions: {
+      sourceType: "script",
+      globals: {
+        require: "readonly",
+        module: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        process: "readonly"
+      }
+    },
+    rules: {
+      "@typescript-eslint/no-require-imports": "off"
+    }
   }
 ]);
 

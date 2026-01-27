@@ -3,49 +3,49 @@ const fs = require('fs');
 const path = require('path');
 
 function getArg(name, def) {
-  const argv = process.argv.slice(2);
-  const idx = argv.findIndex((a) => a === `--${name}` || a.startsWith(`--${name}=`));
-  if (idx === -1) return def;
-  const val = argv[idx].includes('=') ? argv[idx].split('=')[1] : argv[idx + 1];
-  return val || def;
+    const argv = process.argv.slice(2);
+    const idx = argv.findIndex((a) => a === `--${name}` || a.startsWith(`--${name}=`));
+    if (idx === -1) return def;
+    const val = argv[idx].includes('=') ? argv[idx].split('=')[1] : argv[idx + 1];
+    return val || def;
 }
 
 const manifestRel = getArg('manifest', 'public/icons/site.webmanifest');
 const manifestPath = path.resolve(process.cwd(), manifestRel);
 
 if (!fs.existsSync(manifestPath)) {
-  console.error(`Manifest not found at ${manifestPath}`);
-  process.exit(2);
+    console.error(`Manifest not found at ${manifestPath}`);
+    process.exit(2);
 }
 
 let manifest;
 try {
-  manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 } catch (e) {
-  console.error('Failed to parse manifest:', e.message);
-  process.exit(2);
+    console.error('Failed to parse manifest:', e.message);
+    process.exit(2);
 }
 
 const icons = manifest.icons || [];
 const missing = [];
 
 icons.forEach((icon) => {
-  if (!icon.src) return;
-  const raw = icon.src;
-  const rel = raw.startsWith('/') ? raw.slice(1) : raw;
-  // Try expected locations: project root (rare), and public/ (Next.js public)
-  const candidates = [
-    path.resolve(process.cwd(), rel),
-    path.resolve(process.cwd(), 'public', rel)
-  ];
-  const exists = candidates.some((p) => fs.existsSync(p));
-  if (!exists) missing.push(raw);
+    if (!icon.src) return;
+    const raw = icon.src;
+    const rel = raw.startsWith('/') ? raw.slice(1) : raw;
+    // Try expected locations: project root (rare), and public/ (Next.js public)
+    const candidates = [
+        path.resolve(process.cwd(), rel),
+        path.resolve(process.cwd(), 'public', rel)
+    ];
+    const exists = candidates.some((p) => fs.existsSync(p));
+    if (!exists) missing.push(raw);
 });
 
 if (missing.length) {
-  console.error('Missing icon files referenced in manifest:');
-  missing.forEach((m) => console.error('  -', m));
-  process.exit(1);
+    console.error('Missing icon files referenced in manifest:');
+    missing.forEach((m) => console.error('  -', m));
+    process.exit(1);
 }
 
 console.log('All manifest icon files exist.');
