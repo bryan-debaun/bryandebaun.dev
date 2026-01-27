@@ -44,18 +44,19 @@ export default async function Projects() {
     }
 
     return (
-        <div className="prose prose-norwegian dark:prose-invert max-w-none px-4 md:px-6 lg:px-8">
+        <div className="prose prose-norwegian dark:prose-invert max-w-none px-4 md:px-6 lg:px-8 projects-list">
             <h2>Projects</h2>
-            <div className="space-y-4">
+            <div className="space-y-1">
                 {repos.map((r) => (
-                    <div key={r.name} className="flex items-center gap-4 group">
+                    <div key={r.name} className="flex items-center gap-3 group">
                         <div className="w-24 flex-shrink-0 md:w-32 lg:w-40">
                             <a
                                 href={r.html_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 aria-label={`${r.name} — ${r.description ?? 'Repository'}`}
-                                className="inline-block rounded px-4 py-2 no-underline btn btn--primary"
+                                title={r.name}
+                                className="block w-full rounded-lg px-3 py-2 no-underline btn btn--primary uppercase text-xs overflow-hidden whitespace-nowrap truncate text-center"
                             >
                                 {r.name}
                             </a>

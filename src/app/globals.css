@@ -207,9 +207,15 @@ main a,
   transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, color .12s ease;
 }
 
+.btn:hover,
+.btn:focus {
+  text-decoration: none;
+}
+
+/* Use a box-shadow for focus so the ring follows the button's rounded corners */
 .btn:focus-visible {
-  outline: 3px solid rgba(16, 143, 139, 0.22);
-  outline-offset: 3px;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 143, 139, 0.12);
 }
 
 /* Dark-mode accent: solid teal button */
@@ -276,6 +282,7 @@ main a,
   --btn-accent: var(--color-norwegian-400);
   --btn-accent-strong: var(--color-norwegian-500);
   --btn-accent-dark: var(--color-norwegian-400-dark);
+  --btn-radius: 0.5rem;
 }
 
 
@@ -308,6 +315,17 @@ main a,
   filter: none;
 }
 
+/* Dark-mode tweak for primary (kept simple globally) */
+html.dark .btn--primary {
+  background: var(--btn-accent-dark);
+  color: var(--color-white);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+html.dark .btn--primary:hover {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+}
+
 /* Dark-mode hover tweak: subtle brighten while maintaining white text */
 .dark .btn--primary:hover {
   color: var(--color-white);
@@ -330,8 +348,40 @@ main a,
 /* Focus and accessibility (uniform for variants) */
 .btn--primary:focus-visible,
 .btn--outline:focus-visible {
-  outline: 3px solid rgba(16, 143, 139, 0.12);
-  outline-offset: 3px;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 143, 139, 0.12);
+}
+
+/* Page-scoped override: slightly larger/taller buttons for Projects list */
+.projects-list .btn--primary {
+  padding: 0.625rem 0.875rem;
+  /* increase vertical padding a bit */
+  font-size: 0.8125rem;
+  /* 13px for slightly larger text */
+  /* use dual-background technique so the gradient border follows the button's rounded corners */
+  border: 2px solid transparent; /* increased thickness for more visible gradient */
+  border-radius: 0.5rem;
+  background-image: linear-gradient(180deg, var(--btn-accent), var(--btn-accent-strong)), linear-gradient(90deg, var(--color-norwegian-400), var(--color-fjord-600));
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  box-shadow: 0 6px 18px rgba(64, 215, 208, 0.08);
+}
+
+.projects-list .btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(64, 215, 208, 0.14);
+}
+
+/* Dark-mode variant for project-list buttons (uses darker accent + neon tint) */
+.projects-list .dark .btn--primary,
+.projects-list html.dark .btn--primary {
+  background-image: linear-gradient(180deg, var(--btn-accent-dark), var(--btn-accent-dark)), linear-gradient(90deg, var(--color-norwegian-300-dark), var(--color-fjord-neon));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+.projects-list .dark .btn--primary:hover,
+.projects-list html.dark .btn--primary:hover {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
 }
 
 /* Repo card: migrated to Tailwind utility classes in `src/components/RepoCard.tsx` for clearer intent and dark-mode parity.
