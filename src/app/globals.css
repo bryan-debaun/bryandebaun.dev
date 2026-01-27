@@ -130,8 +130,18 @@ html.light {
   height: 2px;
   width: 0;
   background: var(--color-fjord-600);
-  border-radius: 2px;
-  transition: width .18s ease-in-out;
+}
+
+/* Global link style: no underline by default, show underline on hover/focus */
+a {
+  text-decoration: none;
+  transition: color .12s ease, text-decoration-color .12s ease;
+}
+
+a:hover,
+a:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
 .site-nav a:hover::after,
