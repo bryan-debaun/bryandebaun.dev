@@ -819,6 +819,9 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
+  /* Ensure body-level tokens resolve to the next/font-injected variables so var() looks up correctly */
+  --font-body: var(--font-inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial);
+  --font-display: var(--font-orbitron, "Orbitron", system-ui, -apple-system);
   /* Use the typography token so next/font/our tokens control the font-family */
   font-family: var(--font-body);
 }
