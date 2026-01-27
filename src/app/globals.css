@@ -104,6 +104,20 @@ html.light {
   transition: background-color .15s ease, border-color .15s ease, color .12s ease;
 }
 
+/* Brand link: do not underline on hover/focus (logo + initials) */
+.site-header .inline-flex,
+.site-header .inline-flex:hover,
+.site-header .inline-flex:focus,
+.site-header .inline-flex:focus-visible {
+  text-decoration: none;
+}
+
+.site-header .inline-flex:focus-visible {
+  /* keep accessibility focus visible but without underline */
+  outline: 3px solid rgba(23, 111, 196, 0.12);
+  outline-offset: 3px;
+}
+
 .site-nav a,
 .site-nav a * {
   color: var(--color-norwegian-700) !important;
