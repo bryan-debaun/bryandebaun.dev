@@ -3,7 +3,16 @@ import { spawn } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
-export function runContentWithSpawn(spawnFn: (cmd: string, args: string[], opts: any) => any): Promise<number> {
+type SpawnLike = {
+    stdout: { on: (event: 'data', cb: (d: Buffer) => void) => void }
+    stderr: { on: (event: 'data', cb: (d: Buffer) => void) => void }
+    on(event: 'error', cb: (e: Error) => void): void
+    on(event: 'close', cb: (code: number) => void): void
+}
+
+type SpawnFn = (cmd: string, args: string[], opts: { shell: boolean }) => SpawnLike
+
+export function runContentWithSpawn(spawnFn: SpawnFn): Promise<number> {
     return new Promise((resolve, reject) => {
         const cp = spawnFn('npx', ['contentlayer2', 'build', '--clearCache'], { shell: true })
 
@@ -63,9 +72,12 @@ export async function main(): Promise<void> {
     try {
         await runContent()
         process.exit(0)
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error('Content build wrapper: failing with', e)
-        process.exit(typeof e.code === 'number' ? e.code : 1)
+        if (typeof e === 'object' && e !== null && 'code' in e && typeof (e as { code?: number }).code === 'number') {
+            process.exit((e as { code: number }).code)
+        }
+        process.exit(1)
     }
 }
 
