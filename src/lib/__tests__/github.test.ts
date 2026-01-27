@@ -48,4 +48,26 @@ describe('github lib', () => {
         expect(res.find((r) => r.name === 'two')).toBeTruthy()
         expect(res.find((r) => r.name === 'three')).toBeTruthy()
     })
+
+    it('uses GITHUB_TOKEN from env when present', async () => {
+        const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>
+        fetchMock.mockResolvedValue({ ok: true, json: async () => [] })
+
+        process.env.GITHUB_TOKEN = 'env-token'
+        await getUserRepos('me')
+        const lastCallArgs = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+        expect(lastCallArgs[1].headers.Authorization).toBe('token env-token')
+        delete process.env.GITHUB_TOKEN
+    })
+
+    it('opts.token overrides env var', async () => {
+        const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>
+        fetchMock.mockResolvedValue({ ok: true, json: async () => [] })
+
+        process.env.GITHUB_TOKEN = 'env-token'
+        await getUserRepos('me', { token: 'opt-token' })
+        const lastCallArgs = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+        expect(lastCallArgs[1].headers.Authorization).toBe('token opt-token')
+        delete process.env.GITHUB_TOKEN
+    })
 })

@@ -23,7 +23,10 @@ export async function getUserRepos(username: string, opts: GetUserReposOptions =
     const headers: Record<string, string> = {
         Accept: 'application/vnd.github+json'
     }
-    if (opts.token) headers.Authorization = `token ${opts.token}`
+
+    // Prefer an explicit token, otherwise fall back to env var (server-only)
+    const token = opts.token ?? process.env.GITHUB_TOKEN
+    if (token) headers.Authorization = `token ${token}`
 
     let page = 1
     const all: Repo[] = []
@@ -37,7 +40,11 @@ export async function getUserRepos(username: string, opts: GetUserReposOptions =
         })
 
         if (!res.ok) {
-            throw new Error(`GitHub API request failed: ${res.status}`)
+            // For common auth/rate-limit failures, include header info to make debugging easier
+            const remaining = res.headers.get('x-ratelimit-remaining')
+            const reset = res.headers.get('x-ratelimit-reset')
+            const message = `GitHub API request failed: ${res.status} (remaining: ${remaining}, reset: ${reset})`
+            throw new Error(message)
         }
 
         const data = (await res.json()) as Array<Record<string, unknown>>
