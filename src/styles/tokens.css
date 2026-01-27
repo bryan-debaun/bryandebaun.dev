@@ -1,0 +1,26 @@
+/* Typography tokens — font families and type scale
+   - The `next/font` helper injects CSS variables (e.g. --font-inter, --font-orbitron).
+   - We map those into semantic tokens used by the site. */
+:root {
+    /* Mapped tokens (fall back to system fonts if variables are not present) */
+    --font-body: var(--font-inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial);
+    --font-display: var(--font-orbitron, "Orbitron", system-ui, -apple-system);
+
+    /* Type scale */
+    --fs-hero: 2.25rem;
+    /* hero / large display */
+    --fs-h1: 1.75rem;
+    /* h1 */
+    --fs-h2: 1.25rem;
+    /* h2 */
+    --fs-h3: 1.125rem;
+    /* h3 */
+    --fs-body: 1rem;
+    /* base */
+    --fs-small: 0.875rem;
+    --fs-caption: 0.75rem;
+
+    /* Line heights */
+    --leading-tight: 1.15;
+    --leading-normal: 1.5;
+}

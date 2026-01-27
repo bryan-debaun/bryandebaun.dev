@@ -11,7 +11,9 @@
         "Bryan",
         "Baun",
         "Vercel",
-        "remarkrc"
+        "remarkrc",
+        "Orbitron",
+        "subsetting"
     ],
     "ignorePaths": [
         "node_modules/**",

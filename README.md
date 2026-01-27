@@ -11,6 +11,16 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Fonts & Typography
+
+This site uses **Inter** for body/UI text and **Orbitron** for display/headings. Fonts are loaded via Next.js' `next/font` helper in `src/app/layout.tsx` and the typographic tokens (font-family and type scale) are defined in `src/styles/tokens.css` and applied in `src/app/globals.css`.
+
+To update fonts:
+
+- Prefer `next/font` usage in `src/app/layout.tsx` (`Inter` / `Orbitron`) for automatic subsetting and preload.
+- If self-hosting is required, add WOFF2 subsets to `public/fonts/` and update `layout.tsx` and the ADR in `docs/adr/0001-choose-fonts.md`.
+- Update `src/styles/tokens.css` to adjust the type scale or fallbacks.
+
 ## Deployment
 
 This project is designed for deployment to Vercel. Connect your GitHub repo in Vercel and add the custom domain (`bryandebaun.dev`) after DNS is configured.
