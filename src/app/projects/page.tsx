@@ -45,15 +45,19 @@ export default async function Projects() {
     }
 
     return (
-        <div className="prose prose-norwegian dark:prose-invert">
+        <div className="prose prose-norwegian dark:prose-invert max-w-none px-4 md:px-6 lg:px-8">
             <h2>Projects</h2>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-6">
                 {repos.map((r) => (
-                    <div key={r.name}>
-                        {/* RepoCard shows repo name, description, and optional site */}
-                        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                        {/* @ts-ignore server component import is fine in this layout */}
-                        <RepoCard repo={r} />
+                    <div key={r.name} className="flex items-center gap-6">
+                        <div className="w-32 flex-shrink-0 md:w-40 lg:w-48">
+                            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                            {/* @ts-ignore server component import is fine in this layout */}
+                            <RepoCard repo={r} />
+                        </div>
+                        <div className="flex-1 flex items-center">
+                            <p className="text-sm text-muted leading-relaxed">{r.description ?? ''}</p>
+                        </div>
                     </div>
                 ))}
             </div>
