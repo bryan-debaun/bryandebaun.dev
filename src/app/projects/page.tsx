@@ -1,6 +1,5 @@
 import type { Repo } from "../../lib/github"
 import { getShowcaseRepos } from "../../lib/github"
-import RepoCard from "../../components/RepoCard"
 
 const curatedFallback: Repo[] = [
     {
@@ -51,9 +50,15 @@ export default async function Projects() {
                 {repos.map((r) => (
                     <div key={r.name} className="flex items-center gap-4 group">
                         <div className="w-24 flex-shrink-0 md:w-32 lg:w-40">
-                            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                            {/* @ts-ignore server component import is fine in this layout */}
-                            <RepoCard repo={r} />
+                            <a
+                                href={r.html_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={`${r.name} — ${r.description ?? 'Repository'}`}
+                                className="inline-block rounded px-4 py-2 no-underline btn btn--primary"
+                            >
+                                {r.name}
+                            </a>
                         </div>
                         <div className="flex-1 flex items-center">
                             <p className="text-sm leading-relaxed text-[var(--color-norwegian-700)] opacity-90 transition-opacity transition-transform duration-200 ease-out group-hover:translate-x-2 group-hover:opacity-100 motion-reduce:transition-none">{r.description ?? ''}</p>
