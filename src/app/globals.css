@@ -334,36 +334,21 @@ main a,
   outline-offset: 3px;
 }
 
-/* Repo card utility */
-.repo-card {
-  /* Minimal, reusable card utility: centered content, accessible focus */
-  @apply flex items-center justify-center text-center h-20 px-4 rounded-md transform transition-transform duration-200 ease-out focus-visible:ring-2 focus-visible:ring-offset-2 w-full;
-  /* Use site palette: norweigian-300 base and norweigian-400 on hover */
-  background-color: var(--color-norwegian-300);
-  border: 1px solid rgba(16, 143, 139, 0.12);
-  box-shadow: 0 4px 10px rgba(16, 143, 139, 0.06);
-}
+/* Repo card: migrated to Tailwind utility classes in `src/components/RepoCard.tsx` for clearer intent and dark-mode parity.
+   Motion remains "motion-safe" by using Tailwind's motion utilities and the global `prefers-reduced-motion` defaults.
 
-.repo-card:hover {
-  background-color: var(--color-norwegian-400);
-  box-shadow: 0 12px 32px rgba(16, 143, 139, 0.12);
-  transform: translateY(-3px) scale(1.03);
-}
+   If you prefer a global CSS fallback for reduced-motion, add a small `@media (prefers-reduced-motion: reduce)` block here.
+*/
 
-html.dark .repo-card {
-  background-color: var(--color-norwegian-200-dark);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
-}
+@media (prefers-reduced-motion: reduce) {
 
-html.dark .repo-card:hover {
-  background-color: var(--color-norwegian-300-dark);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-  transform: translateY(-1px) scale(1.02);
-}
-
-.repo-card__title {
-  @apply m-0 h-full flex items-center justify-center text-sm font-semibold truncate leading-none uppercase text-center;
+  /* Provide a conservative global fallback that disables non-essential transitions/animations */
+  * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-delay: 0ms !important;
+    transform: none !important;
+  }
 }
 
 /* Preserve dark-mode variants */

@@ -47,16 +47,16 @@ export default async function Projects() {
     return (
         <div className="prose prose-norwegian dark:prose-invert max-w-none px-4 md:px-6 lg:px-8">
             <h2>Projects</h2>
-            <div className="space-y-6">
+            <div className="space-y-4">
                 {repos.map((r) => (
-                    <div key={r.name} className="flex items-center gap-6">
-                        <div className="w-32 flex-shrink-0 md:w-40 lg:w-48">
+                    <div key={r.name} className="flex items-center gap-4 group">
+                        <div className="w-24 flex-shrink-0 md:w-32 lg:w-40">
                             {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                             {/* @ts-ignore server component import is fine in this layout */}
                             <RepoCard repo={r} />
                         </div>
                         <div className="flex-1 flex items-center">
-                            <p className="text-sm text-muted leading-relaxed">{r.description ?? ''}</p>
+                            <p className="text-sm leading-relaxed text-[var(--color-norwegian-700)] opacity-90 transition-opacity transition-transform duration-200 ease-out group-hover:translate-x-2 group-hover:opacity-100 motion-reduce:transition-none">{r.description ?? ''}</p>
                         </div>
                     </div>
                 ))}
