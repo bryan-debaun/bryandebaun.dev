@@ -377,6 +377,12 @@ html.dark .btn--primary:hover {
   transform: translateY(-1px);
 }
 
+/* Prevent underline for project row links on hover/focus so descriptions and labels don't get underlined */
+.projects-list a:hover,
+.projects-list a:focus {
+  text-decoration: none;
+}
+
 /* Dark-mode variant for project-list buttons (uses darker accent + neon tint) */
 .projects-list .dark .btn--primary,
 .projects-list html.dark .btn--primary {

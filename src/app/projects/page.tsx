@@ -48,23 +48,17 @@ export default async function Projects() {
             <h2>Projects</h2>
             <div className="space-y-1">
                 {repos.map((r) => (
-                    <div key={r.name} className="flex items-center gap-3 group">
+                    <a key={r.name} href={r.html_url} target="_blank" rel="noopener noreferrer" aria-label={`${r.name} — ${r.description ?? 'Repository'}`} title={r.name} className="group flex items-center gap-3">
                         <div className="w-24 flex-shrink-0 md:w-32 lg:w-40">
-                            <a
-                                href={r.html_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label={`${r.name} — ${r.description ?? 'Repository'}`}
-                                title={r.name}
-                                className="block w-full rounded-lg px-3 py-2 no-underline btn btn--primary uppercase text-xs overflow-hidden whitespace-nowrap truncate text-center shadow-[0_6px_18px_rgba(64,215,208,0.08)] hover:shadow-[0_10px_28px_rgba(64,215,208,0.14)] dark:shadow-[0_6px_18px_rgba(0,0,0,0.6)] dark:hover:shadow-[0_10px_28px_rgba(0,0,0,0.7)]"
-                            >
+                            <span className="block w-full rounded-lg px-3 py-2 no-underline btn btn--primary uppercase text-xs overflow-hidden whitespace-nowrap truncate text-center shadow-[0_6px_18px_rgba(64,215,208,0.08)] hover:shadow-[0_10px_28px_rgba(64,215,208,0.14)] dark:shadow-[0_6px_18px_rgba(0,0,0,0.6)] dark:hover:shadow-[0_10px_28px_rgba(0,0,0,0.7)]" aria-hidden="true">
                                 {r.name}
-                            </a>
+                            </span>
                         </div>
                         <div className="flex-1 flex items-center">
-                            <p className="text-sm leading-relaxed text-[var(--color-norwegian-700)] opacity-90 transition-opacity transition-transform duration-200 ease-out group-hover:translate-x-2 group-hover:opacity-100 motion-reduce:transition-none">{r.description ?? ''}</p>
+                            <span className="mr-3 inline-block w-[2px] h-6 rounded bg-gradient-to-b from-[var(--color-norwegian-400)] to-[var(--color-fjord-600)] opacity-0 transition-opacity duration-200 group-hover:opacity-100 motion-reduce:transition-none" aria-hidden="true" />
+                            <p className="text-sm leading-relaxed text-[var(--color-norwegian-700)] opacity-90 transition duration-200 transform group-hover:-translate-y-0.5 group-hover:shadow-[0_6px_18px_rgba(64,215,208,0.04)] group-hover:opacity-100 motion-reduce:transition-none cursor-pointer">{r.description ?? ''}</p>
                         </div>
-                    </div>
+                    </a>
                 ))}
             </div>
         </div>
