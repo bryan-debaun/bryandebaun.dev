@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import EventEmitter from 'events'
 import fs from 'fs'
 
 
