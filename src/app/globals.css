@@ -310,8 +310,16 @@ html.light .site-logo {
 
 /* Footer color follows the Norwegian muted teal (light) and a soft mint in dark mode */
 .site-footer {
+  /* Use body font (Inter) for footer text for better legibility */
+  font-family: var(--font-body);
   color: var(--color-norwegian-700);
   transition: color .12s ease;
+}
+
+/* Ensure emphasized footer text (e.g., .font-semibold spans) use the body font explicitly */
+.site-footer .font-semibold,
+.site-footer strong {
+  font-family: var(--font-body);
 }
 
 html.dark .site-footer {
