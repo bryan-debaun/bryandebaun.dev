@@ -1,8 +1,6 @@
 ---
 description: "Testing agent for bryandebaun.dev - guidance to run and add tests, and CI expectations"
 name: "bryandebaun.dev Tester"
-testCommand: "npm test"
-coverageCommand: "npm run coverage"
 tools:
   - execute/runInTerminal
   - execute/runTests

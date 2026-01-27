@@ -1,8 +1,6 @@
 ---
 description: "Coding agent for bryandebaun.dev - Next.js + TypeScript personal website"
 name: "bryandebaun.dev Coder"
-buildCommand: "npm run build"
-testCommand: "npm test"
 tools:
   - vscode/openSimpleBrowser
   - execute/runInTerminal
