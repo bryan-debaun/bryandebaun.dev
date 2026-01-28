@@ -50,9 +50,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
         <footer className="site-footer mx-auto max-w-5xl px-6 py-8 text-sm">
-          <div className="flex items-center gap-3">
-            <div>
-              © {new Date().getFullYear()} <span className="font-semibold">Bryan DeBaun</span>
+          <div className="flex items-center gap-3 justify-center md:justify-start">
+            <div className="inline-flex items-center gap-3 whitespace-nowrap text-center md:text-left">
+              <span>© {new Date().getFullYear()} <span className="font-semibold">Bryan DeBaun</span></span>
               <Image src="/icons/wolf.svg" alt="" className="site-logo inline-block ml-0" width={24} height={24} priority />
             </div>
           </div>
