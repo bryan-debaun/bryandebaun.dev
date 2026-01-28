@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Orbitron } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
-import DarkModeToggle from "../components/DarkModeToggle";
+import Header from "../components/Header";
 import "./globals.css";
 
 // Inter for body/UI and Orbitron for display/headings
@@ -47,20 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${inter.variable} ${orbitron.variable} antialiased min-h-screen`}>
-        <header className="site-header border-b sticky top-0 z-10">
-          <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
-            <Link href="/" className="inline-flex items-center gap-2" aria-label="Home — Bryan DeBaun">
-              <Image src="/icons/wolf.svg" alt="" className="site-logo w-12 h-12 md:w-16 md:h-16 object-contain" width={64} height={64} priority />
-              <span className="site-brand text-lg font-semibold tracking-wide">BAD</span>
-            </Link>
-            <nav className="site-nav flex gap-6 items-center prose prose-norwegian dark:prose-invert">
-              <Link href="/about" className="text-sm">About</Link>
-              <Link href="/projects" className="text-sm">Projects</Link>
-              <Link href="/blog" className="text-sm">Blog</Link>
-              <DarkModeToggle />
-            </nav>
-          </div>
-        </header>
+        <Header />
         <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
         <footer className="site-footer mx-auto max-w-5xl px-6 py-8 text-sm">
           <div className="flex items-center gap-3">

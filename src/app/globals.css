@@ -106,6 +106,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ensure images don't cause horizontal overflow on small screens */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
 h1,
 h2,
 h3,
