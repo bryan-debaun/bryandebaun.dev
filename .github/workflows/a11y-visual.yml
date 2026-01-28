@@ -1,0 +1,58 @@
+name: A11y & Visual Regression
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - 'feature/**'
+
+jobs:
+  run-a11y:
+    name: Run A11y & Visual Regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Build
+        run: npm run build
+
+      - name: Start server
+        run: |
+          npm run start &
+          echo "Waiting for localhost:3000..."
+          npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run A11y script
+        run: npm run a11y:ci
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-artifacts
+          path: artifacts/a11y/**
+          retention-days: 14
+
+      - name: Comment on PR with summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo
+            const pr = context.payload.pull_request.number
+            const body = `A11y automation ran: artifacts are attached to the workflow run as **a11y-artifacts**. Download and review the screenshots (playwright), axe json, touch-target reports, and Lighthouse HTML where available.`;
+            await github.rest.issues.createComment({ owner, repo, issue_number: pr, body })
