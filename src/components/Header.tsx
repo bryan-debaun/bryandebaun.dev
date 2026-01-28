@@ -75,10 +75,10 @@ export default function Header() {
 
             {/* Mobile menu (collapsible) */}
             <div id={menuId} className={`md:hidden border-t ${open ? "block" : "hidden"}`} role="menu" aria-labelledby={toggleId} aria-hidden={!open}>
-                <div className="px-6 py-3 space-y-2">
-                    <Link href="/about" id="mobile-nav-about" className="block px-3 py-3 rounded text-sm" role="menuitem">About</Link>
-                    <Link href="/projects" id="mobile-nav-projects" className="block px-3 py-3 rounded text-sm" role="menuitem">Projects</Link>
-                    <Link href="/blog" id="mobile-nav-blog" className="block px-3 py-3 rounded text-sm" role="menuitem">Blog</Link>
+                <div className="px-6 py-3 space-y-2 flex flex-col items-center site-nav prose prose-norwegian dark:prose-invert">
+                    <Link href="/about" id="mobile-nav-about" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">About</Link>
+                    <Link href="/projects" id="mobile-nav-projects" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">Projects</Link>
+                    <Link href="/blog" id="mobile-nav-blog" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">Blog</Link>
                 </div>
             </div>
         </header>
