@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Local PR body files used for editing PRs locally
 .github/pr-bodies/
+
+# Local handoffs (not committed)
+docs/hand-offs/
