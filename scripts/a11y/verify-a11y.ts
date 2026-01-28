@@ -31,11 +31,53 @@ function mkdirp(dir: string) {
     fs.mkdirSync(dir, { recursive: true })
 }
 
+/**
+ * Safely extract a string message from unknown errors without using `any`.
+ */
+function extractErrorMessage(err: unknown): string {
+    if (!err) return ''
+    if (typeof err === 'string') return err
+    if (typeof err === 'object' && err !== null && 'message' in err && typeof (err as { message?: unknown }).message === 'string') {
+        return (err as { message: string }).message
+    }
+    return String(err)
+}
+
+/**
+ * Read axe source safely from different module shapes without `any`.
+ */
+function getAxeSourceModule(m: unknown): string | undefined {
+    if (!m || typeof m !== 'object') return undefined
+    const mm = m as Record<string, unknown>
+    if (typeof mm.source === 'string') return mm.source
+    if (mm.default && typeof mm.default === 'object') {
+        const d = mm.default as Record<string, unknown>
+        if (typeof d.source === 'string') return d.source
+        if (d.axe && typeof d.axe === 'object') {
+            const ax = d.axe as Record<string, unknown>
+            if (typeof ax.source === 'string') return ax.source
+        }
+    }
+    return undefined
+}
+
 async function runAxeOnPage(page: Page): Promise<AxeResults> {
     // import axe-core dynamically so the module is only required at runtime
     const axeModule = await import('axe-core')
-    // axeModule doesn't have strong typing here; access source safely
-    await page.addScriptTag({ content: axeModule.source })
+    // axeModule may export the source in a few different shapes depending on bundler or package layout.
+    const axeSource = getAxeSourceModule(axeModule)
+    if (!axeSource) {
+        // As a last resort, attempt to load the browser build from the installed package folder
+        try {
+            const fallbackPath = require.resolve('axe-core/axe.min.js')
+            await page.addScriptTag({ path: fallbackPath })
+        } catch (error) {
+            console.error('Could not locate axe-core source. Module keys:', Object.keys(axeModule || {}), 'error:', extractErrorMessage(error))
+            throw new Error('axe-core source not found; cannot inject axe into page')
+        }
+    } else {
+        await page.addScriptTag({ content: axeSource })
+    }
 
     // Run axe in the page context. Narrow typings to avoid `any` usage within the source file.
     const results = await page.evaluate(async () => (window as unknown as { axe: { run: () => Promise<unknown> } }).axe.run())
@@ -89,8 +131,11 @@ async function run() {
     const url = urlArgIndex >= 0 ? argv[urlArgIndex + 1] : process.env.A11Y_URL || 'http://localhost:3000'
     const outDir = outArgIndex >= 0 ? argv[outArgIndex + 1] : process.env.A11Y_OUTDIR || 'artifacts/a11y'
 
+    const ciMode = argv.includes('--ci') || Boolean(process.env.CI)
     const opts: Options = { url, outDir, viewports: DEFAULT_VIEWPORTS, browsers: DEFAULT_BROWSERS }
     mkdirp(outDir)
+
+    let hadError = false
 
     for (const browserName of opts.browsers) {
         let browser: Browser | null = null
@@ -100,17 +145,32 @@ async function run() {
             if (!browser) continue
 
             for (const vp of opts.viewports) {
-                const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height } })
-                const page = await context.newPage()
-                // Light and dark modes
+                // Create separate contexts per theme so both `prefers-color-scheme` and `class`-based dark modes work reliably.
                 for (const theme of ['light', 'dark']) {
-                    await page.goto(url, { waitUntil: 'networkidle' })
-                    // Apply theme class if needed
+                    const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, colorScheme: theme as 'light' | 'dark' })
+                    const page = await context.newPage()
+
+                    // Ensure the theme class is present before any page scripts run so initial render respects it.
                     if (theme === 'dark') {
-                        await page.evaluate(() => document.documentElement.classList.add('dark'))
+                        await context.addInitScript({ content: `document.documentElement.classList.add('dark')` })
                     } else {
-                        await page.evaluate(() => document.documentElement.classList.remove('dark'))
+                        await context.addInitScript({ content: `document.documentElement.classList.remove('dark')` })
                     }
+
+                    await page.goto(url, { waitUntil: 'networkidle' })
+
+                    // Dispatch a 'themechange' event to notify any client-side listeners (e.g., DarkModeToggle) to re-sync.
+                    try {
+                        await page.evaluate(() => {
+                            window.dispatchEvent(new CustomEvent('themechange'))
+                        })
+                    } catch (err) {
+                        // Non-fatal: some pages may block synthetic events; log and continue
+                        console.warn('Failed to dispatch themechange event:', err)
+                    }
+
+                    // Give the page a short moment to apply theme-related changes
+                    await page.waitForTimeout(250)
 
                     const filePrefix = `${browserName}-${vp.name}-${theme}`
                     const screenshotPath = path.join(outDir, `${filePrefix}.png`)
@@ -134,18 +194,37 @@ async function run() {
                     }
 
                     console.log(`Wrote artifacts for ${filePrefix}`)
-                }
 
-                await context.close()
+                    await context.close()
+                }
             }
-        } catch (e) {
-            console.error('Error while running a11y for', browserName, e)
+        } catch (e: unknown) {
+            hadError = true
+            console.error('Error while running a11y for', browserName)
+            // Provide a helpful message when Playwright browsers are not installed
+            const msg = extractErrorMessage(e)
+            if (msg.includes("Executable doesn't exist") || msg.includes('Please run the following command to download new browsers') || msg.includes('playwright')) {
+                console.error('\nPlaywright appears to be missing the required browser binaries for', browserName + '.')
+                console.error('Install them locally with:')
+                console.error('\n  npx playwright install\n')
+                if (ciMode) {
+                    console.error('In CI, ensure the workflow runs: `npx playwright install --with-deps` before executing this script.')
+                }
+            }
+            console.error(msg)
         } finally {
             if (browser) await browser.close()
         }
     }
 
+    if (hadError) {
+        console.error('One or more browsers failed during the a11y run. See errors above. Exiting with non-zero status.')
+        process.exit(1)
+    }
+
     console.log('A11y run complete. Artifacts in', outDir)
+    // Explicitly exit to avoid lingering handles in some environments
+    process.exit(0)
 }
 
 run().catch((e) => {

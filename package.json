@@ -20,6 +20,7 @@
     "start": "next start",
     "a11y:local": "tsx scripts/a11y/verify-a11y.ts --url http://localhost:3000 --outDir artifacts/a11y",
     "a11y:ci": "tsx scripts/a11y/verify-a11y.ts --url http://localhost:3000 --outDir artifacts/a11y --ci",
+    "playwright:install": "npx playwright install --with-deps",
     "ci:lighthouse": "lhci autorun",
     "lint:mdx": "eslint --ext .mdx \"src/content\"",
     "lint": "eslint"
