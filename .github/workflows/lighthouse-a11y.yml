@@ -31,12 +31,22 @@ jobs:
           npx wait-on http://localhost:3000 -t 120000
 
       - name: Run Lighthouse CI (autorun)
-        run: npx -y @lhci/cli autorun --upload.target=temporary-public-storage
+        run: |
+          mkdir -p ./lhci-report
+          # Run LHCI and tee output to a file so we can extract the temporary-public-storage URL
+          npx -y @lhci/cli autorun --upload.target=temporary-public-storage 2>&1 | tee ./lhci-report/lhci-output.txt
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Capture LHCI public report URL
+        run: |
+          mkdir -p ./lhci-report
+          # Extract the first URL ending with report.html (LHCI prints 'Open the report at <url>')
+          grep -Eo 'https?://[^ ]+report.html' ./lhci-report/lhci-output.txt | head -n1 > ./lhci-report/url.txt || echo 'no-url-found' > ./lhci-report/url.txt
 
       - name: Upload Lighthouse report
         uses: actions/upload-artifact@v4
         with:
           name: lhci-report
-          path: ./lhci-report || ./lighthouse-report || .
+          path: ./lhci-report
+          retention-days: 14
