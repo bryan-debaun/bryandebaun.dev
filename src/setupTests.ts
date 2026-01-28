@@ -13,6 +13,14 @@ if (typeof globalThis.window === 'undefined') {
     globalThis.HTMLElement = dom.window.HTMLElement
     globalThis.Node = dom.window.Node
     globalThis.navigator = dom.window.navigator
+
+    // Shim canvas getContext to avoid jsdom "Not implemented" warnings when axe or libraries access canvas
+    if (typeof globalThis.HTMLCanvasElement !== 'undefined' && !globalThis.HTMLCanvasElement.prototype.getContext) {
+        // @ts-expect-error adding getContext shim in test environment
+        globalThis.HTMLCanvasElement.prototype.getContext = function () {
+            return {} as CanvasRenderingContext2D
+        }
+    }
 }
 
 // Mock next/image to a plain img element for tests

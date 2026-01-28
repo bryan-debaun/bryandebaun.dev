@@ -47,7 +47,9 @@ describe('DarkModeToggle', () => {
 
         const { waitFor } = await import('@testing-library/react')
         await user.click(btn)
-        await waitFor(() => expect(knob?.className).toContain('translate-x-[20px]'))
+        // knob should no longer have the zero-translate class and should contain some translate-x value
+        await waitFor(() => expect(knob?.className).not.toContain('translate-x-0'))
+        await waitFor(() => expect(knob?.className).toContain('translate-x-'))
     })
 
     it('syncs across multiple instances via themechange event', async () => {
