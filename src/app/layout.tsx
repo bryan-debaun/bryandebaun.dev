@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Orbitron } from "next/font/google";
-import Link from "next/link";
 import Image from "next/image";
 import Header from "../components/Header";
 import "./globals.css";
