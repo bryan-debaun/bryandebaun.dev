@@ -14,7 +14,7 @@ Adopt a Tailwind-first approach:
 
 - Implement an accessible mobile navigation (toggleable menu hidden on `md+` via `hidden md:flex` and mobile menu using `md:hidden`).
 - Use Tailwind utilities for truncation and overflow (`flex-1 min-w-0`, `overflow-hidden truncate`).
-- Add minimal scoped CSS only when Tailwind utilities cannot express required behavior (e.g., small animation or a global `@apply` for `img { max-w-full h-auto }`).
+- Add minimal scoped CSS only when Tailwind utilities cannot express required behavior (e.g., a small animation or a global rule that applies `max-w-full` and `h-auto` to images using `@apply`).
 
 Alternative considered:
 
@@ -29,7 +29,7 @@ Alternative considered:
 ## Notes
 
 - Branch: `feature/33-tailwind-mobile-nav`
-- See issue: <https://github.com/bryan-debaun/bryandebaun.dev/issues/33>
+- See issue: [#33](https://github.com/bryan-debaun/bryandebaun.dev/issues/33)
 
 Owner: @bryan-debaun
 
