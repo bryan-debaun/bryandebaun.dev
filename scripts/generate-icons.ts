@@ -21,7 +21,7 @@ if (argv.includes('--help') || argv.includes('-h')) {
     console.log(`Usage: tsx scripts/generate-icons.ts [--src <path>] [--out <dir>] [--sizes <csv>] [--ico]
 
 Options:
-  --src     Source SVG/PNG (default: public/icons/omega-wolf.svg)
+  --src     Source SVG/PNG (default: public/icons/wolf.svg)
   --out     Output directory (default: public/icons)
   --sizes   Comma separated list of sizes (default: 16,32,48,96,180,192,512)
   --ico     (optional) Generate an .ico file (not implemented in this script)
@@ -29,7 +29,7 @@ Options:
     process.exit(0)
 }
 
-const srcArg = getArg('src', 'public/icons/omega-wolf.svg')!
+const srcArg = getArg('src', 'public/icons/wolf.svg')!
 const outArg = getArg('out', 'public/icons')!
 const sizesArg = getArg('sizes', '16,32,48,96,180,192,512')!
 const makeIco = hasFlag('ico')

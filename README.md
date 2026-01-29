@@ -41,6 +41,16 @@ If a new word is flagged by `cspell`, add it to `cspell.json` under `words`.
 - MDX/Contentlayer integration is planned, but currently the `next-contentlayer` package is incompatible with Next.js 16; see Issue #2 for tracking.
 - CI runs on push and PRs and performs build and lint checks.
 
+### PWA icons / Troubleshooting ⚠️
+
+- If you see an outdated or incorrect icon after installing the PWA (for example, an old `omega` icon), Chrome may be caching the manifest or icon files. Try the following to refresh the installed app:
+  - Open Chrome > More tools > Clear browsing data and clear "Cached images and files" for the site, or use an Incognito/fresh profile to test installation.
+  - On the site, open DevTools > Application > Manifest and confirm the icons listed match `/public/icons` (look for `wolf-` or `badge-` assets).
+  - Re-install the PWA (Chrome > Install app) after clearing site data.
+
+- Developers: the icon generator defaults to `public/icons/wolf.svg`. Run `npm run icons:generate` to regenerate PNG assets into `public/icons/`.
+- CI will run `npm run verify:no-omega` (added) to prevent accidental re-introduction of legacy `omega` references.
+
 ## GitHub API access
 
 For some pages (like the Projects listing) this site can fetch repository metadata from the GitHub API. To increase API rate limits and avoid unauthenticated throttling in CI or development, you can optionally set a `GITHUB_TOKEN` in your environment (e.g., `.env.local`). The helper used by the site honors `GITHUB_TOKEN` when present and will fetch with ISR-style caching (24h by default).
