@@ -2,6 +2,8 @@ import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
     testDir: 'tests/visual',
+    // Only pick up Playwright-specific tests with this naming convention
+    testMatch: '**/*.playwright.ts',
     timeout: 60_000,
     expect: {
         toHaveScreenshot: {
