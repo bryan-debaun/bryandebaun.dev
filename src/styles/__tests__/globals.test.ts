@@ -8,5 +8,6 @@ describe('global styles', () => {
         const src = readFileSync(filePath, 'utf8')
         expect(src).toContain('h2')
         expect(src).toContain('text-transform: uppercase')
+        expect(src).toContain('text-align: center')
     })
 })
