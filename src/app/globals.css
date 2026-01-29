@@ -132,6 +132,8 @@ h1 {
 
 h2 {
   font-size: var(--fs-h1);
+  /* Ensure H2 headings always render in ALL CAPS for consistency */
+  text-transform: uppercase;
 }
 
 h3 {

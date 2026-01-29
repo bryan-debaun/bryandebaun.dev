@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   run-a11y:
     name: Run A11y & Visual Regression
@@ -57,7 +61,8 @@ jobs:
           script: |
             const { owner, repo } = context.repo
             const pr = context.payload.pull_request?.number || context.payload.issue?.number
-            const body = `A11y automation ran: artifacts are attached to the workflow run as **a11y-artifacts**. Download and review the screenshots (playwright), axe json, touch-target reports, and Lighthouse HTML where available.`;
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`
+            const body = `A11y automation ran: artifacts are attached to this workflow run. [View workflow run](${runUrl}) — artifacts are uploaded as **a11y-artifacts**. Download and review the screenshots (Playwright), axe JSON, touch-target reports, and Lighthouse HTML where available. If you can't see the artifacts it may be because this PR is from a fork and workflows from forks have restricted permissions; please ask a maintainer to re-run the workflow on the main repo branch or rebase the PR.`;
             try {
               if (pr) {
                 await github.rest.issues.createComment({ owner, repo, issue_number: pr, body })
@@ -65,6 +70,7 @@ jobs:
                 console.warn('No PR number found in event payload; skipping comment.')
               }
             } catch (err) {
-              // If commenting fails due to token restrictions (e.g., PR from fork), surface a debug log but do not fail the job
+              // If commenting fails due to permission restrictions (e.g., PR from fork), surface a debug log with guidance
               console.warn('Failed to post PR comment:', err.message || String(err))
+              console.warn('If this is a forked PR, workflows triggered by forks may have read-only tokens. Consider re-running as a maintainer or using `pull_request_target` with careful input validation.')
             }
