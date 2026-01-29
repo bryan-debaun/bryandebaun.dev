@@ -74,15 +74,18 @@ type SpawnLike = {
 
 type SpawnFn = (cmd: string, args: string[], opts: { shell: boolean }) => SpawnLike
 
-export function runContentWithSpawn(spawnFn: SpawnFn): Promise<number> {
+export function runContentWithSpawn(spawnFn: SpawnFn, opts?: { normalizeFn?: (rootDir?: string, options?: NormalizeOptions) => { files: string[]; applied: string[] } }): Promise<number> {
     return new Promise((resolve, reject) => {
         try {
             // Decide whether to actually apply normalization or just dry-run
             const applyFlag = process.env.CONTENT_NORMALIZE_APPLY === '1' || process.env.CONTENT_NORMALIZE_APPLY === 'true' || process.argv.includes('--apply-normalize')
-            const res = normalizeContentFiles(undefined, { apply: applyFlag, backup: true })
+            const normalizeFn = opts?.normalizeFn ?? normalizeContentFiles
+            const res = normalizeFn(undefined, { apply: applyFlag, backup: true })
             if (res.files.length > 0 && !applyFlag) {
-                console.log('Some content files require normalization. No changes applied (dry-run).')
-                console.log('Run `npm run normalize-content` or `CONTENT_NORMALIZE_APPLY=1 npm run run-content` to apply changes.')
+                console.error('Content normalization required: some content files need normalization (LF endings / trimmed whitespace).')
+                console.error('Please run `npm run normalize-content` and commit the changes before retrying the build.')
+                reject({ code: 3, message: 'content normalization required' })
+                return
             }
         } catch (e) {
             console.error('Content normalization failed', e)

@@ -40,8 +40,9 @@ describe('runContent', () => {
         vi.spyOn(fs, 'existsSync').mockReturnValue(true)
         vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify([{}]))
         const mod = await import('../run-content.ts')
+        vi.spyOn(mod.default || mod, 'normalizeContentFiles').mockReturnValue({ files: [], applied: [] })
         const { runContentWithSpawn } = mod.default || mod
-        const p = runContentWithSpawn(() => cp)
+        const p = runContentWithSpawn(() => cp, { normalizeFn: () => ({ files: [], applied: [] }) })
         cp._emitClose(0)
         await expect(p).resolves.toBe(0)
     })
@@ -50,8 +51,9 @@ describe('runContent', () => {
         const cp = createManualProcess()
         vi.spyOn(fs, 'existsSync').mockReturnValue(false)
         const mod = await import('../run-content.ts')
+        vi.spyOn(mod.default || mod, 'normalizeContentFiles').mockReturnValue({ files: [], applied: [] })
         const { runContentWithSpawn } = mod.default || mod
-        const p = runContentWithSpawn(() => cp)
+        const p = runContentWithSpawn(() => cp, { normalizeFn: () => ({ files: [], applied: [] }) })
         cp._emitClose(2)
         await expect(p).rejects.toMatchObject({ code: 2 })
     })
@@ -60,8 +62,9 @@ describe('runContent', () => {
         const err = new Error('spawn failed')
         const cp = createManualProcess()
         const mod = await import('../run-content.ts')
+        vi.spyOn(mod.default || mod, 'normalizeContentFiles').mockReturnValue({ files: [], applied: [] })
         const { runContentWithSpawn } = mod.default || mod
-        const p = runContentWithSpawn(() => cp)
+        const p = runContentWithSpawn(() => cp, { normalizeFn: () => ({ files: [], applied: [] }) })
         cp._emitError(err)
         await expect(p).rejects.toMatchObject({ code: 1 })
     })
@@ -89,5 +92,16 @@ describe('runContent', () => {
         expect(bakGlob).toBeTruthy()
         // cleanup
         fs.rmSync(tmp, { recursive: true, force: true })
+    })
+
+    it('rejects when normalization is required (dry-run) and no apply flag is set', async () => {
+        const cp = createManualProcess()
+        const mod = await import('../run-content.ts')
+        // Force normalization to report change but not applied
+        vi.spyOn(mod.default || mod, 'normalizeContentFiles').mockReturnValue({ files: ['src/content/philosophy/cptsd.mdx'], applied: [] })
+        const { runContentWithSpawn } = mod.default || mod
+        // Force normalization required via explicit override
+        const p = runContentWithSpawn(() => cp, { normalizeFn: () => ({ files: ['src/content/philosophy/cptsd.mdx'], applied: [] }) })
+        await expect(p).rejects.toMatchObject({ code: 3 })
     })
 })
