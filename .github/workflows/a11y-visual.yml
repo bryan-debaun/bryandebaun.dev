@@ -50,16 +50,20 @@ jobs:
           retention-days: 14
 
       - name: Comment on PR with summary
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { owner, repo } = context.repo
-            const pr = context.payload.pull_request.number
+            const pr = context.payload.pull_request?.number || context.payload.issue?.number
             const body = `A11y automation ran: artifacts are attached to the workflow run as **a11y-artifacts**. Download and review the screenshots (playwright), axe json, touch-target reports, and Lighthouse HTML where available.`;
             try {
-              await github.rest.issues.createComment({ owner, repo, issue_number: pr, body })
+              if (pr) {
+                await github.rest.issues.createComment({ owner, repo, issue_number: pr, body })
+              } else {
+                console.warn('No PR number found in event payload; skipping comment.')
+              }
             } catch (err) {
               // If commenting fails due to token restrictions (e.g., PR from fork), surface a debug log but do not fail the job
               console.warn('Failed to post PR comment:', err.message || String(err))
