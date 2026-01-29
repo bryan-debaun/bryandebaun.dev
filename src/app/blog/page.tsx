@@ -1,20 +1,23 @@
 import { allPosts } from 'contentlayer/generated'
+import { publicOnly } from '@/lib/content'
 
 export default function Blog() {
+    const posts = publicOnly(allPosts)
+
     return (
         <div className="prose prose-norwegian dark:prose-invert">
             <h2>Blog</h2>
-            {allPosts.length === 0 ? (
+            {posts.length === 0 ? (
                 <p>No posts yet.</p>
             ) : (
                 <ul>
-                    {allPosts.map((post) => {
+                    {posts.map((post) => {
                         const slugParts = post.slug.split('/')
                         const shortSlug = slugParts[slugParts.length - 1]
                         return (
                             <li key={post._id}>
                                 <a href={`/blog/${shortSlug}`}>{post.title}</a>
-                                {post.description ? <span> — {post.description}</span> : null}
+                                {post.summary ? <span> — {post.summary}</span> : null}
                             </li>
                         )
                     })}

@@ -26,12 +26,12 @@ describe('check-content main', () => {
     })
 
     it('prints success when index has posts', async () => {
-        vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+        vi.spyOn(fs, 'existsSync').mockImplementation((p) => p.includes('Post') || p.includes('Philosophy'))
         vi.spyOn(fs, 'readFileSync').mockReturnValue('[{}]')
         const log = vi.spyOn(console, 'log').mockImplementation(() => { })
         const mod = await import('../check-content.ts')
         const { main } = mod.default || mod
         main()
-        expect(log).toHaveBeenCalledWith('Content check passed: 1 posts')
+        expect(log).toHaveBeenCalledWith('Content check passed: 1 documents (Post + Philosophy)')
     })
 })

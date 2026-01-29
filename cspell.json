@@ -13,7 +13,8 @@
         "Vercel",
         "remarkrc",
         "Orbitron",
-        "subsetting"
+        "subsetting",
+        "frontmatter"
     ],
     "ignorePaths": [
         "node_modules/**",

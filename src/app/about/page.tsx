@@ -1,3 +1,6 @@
+import NowReading from '@/components/NowReading'
+import PhilosophyList from '@/components/PhilosophyList'
+
 export default function About() {
     return (
         <div className="prose prose-norwegian dark:prose-invert">
@@ -11,6 +14,13 @@ export default function About() {
                 This site shows selected projects, writings, and demos that highlight my
                 technical approach and engineering craft.
             </p>
+
+            <h3>Work & Passions</h3>
+            <p>Selected work, passions, and advocacy are surfaced in the sections below.</p>
+
+            <NowReading />
+
+            <PhilosophyList />
         </div>
     );
 }
