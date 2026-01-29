@@ -14,7 +14,13 @@
         "remarkrc",
         "Orbitron",
         "subsetting",
-        "frontmatter"
+        "frontmatter",
+        "CPTSD",
+        "PTSD",
+        "EMDR",
+        "reparenting",
+        "Gottman",
+        "Kolk"
     ],
     "ignorePaths": [
         "node_modules/**",
