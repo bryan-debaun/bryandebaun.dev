@@ -18,6 +18,13 @@ export default function About() {
             <h3>Work & Passions</h3>
             <p>Selected work, passions, and advocacy are surfaced in the sections below.</p>
 
+            <h3>Why BAD?</h3>
+            <p>
+                BAD stands for Bryan A. DeBaun, but the word isn&apos;t an accident.
+                It&apos;s a deliberate contrast — a reminder that "good" and "bad" in
+                software are rarely absolute. The name sticks, and that&apos;s the point.
+            </p>
+
             <NowReading />
 
             <PhilosophyList />
