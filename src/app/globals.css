@@ -172,9 +172,23 @@ html.light {
 
 /* Header and nav — accent Norwegian styling */
 .site-header {
+  --header-height: 80px;
+  /* mobile default (logo 48 + py-4*2 = 48 + 32) */
   background-color: var(--color-norwegian-50);
   border-bottom: 1px solid var(--color-norwegian-300);
   transition: background-color .15s ease, border-color .15s ease, color .12s ease;
+}
+
+/* Adjust header height variable for larger screens (logo 64 + py-4*2 = 64 + 32) */
+@media (min-width: 768px) {
+  .site-header {
+    --header-height: 96px;
+  }
+}
+
+/* Allow anchored scrolling to avoid content being hidden under sticky header */
+html {
+  scroll-padding-top: var(--header-height);
 }
 
 /* Brand link: do not underline on hover/focus (logo + initials) */
@@ -269,8 +283,11 @@ a:focus-visible {
 
 /* Preserve dark mode behavior */
 .dark .site-header {
-  /* subtle translucent overlay for separation on dark backgrounds */
-  background: rgba(255, 255, 255, 0.03);
+  /* Use the dark background variable so the header obscures content correctly in dark mode */
+  background-color: var(--background);
+  /* Add a subtle translucent overlay + blur for depth while keeping content obscured */
+  background-image: linear-gradient(rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.02));
+  backdrop-filter: saturate(120%) blur(6px);
   border-bottom: 1px solid var(--color-norwegian-300-dark);
   /* tint header text slightly to our Norwegian light tone */
   color: var(--color-norwegian-100);

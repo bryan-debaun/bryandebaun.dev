@@ -3,6 +3,68 @@ import { spawn } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 
+// Preserve original fs methods so tests that mock fs won't cause normalization to write mocked data
+const realFs = {
+    readFileSync: fs.readFileSync.bind(fs),
+    writeFileSync: fs.writeFileSync.bind(fs),
+    readdirSync: fs.readdirSync.bind(fs),
+    existsSync: fs.existsSync.bind(fs),
+    statSync: fs.statSync.bind(fs),
+}
+
+export type NormalizeOptions = { apply?: boolean; backup?: boolean }
+
+export function normalizeContentFiles(rootDir: string = path.join(process.cwd(), 'src', 'content'), options: NormalizeOptions = { apply: false, backup: true }) {
+    // Recursively walk directory and collect .md/.mdx files using original fs
+    function walk(dir: string): string[] {
+        const entries = realFs.readdirSync(dir, { withFileTypes: true })
+        let files: string[] = []
+        for (const e of entries) {
+            const p = path.join(dir, e.name)
+            if (e.isDirectory()) files = files.concat(walk(p))
+            else if (e.isFile() && /\.(md|mdx)$/.test(e.name)) files.push(p)
+        }
+        return files
+    }
+
+    if (!realFs.existsSync(rootDir)) return { files: [], applied: [] }
+    const files = walk(rootDir)
+    const changed: string[] = []
+    const applied: string[] = []
+
+    for (const f of files) {
+        let s = realFs.readFileSync(f, 'utf8')
+        const orig = s
+        // Normalize CRLF -> LF, remove stray CR, trim trailing whitespace per-line, ensure trailing newline
+        s = s.replace(/\r\n/g, '\n').replace(/\r/g, '')
+        s = s.replace(/[ \t]+$/gm, '')
+        if (!s.endsWith('\n')) s += '\n'
+        if (s !== orig) {
+            changed.push(path.relative(process.cwd(), f))
+            if (options.apply) {
+                // backup if requested
+                if (options.backup) {
+                    const bak = `${f}.${Date.now()}.bak`
+                    realFs.writeFileSync(bak, orig, 'utf8')
+                    console.log(`Backup written: ${path.relative(process.cwd(), bak)}`)
+                }
+                realFs.writeFileSync(f, s, 'utf8')
+                applied.push(path.relative(process.cwd(), f))
+                console.log(`Applied normalization: ${path.relative(process.cwd(), f)}`)
+            }
+        }
+    }
+
+    if (changed.length > 0) {
+        console.log(`Normalization: ${changed.length} file(s) require normalization.`)
+        if (!options.apply) {
+            console.log('Dry run: no files were modified. Re-run with --apply-normalize or set CONTENT_NORMALIZE_APPLY=1 to apply changes.')
+        }
+    }
+
+    return { files: changed, applied }
+}
+
 type SpawnLike = {
     stdout: { on: (event: 'data', cb: (d: Buffer) => void) => void }
     stderr: { on: (event: 'data', cb: (d: Buffer) => void) => void }
@@ -14,6 +76,20 @@ type SpawnFn = (cmd: string, args: string[], opts: { shell: boolean }) => SpawnL
 
 export function runContentWithSpawn(spawnFn: SpawnFn): Promise<number> {
     return new Promise((resolve, reject) => {
+        try {
+            // Decide whether to actually apply normalization or just dry-run
+            const applyFlag = process.env.CONTENT_NORMALIZE_APPLY === '1' || process.env.CONTENT_NORMALIZE_APPLY === 'true' || process.argv.includes('--apply-normalize')
+            const res = normalizeContentFiles(undefined, { apply: applyFlag, backup: true })
+            if (res.files.length > 0 && !applyFlag) {
+                console.log('Some content files require normalization. No changes applied (dry-run).')
+                console.log('Run `npm run normalize-content` or `CONTENT_NORMALIZE_APPLY=1 npm run run-content` to apply changes.')
+            }
+        } catch (e) {
+            console.error('Content normalization failed', e)
+            reject({ code: 1, message: 'content normalization failed' })
+            return
+        }
+
         const cp = spawnFn('npx', ['contentlayer2', 'build', '--clearCache'], { shell: true })
 
         let out = ''

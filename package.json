@@ -6,6 +6,7 @@
     "dev": "next dev",
     "content:dev": "contentlayer2 dev",
     "run-content": "tsx scripts/run-content.ts",
+    "normalize-content": "tsx scripts/run-content.ts --apply-normalize",
     "build": "npm run run-content && next build",
     "test:content": "tsx scripts/check-content.ts",
     "content:checks": "npm run verify:icons && npm run verify:no-omega && npm run lint:content && npm run cspell:check && npm run link-check",

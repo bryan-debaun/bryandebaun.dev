@@ -58,7 +58,6 @@ async function compareWithBaseline(name: string, buffer: Buffer) {
     // Use env-configurable threshold to allow CI to relax tolerance when needed
     const maxDiff = Number.parseFloat(process.env.VISUAL_MAX_DIFF ?? '0.002')
     // Log for easier debugging in CI
-    // eslint-disable-next-line no-console
     console.log(`visual diff for ${name}: ${ratio} (threshold: ${maxDiff})`)
     expect(ratio).toBeLessThan(maxDiff)
 }

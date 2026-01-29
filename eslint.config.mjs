@@ -14,10 +14,10 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     ".contentlayer/**",
-    // Ignore problematic MDX files until upstream parsing issue is resolved
+    // Temporary: ignore specific MDX files that trigger the MDX parser bug. See issue: TODO
     "src/content/posts/hello-world.mdx",
-    "src/content/philosophy/hello.mdx",
     "src/content/philosophy/private-example.mdx",
+    "src/content/philosophy/cptsd.mdx",
   ]),
   // MDX files: lint with eslint-plugin-mdx (only content folder)
   {

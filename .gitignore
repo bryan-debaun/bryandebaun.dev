@@ -55,3 +55,6 @@ docs/hand-offs/
 # Playwright / test artifacts
 /test-results/
 /artifacts/**/diffs/
+
+# Editor/backups created by normalization or tools
+**/*.bak
