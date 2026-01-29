@@ -8,7 +8,7 @@ export default function PhilosophyList({ limit = 5 }: { limit?: number }) {
     return (
         <section>
             <h3>Thoughts & Philosophy</h3>
-            <ul>
+            <ul className="list-none pl-0">
                 {posts.map((p) => {
                     const slugParts = p.slug.split('/')
                     const shortSlug = slugParts[slugParts.length - 1]

@@ -8,7 +8,7 @@ export default function NowReading() {
     return (
         <section>
             <h3>Now Reading</h3>
-            <ul>
+            <ul className="list-none pl-0">
                 {items.map((p) => (
                     <li key={p._id}>
                         <BookNote reading={p.reading} />

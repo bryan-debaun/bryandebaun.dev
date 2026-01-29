@@ -10,7 +10,7 @@ export default function Philosophy() {
             {posts.length === 0 ? (
                 <p>No notes yet.</p>
             ) : (
-                <ul>
+                <ul className="list-none pl-0">
                     {posts.map((p) => {
                         const slugParts = p.slug.split('/')
                         const shortSlug = slugParts[slugParts.length - 1]
