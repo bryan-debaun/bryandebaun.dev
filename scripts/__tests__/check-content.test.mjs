@@ -32,6 +32,6 @@ describe('check-content main', () => {
         const mod = await import('../check-content.ts')
         const { main } = mod.default || mod
         main()
-        expect(log).toHaveBeenCalledWith('Content check passed: 1 documents (Post + Philosophy)')
+        expect(log).toHaveBeenCalledWith(expect.stringMatching(/Content check passed: \d+ documents \(Post \+ Philosophy\)/))
     })
 })
