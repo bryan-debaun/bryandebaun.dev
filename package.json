@@ -33,6 +33,9 @@
       "threads": false,
       "setupFiles": [
         "src/setupTests.ts"
+      ],
+      "exclude": [
+        "tests/visual/**"
       ]
     }
   },
