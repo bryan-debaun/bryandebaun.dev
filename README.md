@@ -36,6 +36,14 @@ This repository includes content quality tooling and a CI job to run checks on P
 
 If a new word is flagged by `cspell`, add it to `cspell.json` under `words`.
 
+## Accessibility & visual regression 🧭✅
+
+The repository includes a small Playwright-based audit script used in CI to capture accessibility reports and full-page screenshots for visual review.
+
+- Run locally: `npm run a11y:local -- --url http://localhost:3000 --outDir artifacts/a11y` (the script will capture `/`, `/about`, and `/philosophy` by default)
+- CI: `npm run a11y:ci` is wired into the `a11y-visual.yml` workflow and uploads artifacts for per-PR review
+- The script writes screenshots, `axe` results, touch-target reports, and optional Lighthouse HTML per viewport and theme. Use these artifacts for visual diffing or to triage accessibility issues.
+
 ## Content frontmatter & private semantics 📄🔒
 
 Content is authored as MDX under `src/content/` and parsed by Contentlayer. Frontmatter fields available to `Post` and `Philosophy` documents include:

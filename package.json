@@ -21,6 +21,7 @@
     "a11y:local": "tsx scripts/a11y/verify-a11y.ts --url http://localhost:3000 --outDir artifacts/a11y",
     "a11y:ci": "tsx scripts/a11y/verify-a11y.ts --url http://localhost:3000 --outDir artifacts/a11y --ci",
     "playwright:install": "npx playwright install --with-deps",
+    "visual:test": "npx playwright test --config=playwright.config.ts",
     "ci:lighthouse": "lhci autorun",
     "lint:mdx": "node -e \"const glob=require('glob'); const files=glob.sync('src/content/**/*.{md,mdx}'); if(!files.length){console.log('No MDX files to lint (none or all ignored)'); process.exit(0);} const cp=require('child_process').spawnSync('eslint',['--ext','.mdx','src/content/**/*.{md,mdx}'],{stdio:'inherit'}); process.exit(cp.status);\"",
     "lint": "eslint"
@@ -43,6 +44,7 @@
   "devDependencies": {
     "@contentlayer/source-files": "^0.3.4",
     "@mdx-js/mdx": "^3.1.1",
+    "@playwright/test": "^1.40.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/typography": "^0.5.19",
     "@testing-library/jest-dom": "^6.9.1",
@@ -50,6 +52,8 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/jsdom": "^27.0.0",
     "@types/node": "^20",
+    "@types/pixelmatch": "^5.2.6",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "axe-core": "^4.11.1",
@@ -61,7 +65,11 @@
     "eslint-plugin-mdx": "^3.6.2",
     "eslint-plugin-node": "^11.1.0",
     "jsdom": "^27.4.0",
+    "lighthouse": "^11.0.0",
     "markdown-link-check": "^3.14.2",
+    "pixelmatch": "^5.3.0",
+    "playwright": "^1.40.0",
+    "pngjs": "^7.0.0",
     "postcss": "^8.5.6",
     "remark-cli": "^12.0.1",
     "remark-lint": "^10.0.1",
@@ -73,8 +81,6 @@
     "tsx": "^4.18.0",
     "typescript": "5.9.3",
     "vitest": "^1.6.1",
-    "vitest-axe": "^0.1.0",
-    "playwright": "^1.40.0",
-    "lighthouse": "^11.0.0"
+    "vitest-axe": "^0.1.0"
   }
 }

@@ -36,6 +36,11 @@ jobs:
       - name: Run A11y script
         run: npm run a11y:ci
 
+      - name: Run visual snapshot tests
+        run: |
+          echo "Install playwright and run visual tests"
+          npm run visual:test || (echo "Visual tests failed; uploading diffs" && exit 1)
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:

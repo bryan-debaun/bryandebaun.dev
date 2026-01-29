@@ -3,7 +3,7 @@ import { exec } from 'child_process'
 import type { ExecException } from 'child_process'
 
 // Run `git grep -n "omega"` and fail if any matches are found.
-exec('git grep -n "omega"', { maxBuffer: 10 * 1024 * 1024, encoding: 'utf8' }, (err: ExecException | null, stdout: string, _stderr: string) => {
+exec('git grep -n "omega"', { maxBuffer: 10 * 1024 * 1024, encoding: 'utf8' }, (err: ExecException | null, stdout: string) => {
     // git grep exits with code 1 when no matches are found
     if (err && err.code === 1) {
         console.log('No \"omega\" references found.')
