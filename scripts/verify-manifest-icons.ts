@@ -54,5 +54,13 @@ if (missing.length) {
     process.exit(1)
 }
 
+// Ensure the primary icon is the wolf icon to avoid accidental regressions where a different
+// icon (e.g., the "badge") becomes the default PWA icon.
+const firstIconSrc = icons && icons[0] && typeof icons[0].src === 'string' ? icons[0].src : ''
+if (!/wolf/.test(firstIconSrc)) {
+    console.error('Primary manifest icon should be the wolf icon, but manifest lists:', firstIconSrc)
+    process.exit(1)
+}
+
 console.log('All manifest icon files exist.')
 process.exit(0)
