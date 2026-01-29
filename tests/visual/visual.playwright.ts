@@ -55,8 +55,12 @@ async function compareWithBaseline(name: string, buffer: Buffer) {
         fs.writeFileSync(path.join(DIFF_DIR, `${name.replace(/\.png$/, '')}-baseline.png`), baselineBuf)
     }
 
-    // Assert ratio to satisfy linter and ensure a clear test expectation
-    expect(ratio).toBeLessThan(0.002)
+    // Use env-configurable threshold to allow CI to relax tolerance when needed
+    const maxDiff = Number.parseFloat(process.env.VISUAL_MAX_DIFF ?? '0.002')
+    // Log for easier debugging in CI
+    // eslint-disable-next-line no-console
+    console.log(`visual diff for ${name}: ${ratio} (threshold: ${maxDiff})`)
+    expect(ratio).toBeLessThan(maxDiff)
 }
 
 const pages = [
