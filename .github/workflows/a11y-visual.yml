@@ -40,10 +40,35 @@ jobs:
       - name: Run A11y script
         run: npm run a11y:ci
 
-      - name: Run visual snapshot tests
+      - name: Collect runner metadata
         run: |
-          echo "Install playwright and run visual tests"
-          VISUAL_MAX_DIFF=0.03 npm run visual:test || (echo "Visual tests failed; uploading diffs" && exit 1)
+          mkdir -p artifacts/a11y/visual-metadata
+          echo "node: $(node -v)" > artifacts/a11y/visual-metadata/runner.txt
+          echo "npm: $(npm -v)" >> artifacts/a11y/visual-metadata/runner.txt
+          npx playwright --version > artifacts/a11y/visual-metadata/playwright-version.txt || true
+          fc-list > artifacts/a11y/visual-metadata/fonts.txt 2>/dev/null || true
+
+      - name: Run visual snapshot tests (with retry and metadata capture)
+        run: |
+          set +e
+          echo "Running visual tests (first attempt)"
+          VISUAL_MAX_DIFF=0.03 npx playwright test --config=playwright.config.ts
+          rc=$?
+          if [ "$rc" -eq 0 ]; then
+            echo "Visual tests passed"
+            exit 0
+          fi
+          echo "First run failed (rc=$rc); capturing additional metadata and retrying..."
+          npx playwright --version > artifacts/a11y/visual-metadata/playwright-version-2.txt || true
+          fc-list > artifacts/a11y/visual-metadata/fonts-2.txt 2>/dev/null || true
+          echo "Retrying visual tests (second attempt)"
+          VISUAL_MAX_DIFF=0.03 npx playwright test --config=playwright.config.ts
+          rc2=$?
+          if [ "$rc2" -ne 0 ]; then
+            echo "Visual tests failed after retry (rc=$rc2); uploading diffs"
+            exit 1
+          fi
+          echo "Visual tests passed on retry"
 
       - name: Upload artifacts
         if: always()

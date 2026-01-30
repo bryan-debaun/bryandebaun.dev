@@ -51,6 +51,7 @@ docs/hand-offs/
 
 # a11y artifacts
 /artifacts/a11y/
+/gh_artifacts/
 
 # Playwright / test artifacts
 /test-results/

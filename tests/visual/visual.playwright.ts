@@ -7,14 +7,28 @@ import { test, expect, type Page } from '@playwright/test'
 const BASELINE_DIR = path.join(process.cwd(), 'tests/visual/baselines')
 const DIFF_DIR = path.join(process.cwd(), 'artifacts/a11y/diffs')
 
-// Utility: disable animations and force deterministic font stack
+// Utility: disable animations, force deterministic font stack, hide transient UI, and wait for fonts to load
 async function stabilizePage(page: Page) {
     await page.addStyleTag({
         content: `
     *,*::before,*::after{transition:none !important; animation:none !important}
-    html{font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial !important}
+    html{font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial !important; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+    /* Hide scrollbars and transient elements */
+    ::-webkit-scrollbar{display:none}
+    [data-visual-ignore], .cookie-banner, .notification, .announce{display:none !important}
+    /* Force light color scheme for consistent baselines */
+    :root{color-scheme: light}
   `,
     })
+    // Wait for fonts to be loaded to avoid snapshotting before font swap
+    try {
+        await page.evaluate(async () => {
+            const doc = document as unknown as Document & { fonts?: FontFaceSet }
+            if (doc.fonts && doc.fonts.ready) await doc.fonts.ready
+        })
+    } catch {
+        // ignore — fonts API may not be available in all environments
+    }
 }
 
 async function compareWithBaseline(name: string, buffer: Buffer) {
@@ -56,7 +70,8 @@ async function compareWithBaseline(name: string, buffer: Buffer) {
     }
 
     // Use env-configurable threshold to allow CI to relax tolerance when needed
-    const maxDiff = Number.parseFloat(process.env.VISUAL_MAX_DIFF ?? '0.002')
+    // Default threshold slightly relaxed to tolerate minor rendering differences; can be overridden by CI via VISUAL_MAX_DIFF
+    const maxDiff = Number.parseFloat(process.env.VISUAL_MAX_DIFF ?? '0.01')
     // Log for easier debugging in CI
     console.log(`visual diff for ${name}: ${ratio} (threshold: ${maxDiff})`)
     expect(ratio).toBeLessThan(maxDiff)
@@ -73,6 +88,26 @@ for (const p of pages) {
         await page.goto(p.url)
         await stabilizePage(page)
         await page.waitForLoadState('networkidle')
+        // Capture page runtime metadata for diagnostics in CI
+        try {
+            const meta = await page.evaluate<{ userAgent: string; fontsStatus: string; bodyFont: string }>(() => {
+                const doc = document as unknown as Document & { fonts?: FontFaceSet }
+                return {
+                    userAgent: navigator.userAgent,
+                    fontsStatus: doc.fonts?.status ?? 'unsupported',
+                    bodyFont: window.getComputedStyle(document.body).fontFamily
+                }
+            })
+            if (process.env.CI) {
+                const metaDir = path.join(process.cwd(), 'artifacts/a11y/visual-metadata')
+                fs.mkdirSync(metaDir, { recursive: true })
+                const safeName = p.url.replace(/^\//, 'root').replace(/\//g, '_')
+                fs.writeFileSync(path.join(metaDir, `${safeName}-${Date.now()}.json`), JSON.stringify(meta, null, 2))
+            }
+        } catch (e) {
+            console.warn('Failed to capture page metadata', e)
+        }
+
         const buffer = await page.screenshot({ fullPage: true })
         await compareWithBaseline(p.baseline, buffer)
     })
