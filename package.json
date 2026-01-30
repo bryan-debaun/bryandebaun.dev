@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "@contentlayer/source-files": "^0.3.4",
+    "@fontsource/inter": "^4.5.12",
     "@mdx-js/mdx": "^3.1.1",
     "@playwright/test": "^1.40.0",
     "@tailwindcss/postcss": "^4.1.18",
@@ -61,7 +62,6 @@
     "@types/pngjs": "^6.0.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@fontsource/inter": "^4.5.12",
     "axe-core": "^4.11.1",
     "contentlayer2": "0.4.5",
     "cspell": "^9.6.2",

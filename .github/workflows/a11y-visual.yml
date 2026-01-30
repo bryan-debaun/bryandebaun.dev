@@ -36,8 +36,20 @@ jobs:
 
           # Prefer deterministic install from node_modules (installed by npm ci) when available
           if [ -d "node_modules/@fontsource/inter/files" ]; then
-            echo "Found @fontsource/inter in node_modules — copying TTF files"
-            sudo cp -f node_modules/@fontsource/inter/files/*.ttf /usr/share/fonts/truetype/inter/ || true
+            echo "Found @fontsource/inter in node_modules — copying any TTF/WOFF/WOFF2 files"
+            shopt -s nullglob
+            files=(node_modules/@fontsource/inter/files/*.{ttf,woff,woff2})
+            if [ "${#files[@]}" -gt 0 ]; then
+              sudo cp -f "${files[@]}" /usr/share/fonts/truetype/inter/ || true
+            else
+              echo "No TTF/WOFF/WOFF2 files found in @fontsource; attempting archive download fallback"
+              curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/download/v3.19/Inter-3.19.zip" || curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/latest/download/Inter.zip" || true
+              if [ -f /tmp/inter.zip ]; then
+                unzip -o /tmp/inter.zip -d /tmp/inter || true
+                # Copy any TTF files found
+                sudo find /tmp/inter -type f -name "*.ttf" -exec cp -f {} /usr/share/fonts/truetype/inter/ \; || true
+              fi
+            fi
           else
             echo "@fontsource/inter not present in node_modules; attempting archive download fallback"
             curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/download/v3.19/Inter-3.19.zip" || curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/latest/download/Inter.zip" || true
