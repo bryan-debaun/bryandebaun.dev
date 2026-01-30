@@ -35,11 +35,20 @@ jobs:
           sudo mkdir -p /usr/share/fonts/truetype/inter
           # Try a specific release; fall back to latest-release URL
           curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/download/v3.19/Inter-3.19.zip" || curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/latest/download/Inter.zip"
+          # Extract and copy all .ttf files (recursive). Some releases package fonts under nested directories.
           unzip -o /tmp/inter.zip -d /tmp/inter || true
-          shopt -s nullglob || true
-          for f in /tmp/inter/*.ttf; do sudo cp -f "$f" /usr/share/fonts/truetype/inter/; done || true
+          # Prefer explicit find to copy recursively and support different archive layouts
+          if ! sudo find /tmp/inter -type f -name "*.ttf" -exec cp -f {} /usr/share/fonts/truetype/inter/ \;; then
+            echo "No .ttf files found via find; attempting unzip -j fallback"
+            unzip -j -o /tmp/inter.zip "*.ttf" -d /usr/share/fonts/truetype/inter/ || true
+          fi
           sudo fc-cache -f -v || true
-          echo "Installed fonts:"; fc-list | grep -i inter || true
+          echo "Installed fonts (fc-list snippet):"
+          fc-list | grep -i inter || (
+            echo "Inter font not found in system fonts. Listing archive contents for debugging:";
+            unzip -l /tmp/inter.zip | sed -n '1,200p';
+            exit 1
+          )
 
       - name: Build
         run: npm run build
@@ -84,7 +93,7 @@ jobs:
           echo "Visual tests passed on retry"
 
       - name: Upload artifacts
-        if: always()
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: a11y-artifacts
@@ -92,15 +101,34 @@ jobs:
           retention-days: 14
 
       - name: Comment on PR with summary
-        if: github.event_name == 'pull_request'
+        if: ${{ always() && github.event_name == 'pull_request' }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const fs = require('fs')
+            const path = require('path')
             const { owner, repo } = context.repo
             const pr = context.payload.pull_request?.number || context.payload.issue?.number
             const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`
-            const body = `A11y automation ran: artifacts are attached to this workflow run. [View workflow run](${runUrl}) — artifacts are uploaded as **a11y-artifacts**. Download and review the screenshots (Playwright), axe JSON, touch-target reports, and Lighthouse HTML where available. If you can't see the artifacts it may be because this PR is from a fork and workflows from forks have restricted permissions; please ask a maintainer to re-run the workflow on the main repo branch or rebase the PR.`;
+            let body = `A11y automation ran: artifacts are attached to this workflow run. [View workflow run](${runUrl}) — artifacts are uploaded as **a11y-artifacts**. Download and review the screenshots (Playwright), axe JSON, touch-target reports, and Lighthouse HTML where available.`
+
+            // If the runner produced visual diffs, surface that in the PR comment and point to the local inspection helper
+            try {
+              const diffsDir = path.join(process.cwd(), 'artifacts', 'a11y', 'diffs')
+              if (fs.existsSync(diffsDir)) {
+                const diffFiles = fs.readdirSync(diffsDir).filter((f) => f.endsWith('-diff.png'))
+                if (diffFiles.length > 0) {
+                  body += `\n\n⚠️ Visual tests produced **${diffFiles.length}** diff images. Download the **a11y-artifacts** artifact from this workflow run and review the files in **artifacts/a11y/diffs**. To help diagnose, try:\n\n- Run: ` + "`node scripts/inspect-diff-ci-run.js <runDir>`" + `\n- Check: **artifacts/a11y/visual-metadata/fonts.txt** to verify font installation (Inter) — font mis-installation is a common cause of diffs.\n- Re-run locally with: ` + "`VISUAL_MAX_DIFF=0.03 npm run visual:test`"
+                }
+              }
+            } catch (e) {
+              console.warn('Failed to inspect diffs directory for PR comment:', e.message || String(e))
+            }
+
+            // Add fork troubleshooting guidance
+            body += `\n\nIf you can't see the artifacts it may be because this PR is from a fork and workflows triggered by forks have restricted permissions; ask a maintainer to re-run the workflow on the main repo branch or rebase the PR.`
+
             try {
               if (pr) {
                 await github.rest.issues.createComment({ owner, repo, issue_number: pr, body })
@@ -108,7 +136,6 @@ jobs:
                 console.warn('No PR number found in event payload; skipping comment.')
               }
             } catch (err) {
-              // If commenting fails due to permission restrictions (e.g., PR from fork), surface a debug log with guidance
               console.warn('Failed to post PR comment:', err.message || String(err))
               console.warn('If this is a forked PR, workflows triggered by forks may have read-only tokens. Consider re-running as a maintainer or using `pull_request_target` with careful input validation.')
             }
