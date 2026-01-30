@@ -28,25 +28,33 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Install Inter system font for deterministic rendering
+      - name: Install Inter system font for deterministic rendering (prefer @fontsource)
         run: |
           set -e
           echo "Installing Inter fonts to /usr/share/fonts/truetype/inter"
           sudo mkdir -p /usr/share/fonts/truetype/inter
-          # Try a specific release; fall back to latest-release URL
-          curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/download/v3.19/Inter-3.19.zip" || curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/latest/download/Inter.zip"
-          # Extract and copy all .ttf files (recursive). Some releases package fonts under nested directories.
-          unzip -o /tmp/inter.zip -d /tmp/inter || true
-          # Prefer explicit find to copy recursively and support different archive layouts
-          if ! sudo find /tmp/inter -type f -name "*.ttf" -exec cp -f {} /usr/share/fonts/truetype/inter/ \;; then
-            echo "No .ttf files found via find; attempting unzip -j fallback"
-            unzip -j -o /tmp/inter.zip "*.ttf" -d /usr/share/fonts/truetype/inter/ || true
+
+          # Prefer deterministic install from node_modules (installed by npm ci) when available
+          if [ -d "node_modules/@fontsource/inter/files" ]; then
+            echo "Found @fontsource/inter in node_modules — copying TTF files"
+            sudo cp -f node_modules/@fontsource/inter/files/*.ttf /usr/share/fonts/truetype/inter/ || true
+          else
+            echo "@fontsource/inter not present in node_modules; attempting archive download fallback"
+            curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/download/v3.19/Inter-3.19.zip" || curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/latest/download/Inter.zip" || true
+            if [ -f /tmp/inter.zip ]; then
+              unzip -o /tmp/inter.zip -d /tmp/inter || true
+              # Copy any TTF files found
+              sudo find /tmp/inter -type f -name "*.ttf" -exec cp -f {} /usr/share/fonts/truetype/inter/ \; || true
+            fi
           fi
+
+          # Refresh font cache and provide diagnostics
           sudo fc-cache -f -v || true
           echo "Installed fonts (fc-list snippet):"
           fc-list | grep -i inter || (
-            echo "Inter font not found in system fonts. Listing archive contents for debugging:";
-            unzip -l /tmp/inter.zip | sed -n '1,200p';
+            echo "Inter font not found in system fonts. Listing potential sources for debugging:";
+            ls -la node_modules/@fontsource/inter || true;
+            ls -la /usr/share/fonts/truetype/inter || true;
             exit 1
           )
 
