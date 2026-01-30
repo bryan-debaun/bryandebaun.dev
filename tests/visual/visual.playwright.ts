@@ -9,10 +9,22 @@ const DIFF_DIR = path.join(process.cwd(), 'artifacts/a11y/diffs')
 
 // Utility: disable animations, force deterministic font stack, hide transient UI, and wait for fonts to load
 async function stabilizePage(page: Page) {
+    // Inject a deterministic webfont (Inter) to reduce font variation across runner environments
+    await page.addScriptTag({
+        content: `(function(){
+            try {
+                const l = document.createElement('link');
+                l.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap';
+                l.rel = 'stylesheet';
+                document.head.appendChild(l);
+            } catch(e){ /* ignore */ }
+        })()`,
+    })
+
     await page.addStyleTag({
         content: `
     *,*::before,*::after{transition:none !important; animation:none !important}
-    html{font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial !important; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+    html{font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial !important; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
     /* Hide scrollbars and transient elements */
     ::-webkit-scrollbar{display:none}
     [data-visual-ignore], .cookie-banner, .notification, .announce{display:none !important}
@@ -26,6 +38,17 @@ async function stabilizePage(page: Page) {
             const doc = document as unknown as Document & { fonts?: FontFaceSet }
             if (doc.fonts && doc.fonts.ready) await doc.fonts.ready
         })
+        // Wait specifically for the Inter font to be available (best-effort); helps avoid fallback rendering
+        try {
+            await page.waitForFunction(() => {
+                const doc = document as unknown as Document & { fonts?: FontFaceSet }
+                return !!(doc.fonts && typeof doc.fonts.check === 'function' && doc.fonts.check('1em Inter'))
+            }, { timeout: 5000 })
+        } catch {
+            // If the specific font isn't available, we still proceed after the fonts.ready wait
+        }
+        // small pause to let layout settle after font swap
+        await page.waitForTimeout(150)
     } catch {
         // ignore — fonts API may not be available in all environments
     }

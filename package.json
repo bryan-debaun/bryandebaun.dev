@@ -23,6 +23,7 @@
     "a11y:ci": "tsx scripts/a11y/verify-a11y.ts --url http://localhost:3000 --outDir artifacts/a11y --ci",
     "playwright:install": "npx playwright install --with-deps",
     "visual:test": "npx playwright test --config=playwright.config.ts",
+    "inspect:ci": "tsx scripts/inspect-diff-ci-run.ts",
     "ci:lighthouse": "lhci autorun",
     "lint:mdx": "node -e \"const glob=require('glob'); const files=glob.sync('src/content/**/*.{md,mdx}'); if(!files.length){console.log('No MDX files to lint (none or all ignored)'); process.exit(0);} const cp=require('child_process').spawnSync('eslint',['--ext','.mdx','src/content/**/*.{md,mdx}'],{stdio:'inherit'}); process.exit(cp.status);\"",
     "lint": "eslint"

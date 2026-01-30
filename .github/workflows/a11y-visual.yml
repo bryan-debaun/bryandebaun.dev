@@ -28,6 +28,19 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
+      - name: Install Inter system font for deterministic rendering
+        run: |
+          set -e
+          echo "Installing Inter fonts to /usr/share/fonts/truetype/inter"
+          sudo mkdir -p /usr/share/fonts/truetype/inter
+          # Try a specific release; fall back to latest-release URL
+          curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/download/v3.19/Inter-3.19.zip" || curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/latest/download/Inter.zip"
+          unzip -o /tmp/inter.zip -d /tmp/inter || true
+          shopt -s nullglob || true
+          for f in /tmp/inter/*.ttf; do sudo cp -f "$f" /usr/share/fonts/truetype/inter/; done || true
+          sudo fc-cache -f -v || true
+          echo "Installed fonts:"; fc-list | grep -i inter || true
+
       - name: Build
         run: npm run build
 
