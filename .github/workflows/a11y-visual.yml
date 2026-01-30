@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   run-a11y:
     name: Run A11y & Visual Regression
@@ -24,6 +28,48 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
+      - name: Install Inter system font for deterministic rendering (prefer @fontsource)
+        run: |
+          set -e
+          echo "Installing Inter fonts to /usr/share/fonts/truetype/inter"
+          sudo mkdir -p /usr/share/fonts/truetype/inter
+
+          # Prefer deterministic install from node_modules (installed by npm ci) when available
+          if [ -d "node_modules/@fontsource/inter/files" ]; then
+            echo "Found @fontsource/inter in node_modules — copying any TTF/WOFF/WOFF2 files"
+            shopt -s nullglob
+            files=(node_modules/@fontsource/inter/files/*.{ttf,woff,woff2})
+            if [ "${#files[@]}" -gt 0 ]; then
+              sudo cp -f "${files[@]}" /usr/share/fonts/truetype/inter/ || true
+            else
+              echo "No TTF/WOFF/WOFF2 files found in @fontsource; attempting archive download fallback"
+              curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/download/v3.19/Inter-3.19.zip" || curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/latest/download/Inter.zip" || true
+              if [ -f /tmp/inter.zip ]; then
+                unzip -o /tmp/inter.zip -d /tmp/inter || true
+                # Copy any TTF files found
+                sudo find /tmp/inter -type f -name "*.ttf" -exec cp -f {} /usr/share/fonts/truetype/inter/ \; || true
+              fi
+            fi
+          else
+            echo "@fontsource/inter not present in node_modules; attempting archive download fallback"
+            curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/download/v3.19/Inter-3.19.zip" || curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/latest/download/Inter.zip" || true
+            if [ -f /tmp/inter.zip ]; then
+              unzip -o /tmp/inter.zip -d /tmp/inter || true
+              # Copy any TTF files found
+              sudo find /tmp/inter -type f -name "*.ttf" -exec cp -f {} /usr/share/fonts/truetype/inter/ \; || true
+            fi
+          fi
+
+          # Refresh font cache and provide diagnostics
+          sudo fc-cache -f -v || true
+          echo "Installed fonts (fc-list snippet):"
+          fc-list | grep -i inter || (
+            echo "Inter font not found in system fonts. Listing potential sources for debugging:";
+            ls -la node_modules/@fontsource/inter || true;
+            ls -la /usr/share/fonts/truetype/inter || true;
+            exit 1
+          )
+
       - name: Build
         run: npm run build
 
@@ -36,7 +82,38 @@ jobs:
       - name: Run A11y script
         run: npm run a11y:ci
 
+      - name: Collect runner metadata
+        run: |
+          mkdir -p artifacts/a11y/visual-metadata
+          echo "node: $(node -v)" > artifacts/a11y/visual-metadata/runner.txt
+          echo "npm: $(npm -v)" >> artifacts/a11y/visual-metadata/runner.txt
+          npx playwright --version > artifacts/a11y/visual-metadata/playwright-version.txt || true
+          fc-list > artifacts/a11y/visual-metadata/fonts.txt 2>/dev/null || true
+
+      - name: Run visual snapshot tests (with retry and metadata capture)
+        run: |
+          set +e
+          echo "Running visual tests (first attempt)"
+          VISUAL_MAX_DIFF=0.03 npx playwright test --config=playwright.config.ts
+          rc=$?
+          if [ "$rc" -eq 0 ]; then
+            echo "Visual tests passed"
+            exit 0
+          fi
+          echo "First run failed (rc=$rc); capturing additional metadata and retrying..."
+          npx playwright --version > artifacts/a11y/visual-metadata/playwright-version-2.txt || true
+          fc-list > artifacts/a11y/visual-metadata/fonts-2.txt 2>/dev/null || true
+          echo "Retrying visual tests (second attempt)"
+          VISUAL_MAX_DIFF=0.03 npx playwright test --config=playwright.config.ts
+          rc2=$?
+          if [ "$rc2" -ne 0 ]; then
+            echo "Visual tests failed after retry (rc=$rc2); uploading diffs"
+            exit 1
+          fi
+          echo "Visual tests passed on retry"
+
       - name: Upload artifacts
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: a11y-artifacts
@@ -44,17 +121,41 @@ jobs:
           retention-days: 14
 
       - name: Comment on PR with summary
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        if: ${{ always() && github.event_name == 'pull_request' }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const fs = require('fs')
+            const path = require('path')
             const { owner, repo } = context.repo
-            const pr = context.payload.pull_request.number
-            const body = `A11y automation ran: artifacts are attached to the workflow run as **a11y-artifacts**. Download and review the screenshots (playwright), axe json, touch-target reports, and Lighthouse HTML where available.`;
+            const pr = context.payload.pull_request?.number || context.payload.issue?.number
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`
+            let body = `A11y automation ran: artifacts are attached to this workflow run. [View workflow run](${runUrl}) — artifacts are uploaded as **a11y-artifacts**. Download and review the screenshots (Playwright), axe JSON, touch-target reports, and Lighthouse HTML where available.`
+
+            // If the runner produced visual diffs, surface that in the PR comment and point to the local inspection helper
             try {
-              await github.rest.issues.createComment({ owner, repo, issue_number: pr, body })
+              const diffsDir = path.join(process.cwd(), 'artifacts', 'a11y', 'diffs')
+              if (fs.existsSync(diffsDir)) {
+                const diffFiles = fs.readdirSync(diffsDir).filter((f) => f.endsWith('-diff.png'))
+                if (diffFiles.length > 0) {
+                  body += `\n\n⚠️ Visual tests produced **${diffFiles.length}** diff images. Download the **a11y-artifacts** artifact from this workflow run and review the files in **artifacts/a11y/diffs**. To help diagnose, try:\n\n- Run: ` + "`node scripts/inspect-diff-ci-run.js <runDir>`" + `\n- Check: **artifacts/a11y/visual-metadata/fonts.txt** to verify font installation (Inter) — font mis-installation is a common cause of diffs.\n- Re-run locally with: ` + "`VISUAL_MAX_DIFF=0.03 npm run visual:test`"
+                }
+              }
+            } catch (e) {
+              console.warn('Failed to inspect diffs directory for PR comment:', e.message || String(e))
+            }
+
+            // Add fork troubleshooting guidance
+            body += `\n\nIf you can't see the artifacts it may be because this PR is from a fork and workflows triggered by forks have restricted permissions; ask a maintainer to re-run the workflow on the main repo branch or rebase the PR.`
+
+            try {
+              if (pr) {
+                await github.rest.issues.createComment({ owner, repo, issue_number: pr, body })
+              } else {
+                console.warn('No PR number found in event payload; skipping comment.')
+              }
             } catch (err) {
-              // If commenting fails due to token restrictions (e.g., PR from fork), surface a debug log but do not fail the job
               console.warn('Failed to post PR comment:', err.message || String(err))
+              console.warn('If this is a forked PR, workflows triggered by forks may have read-only tokens. Consider re-running as a maintainer or using `pull_request_target` with careful input validation.')
             }

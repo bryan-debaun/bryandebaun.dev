@@ -19,6 +19,9 @@ const DEFAULT_VIEWPORTS = [
 
 const DEFAULT_BROWSERS: Array<'chromium' | 'firefox'> = ['chromium', 'firefox']
 
+// Pages to capture for visual regression and accessibility audits (exported for tests and reuse)
+export const pagesToAudit = ['/', '/about', '/philosophy']
+
 interface Options {
     url: string
     outDir: string
@@ -135,6 +138,9 @@ async function run() {
     const opts: Options = { url, outDir, viewports: DEFAULT_VIEWPORTS, browsers: DEFAULT_BROWSERS }
     mkdirp(outDir)
 
+    // Pages to capture for visual regression and accessibility audits
+    // Uses the exported `pagesToAudit` constant at module scope
+
     let hadError = false
 
     for (const browserName of opts.browsers) {
@@ -157,43 +163,47 @@ async function run() {
                         await context.addInitScript({ content: `document.documentElement.classList.remove('dark')` })
                     }
 
-                    await page.goto(url, { waitUntil: 'networkidle' })
+                    for (const subPath of pagesToAudit) {
+                        const fullUrl = subPath === '/' ? url : `${url.replace(/\/$/, '')}${subPath}`
+                        await page.goto(fullUrl, { waitUntil: 'networkidle' })
 
-                    // Dispatch a 'themechange' event to notify any client-side listeners (e.g., DarkModeToggle) to re-sync.
-                    try {
-                        await page.evaluate(() => {
-                            window.dispatchEvent(new CustomEvent('themechange'))
-                        })
-                    } catch (err) {
-                        // Non-fatal: some pages may block synthetic events; log and continue
-                        console.warn('Failed to dispatch themechange event:', err)
-                    }
-
-                    // Give the page a short moment to apply theme-related changes
-                    await page.waitForTimeout(250)
-
-                    const filePrefix = `${browserName}-${vp.name}-${theme}`
-                    const screenshotPath = path.join(outDir, `${filePrefix}.png`)
-                    await page.screenshot({ path: screenshotPath, fullPage: true })
-
-                    // Axe
-                    const axeResults = await runAxeOnPage(page)
-                    fs.writeFileSync(path.join(outDir, `${filePrefix}-axe.json`), JSON.stringify(axeResults, null, 2))
-
-                    // Touch-target audit
-                    const touchReport = await auditTouchTargets(page)
-                    fs.writeFileSync(path.join(outDir, `${filePrefix}-touch.json`), JSON.stringify(touchReport, null, 2))
-
-                    // Lighthouse only for chromium — run if available. runLighthouse dynamically imports lighthouse and chrome-launcher.
-                    if (browserName === 'chromium') {
-                        const lhPath = path.join(outDir, `${filePrefix}-lighthouse.html`)
-                        const result = await runLighthouse(url, lhPath, { width: vp.width, height: vp.height, emulatedFormFactor: vp.width <= 412 ? 'mobile' : 'desktop' })
-                        if (!result || !('success' in result) || result.success === false) {
-                            fs.writeFileSync(path.join(outDir, `${filePrefix}-lighthouse.txt`), result && 'error' in result ? String(result.error) : 'lighthouse not available')
+                        // Dispatch a 'themechange' event to notify any client-side listeners (e.g., DarkModeToggle) to re-sync.
+                        try {
+                            await page.evaluate(() => {
+                                window.dispatchEvent(new CustomEvent('themechange'))
+                            })
+                        } catch (err) {
+                            // Non-fatal: some pages may block synthetic events; log and continue
+                            console.warn('Failed to dispatch themechange event:', err)
                         }
-                    }
 
-                    console.log(`Wrote artifacts for ${filePrefix}`)
+                        // Give the page a short moment to apply theme-related changes
+                        await page.waitForTimeout(250)
+
+                        const pageTag = subPath === '/' ? 'home' : subPath.replace(/^\//, '').replace(/\//g, '_')
+                        const filePrefix = `${browserName}-${vp.name}-${theme}-${pageTag}`
+                        const screenshotPath = path.join(outDir, `${filePrefix}.png`)
+                        await page.screenshot({ path: screenshotPath, fullPage: true })
+
+                        // Axe
+                        const axeResults = await runAxeOnPage(page)
+                        fs.writeFileSync(path.join(outDir, `${filePrefix}-axe.json`), JSON.stringify(axeResults, null, 2))
+
+                        // Touch-target audit
+                        const touchReport = await auditTouchTargets(page)
+                        fs.writeFileSync(path.join(outDir, `${filePrefix}-touch.json`), JSON.stringify(touchReport, null, 2))
+
+                        // Lighthouse only for chromium — run if available. runLighthouse dynamically imports lighthouse and chrome-launcher.
+                        if (browserName === 'chromium') {
+                            const lhPath = path.join(outDir, `${filePrefix}-lighthouse.html`)
+                            const result = await runLighthouse(fullUrl, lhPath, { width: vp.width, height: vp.height, emulatedFormFactor: vp.width <= 412 ? 'mobile' : 'desktop' })
+                            if (!result || !('success' in result) || result.success === false) {
+                                fs.writeFileSync(path.join(outDir, `${filePrefix}-lighthouse.txt`), result && 'error' in result ? String(result.error) : 'lighthouse not available')
+                            }
+                        }
+
+                        console.log(`Wrote artifacts for ${filePrefix}`)
+                    }
 
                     await context.close()
                 }

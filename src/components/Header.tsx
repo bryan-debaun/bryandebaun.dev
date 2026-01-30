@@ -46,7 +46,6 @@ export default function Header() {
                 <nav className="hidden md:flex site-nav items-center gap-6 prose prose-norwegian dark:prose-invert">
                     <Link href="/about" className="text-sm">About</Link>
                     <Link href="/projects" className="text-sm">Projects</Link>
-                    <Link href="/blog" className="text-sm">Blog</Link>
                     <DarkModeToggle />
                 </nav>
 
@@ -78,7 +77,6 @@ export default function Header() {
                 <div className="px-6 py-3 space-y-2 flex flex-col items-center site-nav prose prose-norwegian dark:prose-invert">
                     <Link href="/about" id="mobile-nav-about" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">About</Link>
                     <Link href="/projects" id="mobile-nav-projects" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">Projects</Link>
-                    <Link href="/blog" id="mobile-nav-blog" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">Blog</Link>
                 </div>
             </div>
         </header>

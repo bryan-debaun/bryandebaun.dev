@@ -13,7 +13,14 @@
         "Vercel",
         "remarkrc",
         "Orbitron",
-        "subsetting"
+        "subsetting",
+        "frontmatter",
+        "CPTSD",
+        "PTSD",
+        "EMDR",
+        "reparenting",
+        "Gottman",
+        "Kolk"
     ],
     "ignorePaths": [
         "node_modules/**",

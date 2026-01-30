@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# temporary test output folders (internal)
+**/__tmp__/
+
 # next.js
 /.next/
 /out/
@@ -51,3 +54,11 @@ docs/hand-offs/
 
 # a11y artifacts
 /artifacts/a11y/
+/gh_artifacts/
+
+# Playwright / test artifacts
+/test-results/
+/artifacts/**/diffs/
+
+# Editor/backups created by normalization or tools
+**/*.bak
