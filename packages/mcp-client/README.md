@@ -18,3 +18,7 @@ npm run generate:mcp-client
 ```
 
 To customize the OpenAPI URL for testing, set `MCP_OPENAPI_URL` environment variable.
+
+CI validation
+
+This repository includes a GitHub Actions workflow (`.github/workflows/verify-mcp-client.yml`) which runs on pull requests and ensures the generated files in `packages/mcp-client/src` are up-to-date. If the generated client would change, the workflow fails and asks contributors to run `npm run generate:mcp-client` and commit the changes.

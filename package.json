@@ -9,6 +9,7 @@
     "normalize-content": "tsx scripts/run-content.ts --apply-normalize",
     "build": "tsx scripts/build.ts",
     "generate:mcp-client": "tsx scripts/generate-mcp-client.ts",
+    "verify:mcp-client": "tsx scripts/generate-mcp-client.ts && git --no-pager diff --exit-code packages/mcp-client/src || (echo 'Generated client out-of-date; run npm run generate:mcp-client' && exit 1)",
     "test:content": "tsx scripts/check-content.ts",
     "content:checks": "npm run verify:icons && npm run verify:no-omega && npm run lint:content && npm run cspell:check && npm run link-check",
     "lint:content": "remark \"README.md\" \"docs/**/*.md\" -q",
