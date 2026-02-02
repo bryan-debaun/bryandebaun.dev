@@ -11,6 +11,24 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+Note: the `build` script enforces `NODE_ENV=production` to ensure consistent production builds even when a system-level `NODE_ENV` differs. Use `npm run dev` for development runs.
+
+## Troubleshooting
+
+### Missing devDependencies when NODE_ENV is set to `production`
+
+If you have `NODE_ENV=production` set at the system or user level, `npm` may skip installing `devDependencies` which are required for local builds (for example `contentlayer2`, `tsx`, and the OpenAPI generator). If `npm run build` prints an error about `contentlayer2` or other missing packages, fix it by running:
+
+```bash
+npm ci --include=dev
+```
+
+Or install the missing packages directly:
+
+```bash
+npm install --save-dev contentlayer2 tsx swagger-typescript-api
+```
+
 ## Fonts & Typography
 
 This site uses **Inter** for body/UI text and **Orbitron** for display/headings. Fonts are loaded via Next.js' `next/font` helper in `src/app/layout.tsx` and the typographic tokens (font-family and type scale) are defined in `src/styles/tokens.css` and applied in `src/app/globals.css`.

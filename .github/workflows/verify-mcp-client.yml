@@ -1,0 +1,44 @@
+name: Verify generated MCP client
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify-mcp-client:
+    name: Verify MCP client generation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download OpenAPI spec (optional)
+        run: |
+          mkdir -p artifacts/openapi
+          echo "Attempting to download OpenAPI spec to artifacts/openapi/bad-mcp.swagger.json"
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 --max-time 60 -sS "$MCP_OPENAPI_URL" -o artifacts/openapi/bad-mcp.swagger.json || echo "Couldn't download spec; generator will try remote directly or fallback to committed spec."
+
+      - name: Generate MCP client
+        run: npm run generate:mcp-client
+
+      - name: Verify generated files are up-to-date
+        run: |
+          # Check for uncommitted changes to generated client
+          if [ -n "$(git status --porcelain packages/mcp-client/src)" ]; then
+            echo "Generated MCP client is out of date. Run 'npm run generate:mcp-client' and commit the changes."
+            echo
+            git --no-pager status --porcelain -- packages/mcp-client/src || true
+            echo
+            git --no-pager --no-color diff -- packages/mcp-client/src || true
+            exit 1
+          fi
