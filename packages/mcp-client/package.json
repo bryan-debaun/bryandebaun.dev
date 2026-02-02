@@ -1,0 +1,15 @@
+{
+    "name": "@bryandebaun/mcp-client",
+    "version": "0.1.0",
+    "private": true,
+    "main": "src/api-client.ts",
+    "types": "src/api-client.ts",
+    "license": "MIT",
+    "description": "Generated MCP API client (initial scaffold)",
+    "keywords": [
+        "mcp",
+        "client",
+        "generated",
+        "openapi"
+    ]
+}

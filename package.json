@@ -8,6 +8,7 @@
     "run-content": "tsx scripts/run-content.ts",
     "normalize-content": "tsx scripts/run-content.ts --apply-normalize",
     "build": "tsx scripts/build.ts",
+    "generate:mcp-client": "tsx scripts/generate-mcp-client.ts",
     "test:content": "tsx scripts/check-content.ts",
     "content:checks": "npm run verify:icons && npm run verify:no-omega && npm run lint:content && npm run cspell:check && npm run link-check",
     "lint:content": "remark \"README.md\" \"docs/**/*.md\" -q",
@@ -42,6 +43,7 @@
     }
   },
   "dependencies": {
+    "axios": "^1.13.4",
     "next": "16.1.4",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -83,6 +85,7 @@
     "remark-mdx-frontmatter": "^5.2.0",
     "remark-preset-lint-recommended": "^7.0.1",
     "sharp": "^0.34.5",
+    "swagger-typescript-api": "^13.2.16",
     "tailwindcss": "^4.1.18",
     "tsx": "^4.18.0",
     "typescript": "5.9.3",
