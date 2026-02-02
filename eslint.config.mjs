@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     ".contentlayer/**",
+    // Ignore generated package output (dist)
+    "packages/*/dist/**",
     // Temporary: ignore specific MDX files that trigger the MDX parser bug. See issue: TODO
     "src/content/posts/hello-world.mdx",
     "src/content/philosophy/private-example.mdx",

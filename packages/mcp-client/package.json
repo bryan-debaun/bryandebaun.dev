@@ -2,8 +2,22 @@
     "name": "@bryandebaun/mcp-client",
     "version": "0.1.0",
     "private": true,
-    "main": "src/api-client.ts",
-    "types": "src/api-client.ts",
+    "main": "dist/index.js",
+    "module": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        },
+        "./package.json": "./package.json"
+    },
+    "type": "module",
+    "scripts": {
+        "build": "tsc --build",
+        "prebuild": "rimraf dist && tsc --build --clean"
+    },
     "license": "MIT",
     "description": "Generated MCP API client (initial scaffold)",
     "keywords": [

@@ -17,6 +17,13 @@ To generate the client locally:
 npm run generate:mcp-client
 ```
 
+To build the package for consumption by the main app (produces `dist/`):
+
+```bash
+cd packages/mcp-client
+npm run build
+```
+
 To customize the OpenAPI URL for testing, set `MCP_OPENAPI_URL` environment variable.
 
 CI validation

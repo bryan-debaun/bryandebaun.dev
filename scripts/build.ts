@@ -16,7 +16,11 @@ export async function main(): Promise<void> {
     Object.assign(process.env as NodeJS.ProcessEnv, { NODE_ENV: 'production' })
 
     try {
-        let code = await spawnCmd('npm', ['run', 'run-content'])
+        // Verify that required devDependencies are present (contentlayer2, tsx, etc.) so the content build won't fail if devDependencies were skipped.
+        let code = await spawnCmd('npx', ['tsx', 'scripts/check-dev-deps.ts'])
+        if (code !== 0) process.exit(code)
+
+        code = await spawnCmd('npm', ['run', 'run-content'])
         if (code !== 0) process.exit(code)
 
         // Use npx to prefer the local next binary

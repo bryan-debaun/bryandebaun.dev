@@ -93,6 +93,8 @@ export function runContentWithSpawn(spawnFn: SpawnFn, opts?: { normalizeFn?: (ro
             return
         }
 
+        // Ensure contentlayer2 is installed locally. If NODE_ENV is set to 'production' globally, devDependencies may be skipped and
+        // contentlayer2 will be missing from node_modules. Provide a clear error message if that's the case.
         const cp = spawnFn('npx', ['contentlayer2', 'build', '--clearCache'], { shell: true })
 
         let out = ''
@@ -144,6 +146,18 @@ export function runContentWithSpawn(spawnFn: SpawnFn, opts?: { normalizeFn?: (ro
 }
 
 export function runContent(): Promise<number> {
+    // Verify contentlayer2 is available when running the real spawn path. This gives a helpful error message for devs who
+    // have NODE_ENV=production set and skipped installing devDependencies. Tests that call `runContentWithSpawn` directly will
+    // bypass this check and can simulate errors via the provided spawn function.
+    try {
+        require.resolve('contentlayer2')
+    } catch {
+        // Some package versions may not expose an "exports" field that `require.resolve` can resolve.
+        // Rather than failing hard, emit a warning and proceed to spawn the CLI; if the spawned process fails
+        // we'll catch that below and surface a meaningful error.
+        console.warn("Warning: require.resolve('contentlayer2') failed — attempting to spawn the contentlayer CLI. If this fails, run `npm ci --include=dev` to install devDependencies.")
+    }
+
     return runContentWithSpawn(spawn)
 }
 

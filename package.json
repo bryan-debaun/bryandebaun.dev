@@ -2,12 +2,16 @@
   "name": "bryandebaun.dev",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "content:dev": "contentlayer2 dev",
     "run-content": "tsx scripts/run-content.ts",
     "normalize-content": "tsx scripts/run-content.ts --apply-normalize",
-    "build": "tsx scripts/build.ts",
+    "build:packages": "tsc --build packages/mcp-client",
+    "build": "npm run build:packages && npx tsx scripts/build.ts",
     "generate:mcp-client": "tsx scripts/generate-mcp-client.ts",
     "verify:mcp-client": "tsx scripts/generate-mcp-client.ts && git --no-pager diff --exit-code packages/mcp-client/src || (echo 'Generated client out-of-date; run npm run generate:mcp-client' && exit 1)",
     "test:content": "tsx scripts/check-content.ts",
@@ -66,7 +70,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "axe-core": "^4.11.1",
-    "contentlayer2": "0.4.5",
+    "contentlayer2": "^0.4.5",
     "cspell": "^9.6.2",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
@@ -91,6 +95,7 @@
     "tsx": "^4.18.0",
     "typescript": "5.9.3",
     "vitest": "^1.6.1",
-    "vitest-axe": "^0.1.0"
+    "vitest-axe": "^0.1.0",
+    "rimraf": "^5.0.0"
   }
 }
