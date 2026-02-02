@@ -11,6 +11,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+Note: the `build` script enforces `NODE_ENV=production` to ensure consistent production builds even when a system-level `NODE_ENV` differs. Use `npm run dev` for development runs.
+
 ## Fonts & Typography
 
 This site uses **Inter** for body/UI text and **Orbitron** for display/headings. Fonts are loaded via Next.js' `next/font` helper in `src/app/layout.tsx` and the typographic tokens (font-family and type scale) are defined in `src/styles/tokens.css` and applied in `src/app/globals.css`.

@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+import { spawn } from 'child_process'
+
+function spawnCmd(cmd: string, args: string[]) {
+    return new Promise<number>((resolve, reject) => {
+        const env = { ...(process.env as NodeJS.ProcessEnv), NODE_ENV: 'production' } as NodeJS.ProcessEnv
+        const cp = spawn(cmd, args, { shell: true, stdio: 'inherit', env })
+        cp.on('error', (e) => reject(e))
+        cp.on('close', (code) => resolve(typeof code === 'number' ? code : 1))
+    })
+}
+
+export async function main(): Promise<void> {
+    // Ensure the build runs with NODE_ENV=production for consistency across environments
+    ;(process.env as any).NODE_ENV = 'production'
+
+    try {
+        let code = await spawnCmd('npm', ['run', 'run-content'])
+        if (code !== 0) process.exit(code)
+
+        // Use npx to prefer the local next binary
+        code = await spawnCmd('npx', ['next', 'build'])
+        process.exit(code)
+    } catch (e) {
+        console.error('Build wrapper failed', e)
+        process.exit(1)
+    }
+}
+
+if (require.main === module) {
+    main()
+}
