@@ -12,7 +12,8 @@ function spawnCmd(cmd: string, args: string[]) {
 
 export async function main(): Promise<void> {
     // Ensure the build runs with NODE_ENV=production for consistency across environments
-    ;(process.env as any).NODE_ENV = 'production'
+    // Use an explicit cast to NodeJS.ProcessEnv to satisfy TypeScript and ESLint
+    Object.assign(process.env as NodeJS.ProcessEnv, { NODE_ENV: 'production' })
 
     try {
         let code = await spawnCmd('npm', ['run', 'run-content'])
