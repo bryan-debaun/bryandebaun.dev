@@ -48,6 +48,7 @@
     }
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "axios": "^1.13.4",
     "next": "16.1.4",
     "react": "19.2.3",
@@ -89,13 +90,13 @@
     "remark-mdx": "^3.1.1",
     "remark-mdx-frontmatter": "^5.2.0",
     "remark-preset-lint-recommended": "^7.0.1",
+    "rimraf": "^5.0.0",
     "sharp": "^0.34.5",
     "swagger-typescript-api": "^13.2.16",
     "tailwindcss": "^4.1.18",
     "tsx": "^4.18.0",
     "typescript": "5.9.3",
     "vitest": "^1.6.1",
-    "vitest-axe": "^0.1.0",
-    "rimraf": "^5.0.0"
+    "vitest-axe": "^0.1.0"
   }
 }
