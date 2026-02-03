@@ -1,9 +1,10 @@
 import React from 'react'
 import type { RatingWithDetails } from '@bryandebaun/mcp-client'
+import { fetchWithFallback } from '@/lib/server-fetch'
 
 export default async function Page() {
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || `http://localhost:${process.env.PORT || 3000}`
-    const res = await fetch(`${origin}/api/mcp/ratings`, { cache: 'no-store' })
+    // Use fetchWithFallback so page is resilient in dev runtimes
+    const res = await fetchWithFallback('/api/mcp/ratings', { cache: 'no-store' })
     const data = await res.json()
 
     const ratings = data?.ratings ?? []
