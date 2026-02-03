@@ -1,8 +1,8 @@
 import type { BookWithAuthors } from '@bryandebaun/mcp-client';
 import { fetchWithFallback } from '@/lib/server-fetch';
-import BooksTableClient from '@/components/BooksTableClient';
-import { averageByKey } from '@/lib/aggregates';
 import type { RatingWithDetails } from '@bryandebaun/mcp-client';
+import BooksTable from '@/components/BooksTable';
+
 
 export default async function Page() {
     // Server-side fetch to our API routes
@@ -15,22 +15,13 @@ export default async function Page() {
     const books: BookWithAuthors[] = booksData?.books ?? [];
     const ratings: RatingWithDetails[] = ratingsData?.ratings ?? [];
 
-    const avgMap = averageByKey(ratings, r => r.bookId, r => r.rating);
-
-    // Materialize averageRating on each book for client table initial state
-    const initialData = books.map((b) => {
-        const br = b as BookWithAuthors & Partial<{ averageRating?: number }>;
-        const avg = typeof br.averageRating === 'number' && !Number.isNaN(br.averageRating) ? br.averageRating : avgMap.get(b.id);
-        return { ...b, averageRating: avg };
-    }) as (BookWithAuthors & { averageRating?: number })[];
-
     return (
         <main className="p-6">
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-semibold">Books</h1>
             </div>
 
-            <BooksTableClient initialData={initialData} />
+            <BooksTable books={books} ratings={ratings} />
         </main>
     );
 }

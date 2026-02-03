@@ -4,14 +4,14 @@ import React from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table";
 
-export type DataTableProps<T> = {
+export type TableProps<T> = {
     data: T[];
     columns: ColumnDef<T, unknown>[];
     className?: string;
     caption?: string;
 };
 
-export default function DataTable<T>({ data, columns, className, caption }: DataTableProps<T>) {
+export default function Table<T>({ data, columns, className, caption }: TableProps<T>) {
     // Ensure stable references are passed into TanStack Table to avoid memoization pitfalls
     const stableData = React.useMemo(() => data, [data]);
     const stableColumns = React.useMemo(() => columns, [columns]);
