@@ -82,8 +82,12 @@ async function runAxeOnPage(page: Page): Promise<AxeResults> {
         await page.addScriptTag({ content: axeSource })
     }
 
-    // Run axe in the page context. Narrow typings to avoid `any` usage within the source file.
-    const results = await page.evaluate(async () => (window as unknown as { axe: { run: () => Promise<unknown> } }).axe.run())
+    // Run axe in the page context. Narrow typings at the evaluation boundary to avoid using `unknown` casts elsewhere.
+    const results = await page.evaluate(async () => {
+        const w = window as Window & { axe?: { run: () => Promise<unknown> } }
+        if (!w.axe || typeof w.axe.run !== 'function') throw new Error('axe not available on page')
+        return w.axe.run()
+    })
     return results as AxeResults
 }
 

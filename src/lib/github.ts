@@ -51,7 +51,7 @@ export async function getUserRepos(username: string, opts: GetUserReposOptions =
         if (!Array.isArray(data) || data.length === 0) break
 
         all.push(...data.map((r) => {
-            const topics = Array.isArray(r.topics) ? (r.topics as unknown as string[]) : []
+            const topics = Array.isArray(r.topics) ? r.topics.filter((t): t is string => typeof t === 'string').map(String) : []
             return {
                 name: String(r.name ?? ''),
                 description: typeof r.description === 'string' ? r.description : null,

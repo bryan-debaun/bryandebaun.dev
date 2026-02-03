@@ -15,11 +15,11 @@ describe('averageByKey', () => {
     })
 
     it('ignores non-numeric values', () => {
-        const items = [
+        const items: Array<{ id: string; value?: number }> = [
             { id: 'a', value: 5 },
-            { id: 'a', value: NaN as unknown as number },
+            { id: 'a', value: NaN },
             { id: 'b', value: 3 },
-        ] as unknown as Array<{ id: string; value?: number }>
+        ]
 
         const map = averageByKey(items, x => x.id, x => x.value)
         expect(map.get('a')).toBe(5)

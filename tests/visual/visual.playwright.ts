@@ -35,13 +35,13 @@ async function stabilizePage(page: Page) {
     // Wait for fonts to be loaded to avoid snapshotting before font swap
     try {
         await page.evaluate(async () => {
-            const doc = document as unknown as Document & { fonts?: FontFaceSet }
+            const doc = document as Document & { fonts?: FontFaceSet }
             if (doc.fonts && doc.fonts.ready) await doc.fonts.ready
         })
         // Wait specifically for the Inter font to be available (best-effort); helps avoid fallback rendering
         try {
             await page.waitForFunction(() => {
-                const doc = document as unknown as Document & { fonts?: FontFaceSet }
+                const doc = document as Document & { fonts?: FontFaceSet }
                 return !!(doc.fonts && typeof doc.fonts.check === 'function' && doc.fonts.check('1em Inter'))
             }, { timeout: 5000 })
         } catch {
@@ -114,7 +114,7 @@ for (const p of pages) {
         // Capture page runtime metadata for diagnostics in CI
         try {
             const meta = await page.evaluate<{ userAgent: string; fontsStatus: string; bodyFont: string }>(() => {
-                const doc = document as unknown as Document & { fonts?: FontFaceSet }
+                const doc = document as Document & { fonts?: FontFaceSet }
                 return {
                     userAgent: navigator.userAgent,
                     fontsStatus: doc.fonts?.status ?? 'unsupported',

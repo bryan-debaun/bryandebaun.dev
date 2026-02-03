@@ -9,7 +9,7 @@ describe('MCP client generator', () => {
         const mockRequest = vi.fn().mockResolvedValue({ data: { books: [], total: 0 } })
         // Assign with the same function type as `api.request` to avoid using `any` in tests
         type RequestType = typeof api.request
-            ; (api as unknown as { request: RequestType }).request = mockRequest as unknown as RequestType
+            ; (api as { request: RequestType }).request = mockRequest as RequestType
 
         const res = await api.api.listBooks()
 

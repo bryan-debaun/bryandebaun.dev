@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { Api, ListRatingsResponse } from '@bryandebaun/mcp-client'
+import { unwrapApiResponse } from '../../../../lib/api-response'
 
 export function createApi() {
     const baseURL = process.env.MCP_BASE_URL || 'https://bad-mcp.onrender.com'
@@ -13,8 +14,8 @@ export async function GET() {
 
     try {
         const res = await api.api.listRatings()
-        // The generated client returns an AxiosResponse — use the generated ListRatingsResponse type
-        const payload = ((res as unknown) as { data?: ListRatingsResponse }).data ?? (res as unknown)
+        // The generated client returns an AxiosResponse — normalize to the expected payload shape
+        const payload = unwrapApiResponse<ListRatingsResponse>(res)
         return NextResponse.json(payload)
     } catch (e) {
         console.error('MCP: failed to fetch ratings', e)

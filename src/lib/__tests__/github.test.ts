@@ -8,8 +8,11 @@ const sampleRepos = [
 ]
 
 describe('github lib', () => {
+    let fetchMock: ReturnType<typeof vi.fn>
+
     beforeEach(() => {
-        vi.stubGlobal('fetch', vi.fn())
+        fetchMock = vi.fn()
+        vi.stubGlobal('fetch', fetchMock as any)
     })
 
     afterEach(() => {
@@ -17,8 +20,6 @@ describe('github lib', () => {
     })
 
     it('getUserRepos fetches pages until empty', async () => {
-        const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>
-
         // Page 1 returns two items, page 2 returns one item, page 3 returns empty
         fetchMock.mockResolvedValueOnce({ ok: true, json: async () => [sampleRepos[0], sampleRepos[1]] })
         fetchMock.mockResolvedValueOnce({ ok: true, json: async () => [sampleRepos[2]] })
@@ -26,11 +27,10 @@ describe('github lib', () => {
 
         const res = await getUserRepos('me', { perPage: 2 })
         expect(res.length).toBe(3)
-        expect((global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.length).toBe(2)
+        expect(fetchMock.mock.calls.length).toBe(2)
     })
 
     it('getShowcaseRepos filters forks and archived by default', async () => {
-        const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>
         fetchMock.mockResolvedValue({ ok: true, json: async () => sampleRepos })
 
         const res = await getShowcaseRepos('me')
@@ -40,7 +40,6 @@ describe('github lib', () => {
     })
 
     it('getShowcaseRepos can include forks and archived when requested', async () => {
-        const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>
         fetchMock.mockResolvedValue({ ok: true, json: async () => sampleRepos })
 
         const res = await getShowcaseRepos('me', { includeForks: true, includeArchived: true })
@@ -50,23 +49,21 @@ describe('github lib', () => {
     })
 
     it('uses GITHUB_TOKEN from env when present', async () => {
-        const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>
         fetchMock.mockResolvedValue({ ok: true, json: async () => [] })
 
         process.env.GITHUB_TOKEN = 'env-token'
         await getUserRepos('me')
-        const lastCallArgs = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+        const lastCallArgs = fetchMock.mock.calls[0]
         expect(lastCallArgs[1].headers.Authorization).toBe('token env-token')
         delete process.env.GITHUB_TOKEN
     })
 
     it('opts.token overrides env var', async () => {
-        const fetchMock = global.fetch as unknown as ReturnType<typeof vi.fn>
         fetchMock.mockResolvedValue({ ok: true, json: async () => [] })
 
         process.env.GITHUB_TOKEN = 'env-token'
         await getUserRepos('me', { token: 'opt-token' })
-        const lastCallArgs = (global.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+        const lastCallArgs = fetchMock.mock.calls[0]
         expect(lastCallArgs[1].headers.Authorization).toBe('token opt-token')
         delete process.env.GITHUB_TOKEN
     })

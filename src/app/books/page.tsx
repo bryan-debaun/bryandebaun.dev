@@ -1,4 +1,4 @@
-import type { BookWithAuthors } from '@bryandebaun/mcp-client'
+import type { Book, BookWithAuthors } from '@bryandebaun/mcp-client'
 import { fetchWithFallback } from '@/lib/server-fetch'
 import StatusBadge from '@/components/StatusBadge'
 import Stars from '@/components/Stars'
@@ -19,7 +19,7 @@ export default async function Page() {
     const avgMap = averageByKey(ratings, r => r.bookId, r => r.rating)
 
     const avgRating = (book: BookWithAuthors) => {
-        const v = (book as unknown as { averageRating?: number }).averageRating
+        const v = (book as Book as { averageRating?: number }).averageRating
         if (typeof v === 'number' && !Number.isNaN(v)) return v
         const mapVal = avgMap.get(book.id)
         if (typeof mapVal === 'number') return mapVal
@@ -69,7 +69,7 @@ export default async function Page() {
                                     })()}
                                 </td>
                                 <td className="px-4 py-4 whitespace-nowrap">
-                                    <StatusBadge status={(b as unknown as { status?: string }).status} />
+                                    <StatusBadge status={b.status} />
                                 </td>
                             </tr>
                         ))}

@@ -42,6 +42,26 @@ const eslintConfig = defineConfig([
     rules: {
       "@typescript-eslint/no-require-imports": "off"
     }
+  },
+  // Disallow casting to `unknown` — prefer explicit types and narrower assertions
+  {
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "TSAsExpression[typeAnnotation.type='TSUnknownKeyword']",
+          message: "Avoid casting to 'unknown'. Prefer explicit types or narrow the value instead."
+        }
+      ]
+    }
+  },
+  // Tests and scripts often require pragmatic casting (stubbing globals, playwright, etc.).
+  {
+    files: ["**/__tests__/**", "tests/**/*.{ts,tsx}", "scripts/**/*.{ts,js,cjs,mjs}"],
+    rules: {
+      "no-restricted-syntax": "off",
+      "@typescript-eslint/no-explicit-any": "off"
+    }
   }
 ]);
 
