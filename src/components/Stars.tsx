@@ -1,7 +1,7 @@
-import React from 'react'
+import React from 'react';
 
 export default function Stars({ value }: { value: number }) {
-    const stars = Math.round((value / 10) * 5)
+    const stars = Math.round((value / 10) * 5);
     return (
         <div className="flex items-center gap-2">
             <div className="flex" aria-hidden>
@@ -12,5 +12,5 @@ export default function Stars({ value }: { value: number }) {
                 ))}
             </div>
         </div>
-    )
+    );
 }

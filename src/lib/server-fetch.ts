@@ -5,22 +5,22 @@
  */
 export async function fetchWithFallback(path: string, init?: RequestInit, timeoutMs = 15000) {
     const makeRequest = (url: string, init?: RequestInit) => {
-        const controller = new AbortController()
-        const id = setTimeout(() => controller.abort(), timeoutMs)
-        const mergedInit = { ...init, signal: controller.signal } as RequestInit
-        return fetch(url, mergedInit).finally(() => clearTimeout(id))
-    }
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeoutMs);
+        const mergedInit = { ...init, signal: controller.signal } as RequestInit;
+        return fetch(url, mergedInit).finally(() => clearTimeout(id));
+    };
 
     try {
-        return await makeRequest(path, init)
+        return await makeRequest(path, init);
     } catch (err: unknown) {
         // If we got a parse error for relative URLs in certain runtimes, retry with an origin
         if (typeof err === 'object' && err !== null) {
-            const message = (err as { message?: unknown }).message
+            const message = (err as { message?: unknown }).message;
             if (typeof message === 'string' && message.includes('Failed to parse URL')) {
-                const origin = process.env.NEXT_PUBLIC_SITE_URL || `http://localhost:${process.env.PORT || 3000}`
+                const origin = process.env.NEXT_PUBLIC_SITE_URL || `http://localhost:${process.env.PORT || 3000}`;
                 try {
-                    return await makeRequest(`${origin}${path}`, init)
+                    return await makeRequest(`${origin}${path}`, init);
                 } catch {
                     // fall through to return a safe fallback response below
                 }
@@ -32,7 +32,7 @@ export async function fetchWithFallback(path: string, init?: RequestInit, timeou
         return new Response(JSON.stringify({}), {
             status: 504,
             headers: { 'content-type': 'application/json' },
-        })
+        });
     }
 }
 

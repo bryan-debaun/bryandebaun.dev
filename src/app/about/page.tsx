@@ -1,6 +1,6 @@
-import NowReading from '@/components/NowReading'
-import PhilosophyList from '@/components/PhilosophyList'
-import WorkPassions from '@/components/WorkPassions'
+import NowReading from '@/components/NowReading';
+import PhilosophyList from '@/components/PhilosophyList';
+import WorkPassions from '@/components/WorkPassions';
 
 export default function About() {
     return (

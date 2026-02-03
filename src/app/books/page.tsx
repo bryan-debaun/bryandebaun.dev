@@ -1,36 +1,36 @@
-import type { Book, BookWithAuthors } from '@bryandebaun/mcp-client'
-import { fetchWithFallback } from '@/lib/server-fetch'
-import StatusBadge from '@/components/StatusBadge'
-import Stars from '@/components/Stars'
-import { averageByKey } from '@/lib/aggregates'
-import type { RatingWithDetails } from '@bryandebaun/mcp-client'
+import type { Book, BookWithAuthors } from '@bryandebaun/mcp-client';
+import { fetchWithFallback } from '@/lib/server-fetch';
+import StatusBadge from '@/components/StatusBadge';
+import Stars from '@/components/Stars';
+import { averageByKey } from '@/lib/aggregates';
+import type { RatingWithDetails } from '@bryandebaun/mcp-client';
 
 export default async function Page() {
     // Server-side fetch to our API routes
-    const booksRes = await fetchWithFallback('/api/mcp/books')
+    const booksRes = await fetchWithFallback('/api/mcp/books');
 
     // Fetch centralized ratings once and compute averages per book
-    const ratingsRes = await fetchWithFallback('/api/mcp/ratings')
+    const ratingsRes = await fetchWithFallback('/api/mcp/ratings');
 
-    const [booksData, ratingsData] = await Promise.all([booksRes.json(), ratingsRes.json()])
-    const books: BookWithAuthors[] = booksData?.books ?? []
-    const ratings: RatingWithDetails[] = ratingsData?.ratings ?? []
+    const [booksData, ratingsData] = await Promise.all([booksRes.json(), ratingsRes.json()]);
+    const books: BookWithAuthors[] = booksData?.books ?? [];
+    const ratings: RatingWithDetails[] = ratingsData?.ratings ?? [];
 
-    const avgMap = averageByKey(ratings, r => r.bookId, r => r.rating)
+    const avgMap = averageByKey(ratings, r => r.bookId, r => r.rating);
 
     const avgRating = (book: BookWithAuthors) => {
-        const v = (book as Book as { averageRating?: number }).averageRating
-        if (typeof v === 'number' && !Number.isNaN(v)) return v
-        const mapVal = avgMap.get(book.id)
-        if (typeof mapVal === 'number') return mapVal
-        return undefined
-    }
+        const v = (book as Book as { averageRating?: number }).averageRating;
+        if (typeof v === 'number' && !Number.isNaN(v)) return v;
+        const mapVal = avgMap.get(book.id);
+        if (typeof mapVal === 'number') return mapVal;
+        return undefined;
+    };
 
     function getAuthorNames(book: BookWithAuthors) {
-        if (!book.authors) return 'Unknown'
+        if (!book.authors) return 'Unknown';
         type AuthorLink = { author?: { name?: string }; name?: string }
-        const names = (book.authors as AuthorLink[]).map(a => a?.author?.name ?? a?.name).filter(Boolean)
-        return names.length ? names.join(', ') : 'Unknown'
+        const names = (book.authors as AuthorLink[]).map(a => a?.author?.name ?? a?.name).filter(Boolean);
+        return names.length ? names.join(', ') : 'Unknown';
     }
 
     return (
@@ -57,7 +57,7 @@ export default async function Page() {
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{getAuthorNames(b)}</td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {(() => {
-                                        const avg = avgRating(b)
+                                        const avg = avgRating(b);
                                         return typeof avg === 'number' ? (
                                             <div className="flex items-center gap-3">
                                                 <Stars value={avg} />
@@ -65,7 +65,7 @@ export default async function Page() {
                                             </div>
                                         ) : (
                                             <span className="text-sm text-gray-500">—</span>
-                                        )
+                                        );
                                     })()}
                                 </td>
                                 <td className="px-4 py-4 whitespace-nowrap">
@@ -77,6 +77,6 @@ export default async function Page() {
                 </table>
             </div>
         </main>
-    )
+    );
 }
 

@@ -15,6 +15,6 @@ export default function Head() {
             <meta name="theme-color" media="(prefers-color-scheme: light)" content="#00b9b3" />
             <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#19b3ac" />
         </>
-    )
+    );
 }
 

@@ -1,14 +1,14 @@
-import { readFileSync } from 'fs'
-import path from 'path'
-import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'fs';
+import path from 'path';
+import { describe, it, expect } from 'vitest';
 
 describe('Books page static checks', () => {
     it('fetches from the MCP books API', () => {
-        const filePath = path.resolve(process.cwd(), 'src', 'app', 'books', 'page.tsx')
-        const src = readFileSync(filePath, 'utf8')
-        expect(src).toContain('/api/mcp/books')
+        const filePath = path.resolve(process.cwd(), 'src', 'app', 'books', 'page.tsx');
+        const src = readFileSync(filePath, 'utf8');
+        expect(src).toContain('/api/mcp/books');
         // ensure we use a semantic table for layout
-        expect(src).toContain('<table')
-        expect(src).toContain('min-w-full')
-    })
-})
+        expect(src).toContain('<table');
+        expect(src).toContain('min-w-full');
+    });
+});

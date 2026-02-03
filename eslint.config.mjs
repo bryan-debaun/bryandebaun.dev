@@ -43,6 +43,12 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-require-imports": "off"
     }
   },
+  // Enforce semicolons — project preference
+  {
+    rules: {
+      semi: ["error", "always"]
+    }
+  },
   // Disallow casting to `unknown` — prefer explicit types and narrower assertions
   {
     rules: {

@@ -1,13 +1,13 @@
-import React from 'react'
-import type { RatingWithDetails } from '@bryandebaun/mcp-client'
-import { fetchWithFallback } from '@/lib/server-fetch'
+import React from 'react';
+import type { RatingWithDetails } from '@bryandebaun/mcp-client';
+import { fetchWithFallback } from '@/lib/server-fetch';
 
 export default async function Page() {
     // Use fetchWithFallback so page is resilient in dev runtimes
-    const res = await fetchWithFallback('/api/mcp/ratings', { cache: 'no-store' })
-    const data = await res.json()
+    const res = await fetchWithFallback('/api/mcp/ratings', { cache: 'no-store' });
+    const data = await res.json();
 
-    const ratings = data?.ratings ?? []
+    const ratings = data?.ratings ?? [];
 
     return (
         <main style={{ padding: 24 }}>
@@ -22,5 +22,5 @@ export default async function Page() {
                 </ul>
             )}
         </main>
-    )
+    );
 }
