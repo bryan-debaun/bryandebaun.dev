@@ -11,7 +11,7 @@ export default async function Page() {
 
     return (
         <main style={{ padding: 24 }}>
-            <h1>Books (MCP demo)</h1>
+            <h1>Books</h1>
             {books.length === 0 ? (
                 <p>No books found.</p>
             ) : (
@@ -23,4 +23,4 @@ export default async function Page() {
             )}
         </main>
     )
-} 
+}  
