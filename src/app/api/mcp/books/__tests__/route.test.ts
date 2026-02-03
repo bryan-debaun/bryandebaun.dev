@@ -5,9 +5,9 @@ import type { Api } from '@bryandebaun/mcp-client'
 describe('GET /api/mcp/books', () => {
     it('returns books from the generated Api client', async () => {
         // Stub the createApi factory to return a fake Api instance
-        const fakeApi = { api: { listBooks: vi.fn().mockResolvedValue({ data: { books: [{ id: 1, title: 'Test Book' }], total: 1 } }) } } as unknown as Api
+        const fakeApi = { api: { listBooks: vi.fn().mockResolvedValue({ data: { books: [{ id: 1, title: 'Test Book' }], total: 1 } }) } } as unknown as Api<unknown>
 
-        const spy = vi.spyOn(route as unknown as { createApi: () => Api }, 'createApi').mockImplementation(() => fakeApi)
+        const spy = vi.spyOn(route as unknown as { createApi: () => Api<unknown> }, 'createApi').mockImplementation(() => fakeApi)
 
         const res = await route.GET() as unknown as Response
         const json = await res.json()
