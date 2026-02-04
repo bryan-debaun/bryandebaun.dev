@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import type { ColumnDef, CellContext } from "@tanstack/react-table";
 import Table from "./Table";
+import Stars from "./Stars";
+import StatusBadge from "./StatusBadge";
 import { bookColumnDescriptors, generateBookRows, type BookRow } from '@/lib/books';
 import { BookWithAuthors, RatingWithDetails } from "packages/mcp-client/src/api-client";
 
@@ -22,12 +24,13 @@ export default function BooksTable({ books, ratings }: Props) {
                 return {
                     id: cd.id ?? "actions",
                     header: cd.header,
+                    meta: { headerClassName: 'w-24 text-right', cellClassName: 'w-24 text-right' },
                     cell: (info: CellContext<BookRow, unknown>) => {
                         const book: BookRow = info.row.original;
                         return (
-                            <div className="flex gap-2">
+                            <div className="flex justify-end">
                                 <button
-                                    className="rounded bg-blue-600 px-3 py-1 text-white text-sm hover:bg-blue-700"
+                                    className="rounded-md bg-slate-700 px-2 py-1 text-white text-xs hover:bg-slate-600"
                                     onClick={async () => {
                                         const newStatus = book.status === "COMPLETED" ? "NOT_STARTED" : "COMPLETED";
                                         try {
@@ -47,7 +50,7 @@ export default function BooksTable({ books, ratings }: Props) {
                                         }
                                     }}
                                 >
-                                    Toggle Status
+                                    Toggle
                                 </button>
                             </div>
                         );
@@ -59,11 +62,27 @@ export default function BooksTable({ books, ratings }: Props) {
                 return {
                     id: cd.id ?? "rating",
                     header: cd.header,
+                    meta: { headerClassName: 'w-28 text-right', cellClassName: 'w-28 text-right' },
                     cell: (info: CellContext<BookRow, unknown>) => {
                         const book: BookRow = info.row.original;
                         const v = book.averageRating as number | undefined;
-                        return typeof v === "number" ? v.toFixed(1) : "—";
+                        return typeof v === "number" ? (
+                            <div className="flex items-center justify-end gap-2">
+                                <Stars value={v} />
+                                <span className="text-xs text-gray-500 dark:text-gray-400">{v.toFixed(1)}</span>
+                            </div>
+                        ) : "—";
                     },
+                } as ColumnDef<BookRow, unknown>;
+            }
+
+            if (cd.accessor === "title") {
+                return {
+                    id: cd.accessor ? String(cd.accessor) : cd.id,
+                    accessorKey: cd.accessor as string,
+                    header: cd.header,
+                    meta: { headerClassName: 'w-1/3', cellClassName: 'text-center' },
+                    cell: (info: CellContext<BookRow, unknown>) => <div className="text-center">{info.getValue() as string}</div>,
                 } as ColumnDef<BookRow, unknown>;
             }
 
@@ -71,6 +90,7 @@ export default function BooksTable({ books, ratings }: Props) {
                 return {
                     id: "authors",
                     header: cd.header,
+                    meta: { headerClassName: 'w-1/3', cellClassName: 'truncate max-w-[20rem] text-center' },
                     cell: (info: CellContext<BookRow, unknown>) => {
                         const row = info.row.original as BookRow;
                         if (!row.authors) return "Unknown";
@@ -83,6 +103,18 @@ export default function BooksTable({ books, ratings }: Props) {
                 } as ColumnDef<BookRow, unknown>;
             }
 
+            if (cd.accessor === "status") {
+                return {
+                    id: cd.accessor ? String(cd.accessor) : cd.id,
+                    accessorKey: cd.accessor as string,
+                    header: cd.header,
+                    meta: { headerClassName: 'w-28 text-center', cellClassName: 'w-28 text-center' },
+                    cell: (info: CellContext<BookRow, unknown>) => (
+                        <div className="flex justify-center"><StatusBadge status={(info.row.original as BookRow).status} /></div>
+                    ),
+                } as ColumnDef<BookRow, unknown>;
+            }
+
             // default text accessor (must provide accessorKey)
             return {
                 id: cd.accessor ? String(cd.accessor) : cd.id,
@@ -92,6 +124,11 @@ export default function BooksTable({ books, ratings }: Props) {
             } as ColumnDef<BookRow, unknown>;
         });
     }, []);
+
+    // keep local table data in sync when server props change
+    useEffect(() => {
+        setData(generateBookRows(booksData, ratingsData) ?? []);
+    }, [booksData, ratingsData]);
 
     return <Table data={data} columns={columns} className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700" caption="Books list" />;
 }
