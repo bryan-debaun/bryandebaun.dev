@@ -113,6 +113,26 @@ img {
   display: block;
 }
 
+/* Utility: allow a child container to full-bleed the viewport while
+   preserving site gutters. Use on pages that should use the entire width.
+   Example: <div class="prose site-bleed max-w-none">...</div> */
+.site-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding-left: 1.5rem;
+  /* matches px-6 */
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .site-bleed {
+    padding-left: 1.5rem;
+    /* md:px-6 */
+    padding-right: 1.5rem;
+  }
+}
+
 h1,
 h2,
 h3,

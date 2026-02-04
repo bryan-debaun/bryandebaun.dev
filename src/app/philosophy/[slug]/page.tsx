@@ -1,5 +1,6 @@
 import React from 'react';
 import * as jsxRuntime from 'react/jsx-runtime';
+import { formatDate } from '@/lib/dates';
 
 const componentCache = new Map<string, React.ComponentType<unknown>>();
 const compiledBySlug = new Map<string, React.ComponentType<unknown>>();
@@ -64,38 +65,13 @@ export default async function PhilosophyPage({ params }: { params?: { slug: stri
         }
     }
 
-    function formatDateSafe(dateValue: unknown) {
-        if (!dateValue) return '';
-        if (typeof dateValue === 'string') {
-            // Parse YYYY-MM-DD (or YYYY-MM-DDTHH:MM:SS...) prefix to avoid timezone shifts.
-            const m = dateValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (m) {
-                const y = Number(m[1]);
-                const mo = Number(m[2]);
-                const d = Number(m[3]);
-                return new Date(y, mo - 1, d).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                });
-            }
-        }
-        const dt = new Date(dateValue as string | number);
-        if (isNaN(dt.getTime())) return String(dateValue);
-        return dt.toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
-    }
-
     return (
-        <article className="prose prose-norwegian dark:prose-invert">
+        <article className="prose prose-norwegian dark:prose-invert max-w-none site-bleed">
             <h1 className="text-center">{post.title}</h1>
             <div>
                 {rendered ?? <div>Unable to render content.</div>}
             </div>
-            {post.date ? <p className="text-sm text-muted text-right">- {formatDateSafe(post.date)}</p> : null}
+            {post.date ? <p className="text-sm text-muted text-right">- {formatDate(post.date, { month: 'long' })}</p> : null}
         </article>
     );
 }
