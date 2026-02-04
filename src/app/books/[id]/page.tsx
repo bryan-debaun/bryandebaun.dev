@@ -4,6 +4,7 @@ import StatusBadge from '@/components/StatusBadge';
 import BackButton from '@/components/BackButton';
 import Link from 'next/link';
 import { formatDate } from '@/lib/dates';
+import BookEnrich from '@/components/BookEnrich';
 
 export default async function BookPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
     const p = await params;
@@ -18,10 +19,25 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
             import('@/lib/services/ratings'),
         ]);
 
-        const book = await getBookById(id);
-        if (!book) throw new Error(`Failed to fetch book ${id}`);
+        // Fetch book details with diagnostic info so we can show helpful errors
+        const { fetchWithFallback } = await import('@/lib/server-fetch');
+        const bookRes = await fetchWithFallback(`/api/mcp/books/${id}`);
+        if (!bookRes.ok) {
+            const txt = await bookRes.text().catch(() => '');
+            throw new Error(`Failed to fetch book ${id}: ${bookRes.status}${txt ? ` - ${txt}` : ''}`);
+        }
+        const book = await bookRes.json();
 
         const ratings = await listRatings({ bookId: id });
+
+        // Try server-side enrichment via OpenLibrary so we can show suggestions immediately
+        let initialMetadata = null;
+        try {
+            const { fetchByIsbn } = await import('@/lib/services/openLibrary');
+            initialMetadata = await fetchByIsbn(book.isbn);
+        } catch (e) {
+            // ignore enrichment failures — we still render the page
+        }
 
         return (
             <main className="p-6">
@@ -43,55 +59,64 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
                     <StatusBadge status={book.status} />
                 </div>
 
-                <section className="mb-6">
-                    <h2 className="text-lg font-medium">Description</h2>
-                    <p className="mt-2 text-sm text-[var(--color-norwegian-700)] text-center">{book.description ?? 'No description'}</p>
-                </section>
+                {/* If OpenLibrary suggested metadata exists, prefer it as the canonical section. Otherwise fall back to Description + Details */}
+                {initialMetadata ? (
+                    <div className="mb-6">
+                        <BookEnrich bookId={book.id} isbn={book.isbn} initialMetadata={initialMetadata} serverAuthors={book.authors} />
+                    </div>
+                ) : (
+                    <>
+                        <section className="mb-6">
+                            <h2 className="text-lg font-medium">Description</h2>
+                            <p className="mt-2 text-sm text-[var(--color-norwegian-700)] text-center">{book.description ?? 'No description'}</p>
+                        </section>
 
-                <section className="mb-6">
-                    <h2 className="text-lg font-medium">Details</h2>
-                    <dl className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-center">
-                        <div>
-                            <dt className="text-xs text-gray-500">ISBN</dt>
-                            <dd className="mt-1">{book.isbn ?? '—'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-xs text-gray-500">Author</dt>
-                            <dd className="mt-1">
-                                {book.authors && book.authors.length ? (
-                                    book.authors.map((a, i: number) => {
-                                        type AuthorRef = { author?: { id?: number; name?: string }; id?: number; name?: string };
-                                        const ref = a as AuthorRef;
-                                        const authorId = ref?.author?.id ?? ref?.id;
-                                        const name = ref?.author?.name ?? ref?.name ?? 'Unknown';
-                                        return (
-                                            <span key={`${authorId ?? name}-${i}`}>
-                                                {authorId ? (
-                                                    <Link href={`/authors/${authorId}`} className="text-[var(--color-norwegian-600)] hover:underline">{name}</Link>
-                                                ) : (
-                                                    <span>{name}</span>
-                                                )}{i < (book.authors?.length ?? 0) - 1 ? ', ' : ''}
-                                            </span>
-                                        );
-                                    })
-                                ) : (
-                                    <span>Unknown</span>
-                                )}
-                            </dd>
-                        </div>
-                        <div>
-                            <dt className="text-xs text-gray-500">Published</dt>
-                            <dd className="mt-1">{formatDate(book.publishedAt)}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-xs text-gray-500">Updated</dt>
-                            <dd className="mt-1">{formatDate(book.updatedAt)}</dd>
-                        </div>
-                    </dl>
-                </section>
+                        <section className="mb-6">
+                            <h2 className="text-lg font-medium">Details</h2>
+                            <dl className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-center">
+                                <div>
+                                    <dt className="text-xs text-gray-500">ISBN</dt>
+                                    <dd className="mt-1">{book.isbn ?? '—'}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-xs text-gray-500">Author</dt>
+                                    <dd className="mt-1">
+                                        {book.authors && book.authors.length ? (
+                                            book.authors.map((a: any, i: number) => {
+                                                type AuthorRef = { author?: { id?: number; name?: string }; id?: number; name?: string };
+                                                const ref = a as AuthorRef;
+                                                const authorId = ref?.author?.id ?? ref?.id;
+                                                const name = ref?.author?.name ?? ref?.name ?? 'Unknown';
+                                                return (
+                                                    <span key={`${authorId ?? name}-${i}`}>
+                                                        {authorId ? (
+                                                            <Link href={`/authors/${authorId}`} className="text-[var(--color-norwegian-600)] hover:underline">{name}</Link>
+                                                        ) : (
+                                                            <span>{name}</span>
+                                                        )}{i < (book.authors?.length ?? 0) - 1 ? ', ' : ''}
+                                                    </span>
+                                                );
+                                            })
+                                        ) : (
+                                            <span>Unknown</span>
+                                        )}
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt className="text-xs text-gray-500">Published</dt>
+                                    <dd className="mt-1">{formatDate(book.publishedAt)}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-xs text-gray-500">Updated</dt>
+                                    <dd className="mt-1">{formatDate(book.updatedAt)}</dd>
+                                </div>
+                            </dl>
+                        </section>
+                    </>
+                )}
 
                 <section>
-                    <h2 className="text-lg font-medium">My Rating:</h2>
+                    <h2 className="text-lg font-medium">My Rating</h2>
                     <div className="mt-2 space-y-2 text-center">
                         {ratings.length ? (
                             ratings.map((r: RatingWithDetails) => (
@@ -115,6 +140,13 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
         );
     } catch (e: unknown) {
         console.error('Failed to fetch book', e);
-        return <main className="p-6">Book not found</main>;
+        const msg = e instanceof Error ? e.message : String(e);
+        return (
+            <main className="p-6">
+                <h2 className="text-lg font-semibold">Book not found</h2>
+                <p className="mt-2 text-sm text-red-600">{msg}</p>
+                <p className="mt-2">Go back to the <a href="/books" className="text-[var(--color-norwegian-600)] hover:underline">books list</a>.</p>
+            </main>
+        );
     }
 }
