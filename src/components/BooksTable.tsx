@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
+
 import type { ColumnDef, CellContext } from '@tanstack/react-table';
 import Table from './Table';
 import Stars from './Stars';
@@ -23,6 +24,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
 
     const rows: BookRow[] = hookRows ?? [];
 
+
     // Build columns (same structure previously in BooksTableView)
     const columns = useMemo<ColumnDef<BookRow, unknown>[]>(() => {
         const cols = bookColumnDescriptors
@@ -42,7 +44,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                                         aria-label={`Toggle status for ${book.title}`}
                                         title="Toggle status"
                                         disabled={isLoading || !toggleStatus}
-                                        onClick={() => toggleStatus && toggleStatus(book)}
+                                        onClick={(e) => { e.stopPropagation(); toggleStatus && toggleStatus(book); }}
                                     >
                                         {isLoading ? (
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
@@ -94,12 +96,12 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                         id: cd.accessor ? String(cd.accessor) : cd.id,
                         accessorKey: cd.accessor as string,
                         header: cd.header,
-                        meta: { headerClassName: 'w-1/3', cellClassName: 'text-center' },
+                        meta: { headerClassName: 'w-1/3', cellClassName: 'text-left md:text-center' },
                         cell: (info: CellContext<BookRow, unknown>) => {
                             const row = info.row.original as BookRow;
                             return (
-                                <div className="text-center">
-                                    <Link href={`/books/${row.id}`} className="text-[var(--color-norwegian-600)] hover:underline">
+                                <div className="text-left md:text-center">
+                                    <Link href={`/books/${row.id}`} className="text-[var(--color-norwegian-600)] hover:underline" onClick={(e) => e.stopPropagation()}>
                                         {String(info.getValue() as string)}
                                     </Link>
                                 </div>
@@ -112,7 +114,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                     return {
                         id: 'authors',
                         header: cd.header,
-                        meta: { headerClassName: 'w-1/3', cellClassName: 'truncate max-w-[20rem] text-center' },
+                        meta: { headerClassName: 'w-1/3', cellClassName: 'truncate max-w-[20rem] text-left md:text-center' },
                         cell: (info: CellContext<BookRow, unknown>) => {
                             const row = info.row.original as BookRow;
                             if (!row.authors) return 'Unknown';
@@ -124,7 +126,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                                     const key = `${authorId ?? name}-${idx}`;
                                     return authorId ? (
                                         <span key={key}>
-                                            <Link href={`/authors/${authorId}`} className="text-[var(--color-norwegian-600)] hover:underline">
+                                            <Link href={`/authors/${authorId}`} className="text-[var(--color-norwegian-600)] hover:underline" onClick={(e) => e.stopPropagation()}>
                                                 {name}
                                             </Link>
                                         </span>
@@ -137,7 +139,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                                 if (i > 0) interleaved.push(<span key={`sep-${i}`}>, </span>);
                                 interleaved.push(p);
                             });
-                            return <div className="truncate max-w-[20rem] text-center">{interleaved}</div>;
+                            return <div className="truncate max-w-[20rem] text-left md:text-center">{interleaved}</div>;
                         },
                     } as ColumnDef<BookRow, unknown>;
                 }
@@ -172,6 +174,12 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
             columns={columns}
             className="overflow-x-auto rounded-lg border border-[var(--tw-prose-td-borders)] dark:border-[var(--tw-prose-invert-td-borders)] bg-[var(--background)] shadow-sm ring-1 ring-[var(--tw-prose-td-borders)]"
             caption="Books list"
+            onRowClick={(row) => {
+                if (typeof window !== 'undefined') {
+                    window.location.href = `/books/${row.id}`;
+                }
+            }}
+            getRowAriaLabel={(row) => `Open details for ${row.title}`}
         />
     );
 }

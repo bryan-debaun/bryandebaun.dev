@@ -27,9 +27,10 @@ const sampleBook: any = {
 
 test('renders title linking to book detail', () => {
     render(<Providers><BooksTable books={[sampleBook]} ratings={[]} /></Providers>);
-    const link = screen.getByRole('link', { name: /test book/i });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', '/books/1');
+    // There are two "link" role elements that may match (the row and the anchor). Find the anchor by href.
+    const links = screen.getAllByRole('link', { name: /test book/i });
+    const anchor = links.find((l) => l.tagName === 'A' && (l as HTMLAnchorElement).getAttribute('href') === '/books/1');
+    expect(anchor).toBeDefined();
 });
 
 test('renders author linking to author detail', () => {

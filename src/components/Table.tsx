@@ -21,9 +21,13 @@ export type TableProps<T> = {
     columns: ColumnDef<T, unknown>[];
     className?: string;
     caption?: string;
+    // Optional: called when a row is activated via click or keyboard
+    onRowClick?: (row: T) => void;
+    // Optional: provide an accessible label for each row
+    getRowAriaLabel?: (row: T) => string;
 };
 
-export default function Table<T>({ data, columns, className, caption }: TableProps<T>) {
+export default function Table<T>({ data, columns, className, caption, onRowClick, getRowAriaLabel }: TableProps<T>) {
     // Ensure stable references are passed into TanStack Table to avoid memoization pitfalls
     const stableData = React.useMemo(() => data, [data]);
     const stableColumns = React.useMemo(() => columns, [columns]);
@@ -52,15 +56,40 @@ export default function Table<T>({ data, columns, className, caption }: TablePro
                     ))}
                 </thead>
                 <tbody className="bg-[var(--background)] dark:bg-[var(--color-bg-dark)] divide-y" style={{ borderColor: 'var(--tw-prose-td-borders)' }}>
-                    {table.getRowModel().rows.map((row) => (
-                        <tr key={row.id} className="bg-[var(--color-norwegian-50)] dark:bg-[var(--background)] hover:bg-[var(--color-norwegian-100)] dark:hover:bg-[var(--color-norwegian-700)]">
-                            {row.getVisibleCells().map((cell) => (
-                                <td key={cell.id} className={`${'px-4 py-4 whitespace-nowrap text-sm text-[var(--foreground)]'} ${cellClassNameFrom(cell.column.columnDef) ?? ''}`}>
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
+                    {table.getRowModel().rows.map((row) => {
+                        const rowData = row.original as T;
+                        const clickable = typeof onRowClick === 'function';
+                        const baseClasses = 'bg-[var(--color-norwegian-50)] dark:bg-[var(--background)]';
+                        const hoverClasses = clickable
+                            ? 'hover:bg-[var(--color-norwegian-100)] dark:hover:bg-[var(--color-norwegian-700)] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fjord-600)]'
+                            : 'hover:bg-[var(--color-norwegian-100)] dark:hover:bg-[var(--color-norwegian-700)]';
+                        return (
+                            <tr
+                                key={row.id}
+                                className={`${baseClasses} ${hoverClasses}`}
+                                {...(clickable
+                                    ? {
+                                        role: 'link',
+                                        tabIndex: 0,
+                                        onClick: () => onRowClick && onRowClick(rowData),
+                                        onKeyDown: (e: React.KeyboardEvent) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                onRowClick && onRowClick(rowData);
+                                            }
+                                        },
+                                        'aria-label': getRowAriaLabel ? getRowAriaLabel(rowData) : undefined,
+                                    }
+                                    : {})}
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <td key={cell.id} className={`${'px-4 py-4 whitespace-nowrap text-sm text-[var(--foreground)]'} ${cellClassNameFrom(cell.column.columnDef) ?? ''}`}>
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </td>
+                                ))}
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>
