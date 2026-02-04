@@ -30,7 +30,9 @@ export default function BooksTable({ books, ratings }: Props) {
                         return (
                             <div className="flex justify-end">
                                 <button
-                                    className={`rounded-md px-2 py-1 text-xs text-[var(--color-white)] bg-[var(--btn-accent)] hover:bg-[var(--btn-accent-strong)] dark:bg-[var(--btn-accent-dark)]`}
+                                    className={`inline-flex items-center justify-center rounded-md p-2 text-xs text-[var(--color-white)] bg-gradient-to-b from-[var(--btn-accent-strong)] to-[var(--btn-accent)] hover:from-[var(--btn-accent)] hover:to-[var(--btn-accent-strong)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fjord-600)]`}
+                                    aria-label={`Toggle status for ${book.title}`}
+                                    title="Toggle status"
                                     onClick={async () => {
                                         const newStatus = book.status === "COMPLETED" ? "NOT_STARTED" : "COMPLETED";
                                         try {
@@ -50,7 +52,9 @@ export default function BooksTable({ books, ratings }: Props) {
                                         }
                                     }}
                                 >
-                                    Toggle
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                                        <path d="M10 5a1 1 0 00-1 1v3H6a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V6a1 1 0 00-1-1z" />
+                                    </svg>
                                 </button>
                             </div>
                         );
@@ -130,5 +134,5 @@ export default function BooksTable({ books, ratings }: Props) {
         setData(generateBookRows(booksData, ratingsData) ?? []);
     }, [booksData, ratingsData]);
 
-    return <Table data={data} columns={columns} className="overflow-x-auto rounded-lg border border-[var(--tw-prose-td-borders)] dark:border-[var(--tw-prose-invert-td-borders)] bg-[var(--background)]" caption="Books list" />;
+    return <Table data={data} columns={columns} className="overflow-x-auto rounded-lg border border-[var(--tw-prose-td-borders)] dark:border-[var(--tw-prose-invert-td-borders)] bg-[var(--background)] shadow-sm ring-1 ring-[var(--tw-prose-td-borders)]" caption="Books list" />;
 }
