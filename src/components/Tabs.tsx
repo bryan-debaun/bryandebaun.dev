@@ -38,7 +38,7 @@ export default function Tabs({ tabs, defaultIndex = 0 }: { tabs: Tab[]; defaultI
 
     return (
         <div>
-            <div role="tablist" aria-orientation="horizontal" className="flex gap-2 border-b pb-2">
+            <div role="tablist" aria-orientation="horizontal" className="flex mb-0 overflow-visible">
                 {tabs.map((t, i) => (
                     <button
                         key={t.id}
@@ -48,7 +48,7 @@ export default function Tabs({ tabs, defaultIndex = 0 }: { tabs: Tab[]; defaultI
                         aria-selected={selected === i}
                         aria-controls={`panel-${t.id}`}
                         tabIndex={selected === i ? 0 : -1}
-                        className={`px-3 py-1 rounded-t-md text-sm font-medium ${selected === i ? 'bg-white dark:bg-[var(--background)] text-[var(--color-norwegian-600)]' : 'text-gray-600 dark:text-gray-300'}`}
+                        className={`flex-1 text-center min-w-0 px-3 py-2 rounded-t-md rounded-b-lg first:rounded-l-lg last:rounded-r-lg first:rounded-bl-none last:rounded-br-none text-sm font-medium cursor-pointer transition-colors duration-150 border border-[var(--tw-prose-td-borders)] dark:border-[var(--tw-prose-invert-td-borders)] -ml-px first:ml-0 shadow-sm mb-[-6px] ${selected === i ? 'rounded-b-none border-b-0 z-30 -mt-1 shadow-md bg-white dark:bg-[var(--background)] text-[var(--color-norwegian-600)]' : 'rounded-b-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[var(--color-bg-dark)]'}`}
                         onClick={() => setSelected(i)}
                         onKeyDown={(e) => onKeyDown(e, i)}
                     >
@@ -57,7 +57,7 @@ export default function Tabs({ tabs, defaultIndex = 0 }: { tabs: Tab[]; defaultI
                 ))}
             </div>
 
-            <div className="mt-4">
+            <div className="mt-0 p-4">
                 {tabs.map((t, i) => (
                     <div
                         key={t.id}
