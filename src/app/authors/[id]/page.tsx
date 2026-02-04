@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 
 export default async function AuthorPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
     const p = await params;
@@ -11,6 +12,7 @@ export default async function AuthorPage({ params }: { params: { id: string } | 
 
         return (
             <main className="p-6">
+                <div className="mb-3"><BackButton fallbackHref="/authors" /></div>
                 <h1 className="text-2xl font-semibold mb-2">{author.name}</h1>
                 <div className="mb-4 text-sm text-[var(--color-norwegian-700)]">{author.bio ?? 'No bio available'}</div>
 

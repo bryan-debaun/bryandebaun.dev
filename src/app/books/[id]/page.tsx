@@ -3,6 +3,7 @@ import { RatingWithDetails } from '@bryandebaun/mcp-client';
 import { average } from '@/lib/aggregates';
 import Stars from '@/components/Stars';
 import StatusBadge from '@/components/StatusBadge';
+import BackButton from '@/components/BackButton';
 import Link from 'next/link';
 
 export default async function BookPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
@@ -28,6 +29,7 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
         return (
             <main className="p-6">
                 <div className="mb-4">
+                    <div className="mb-3"><BackButton fallbackHref="/books" /></div>
                     <h1 className="text-2xl font-semibold mb-2">{book.title}</h1>
                     <div className="flex items-center gap-3">
                         <StatusBadge status={book.status} />
