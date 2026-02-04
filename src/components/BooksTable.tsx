@@ -82,7 +82,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                             return typeof v === 'number' ? (
                                 <div className="flex items-center justify-end gap-2">
                                     <Stars value={v} />
-                                    <span className="text-xs text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300-dark)]">{Number.isInteger(v) ? String(v) : v.toFixed(1)}</span>
+                                    <span className="text-xs text-[var(--color-norwegian-700)] dark:text-[var(--color-white)]">{Number.isInteger(v) ? String(v) : v.toFixed(1)}</span>
                                 </div>
                             ) : (
                                 '—'
@@ -101,7 +101,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                             const row = info.row.original as BookRow;
                             return (
                                 <div className="text-left md:text-center">
-                                    <Link href={`/books/${row.id}`} className="text-[var(--color-norwegian-600)] hover:underline" onClick={(e) => e.stopPropagation()}>
+                                    <Link href={`/books/${row.id}`} className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]" onClick={(e) => e.stopPropagation()}>
                                         {String(info.getValue() as string)}
                                     </Link>
                                 </div>
@@ -126,7 +126,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                                     const key = `${authorId ?? name}-${idx}`;
                                     return authorId ? (
                                         <span key={key}>
-                                            <Link href={`/authors/${authorId}`} className="text-[var(--color-norwegian-600)] hover:underline" onClick={(e) => e.stopPropagation()}>
+                                            <Link href={`/authors/${authorId}`} className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]" onClick={(e) => e.stopPropagation()}>
                                                 {name}
                                             </Link>
                                         </span>

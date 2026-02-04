@@ -44,10 +44,10 @@
   --color-fjord-neon: #e6fbf4;
   --tw-prose-body: var(--color-norwegian-700);
   --tw-prose-headings: var(--color-norwegian-900);
-  --tw-prose-lead: var(--color-norwegian-600);
+  --tw-prose-lead: var(--color-norwegian-700);
   --tw-prose-links: var(--color-fjord-600);
   --tw-prose-bold: var(--color-norwegian-900);
-  --tw-prose-counters: var(--color-norwegian-600);
+  --tw-prose-counters: var(--color-norwegian-700);
   --tw-prose-bullets: var(--color-norwegian-400);
   --tw-prose-hr: var(--color-norwegian-300);
   --tw-prose-quotes: var(--color-norwegian-900);
@@ -466,7 +466,7 @@ main a,
 :root {
   --btn-accent: var(--color-norwegian-400);
   --btn-accent-strong: var(--color-norwegian-500);
-  --btn-accent-dark: var(--color-norwegian-400-dark);
+  --btn-accent-dark: var(--color-norwegian-200-dark);
   --btn-radius: 0.5rem;
 }
 
@@ -764,7 +764,7 @@ main .prose h1 {
 main h2,
 main .prose.prose-norwegian h2,
 main .prose h2 {
-  color: var(--color-norwegian-600);
+  color: var(--color-norwegian-700);
   font-weight: 500;
   font-size: 1.375rem;
   margin-top: 1.25rem;
@@ -777,14 +777,14 @@ html.dark main h1,
 html.dark main .prose.prose-norwegian h1,
 html.dark main .prose h1 {
   /* Ensure this overrides typography plugin defaults */
-  color: var(--color-norwegian-300-dark) !important;
+  color: var(--tw-prose-invert-headings) !important;
   transition: color .15s ease-in-out;
 }
 
 html.dark main h2,
 html.dark main .prose.prose-norwegian h2,
 html.dark main .prose h2 {
-  color: var(--color-norwegian-200-dark);
+  color: var(--tw-prose-invert-headings) !important;
   font-weight: 500;
   transition: color .12s ease;
 }

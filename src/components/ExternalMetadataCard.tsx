@@ -55,7 +55,7 @@ export default function ExternalMetadataCard({ bookId, metadata, serverAuthors }
 
                     {matchedAuthor ? (
                         <div className="mt-3">
-                            <Link href={`/authors/${matchedAuthor.id}`} className="text-[var(--color-norwegian-600)] hover:underline">View author: {matchedAuthor.name}</Link>
+                            <Link href={`/authors/${matchedAuthor.id}`} className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]">View author: {matchedAuthor.name}</Link>
                         </div>
                     ) : null}
                 </div>

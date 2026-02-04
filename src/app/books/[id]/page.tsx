@@ -89,7 +89,7 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
                                                 return (
                                                     <span key={`${authorId ?? name}-${i}`}>
                                                         {authorId ? (
-                                                            <Link href={`/authors/${authorId}`} className="text-[var(--color-norwegian-600)] hover:underline">{name}</Link>
+                                                            <Link href={`/authors/${authorId}`} className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]">{name}</Link>
                                                         ) : (
                                                             <span>{name}</span>
                                                         )}{i < (book.authors?.length ?? 0) - 1 ? ', ' : ''}
@@ -144,7 +144,7 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
             <main className="p-6">
                 <h2 className="text-lg font-semibold">Book not found</h2>
                 <p className="mt-2 text-sm text-red-600">{msg}</p>
-                <p className="mt-2">Go back to the <Link href="/books" className="text-[var(--color-norwegian-600)] hover:underline">books list</Link>.</p>
+                <p className="mt-2">Go back to the <Link href="/books" className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]">books list</Link>.</p>
             </main>
         );
     }

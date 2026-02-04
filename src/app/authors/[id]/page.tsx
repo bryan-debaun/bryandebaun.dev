@@ -34,7 +34,7 @@ export default async function AuthorPage({ params }: { params: { id: string } | 
                         {author.books && author.books.length ? (
                             author.books.map((b: { id?: number; title?: string }, i: number) => (
                                 <div key={b?.id ?? `${b?.title ?? 'book'}-${i}`} className="text-sm">
-                                    <Link href={`/books/${b?.id ?? ''}`} className="text-[var(--color-norwegian-600)] hover:underline">{b.title}</Link>
+                                    <Link href={`/books/${b?.id ?? ''}`} className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]">{b.title}</Link>
                                 </div>
                             ))
                         ) : (
