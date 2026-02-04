@@ -25,13 +25,13 @@ export default function Table<T>({ data, columns, className, caption }: TablePro
         <div className={className}>
             <table className="min-w-full table-fixed">
                 {caption ? <caption className="sr-only">{caption}</caption> : null}
-                <thead className="bg-[var(--color-norwegian-50)] dark:bg-[var(--color-norwegian-800)]">
+                <thead className="bg-[var(--color-norwegian-400)] dark:bg-[var(--color-norwegian-800)]">
                     {table.getHeaderGroups().map((hg) => (
                         <tr key={hg.id}>
                             {hg.headers.map((h) => (
                                 <th
                                     key={h.id}
-                                    className={`${'px-4 py-3 text-center text-xs font-medium text-[var(--color-norwegian-700)] dark:text-[var(--color-norwegian-200-dark)]'} ${(h.column.columnDef as any).meta?.headerClassName ?? ''}`}
+                                    className={`${'px-4 py-3 text-center text-xs font-medium text-white dark:text-[var(--color-norwegian-100)]'} ${(h.column.columnDef as any).meta?.headerClassName ?? ''}`}
                                 >
                                     {flexRender(h.column.columnDef.header, h.getContext())}
                                 </th>
