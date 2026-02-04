@@ -23,15 +23,15 @@ export default function Table<T>({ data, columns, className, caption }: TablePro
 
     return (
         <div className={className}>
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
+            <table className="min-w-full table-fixed">
                 {caption ? <caption className="sr-only">{caption}</caption> : null}
-                <thead className="bg-gray-50 dark:bg-gray-800">
+                <thead className="bg-[var(--color-norwegian-50)] dark:bg-[var(--color-norwegian-800)]">
                     {table.getHeaderGroups().map((hg) => (
                         <tr key={hg.id}>
                             {hg.headers.map((h) => (
                                 <th
                                     key={h.id}
-                                    className={`${'px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400'} ${(h.column.columnDef as any).meta?.headerClassName ?? ''}`}
+                                    className={`${'px-4 py-3 text-center text-xs font-medium text-[var(--color-norwegian-700)] dark:text-[var(--color-norwegian-200-dark)]'} ${(h.column.columnDef as any).meta?.headerClassName ?? ''}`}
                                 >
                                     {flexRender(h.column.columnDef.header, h.getContext())}
                                 </th>
@@ -39,11 +39,11 @@ export default function Table<T>({ data, columns, className, caption }: TablePro
                         </tr>
                     ))}
                 </thead>
-                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-[var(--background)] dark:bg-[var(--color-bg-dark)] divide-y" style={{ borderColor: 'var(--tw-prose-td-borders)' }}>
                     {table.getRowModel().rows.map((row) => (
-                        <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <tr key={row.id} className="bg-[var(--color-norwegian-50)] dark:bg-[var(--background)] hover:bg-[var(--color-norwegian-100)] dark:hover:bg-[var(--color-norwegian-700)]">
                             {row.getVisibleCells().map((cell) => (
-                                <td key={cell.id} className={`${'px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'} ${(cell.column.columnDef as any).meta?.cellClassName ?? ''}`}>
+                                <td key={cell.id} className={`${'px-4 py-4 whitespace-nowrap text-sm text-[var(--foreground)]'} ${(cell.column.columnDef as any).meta?.cellClassName ?? ''}`}>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </td>
                             ))}

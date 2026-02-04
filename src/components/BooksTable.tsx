@@ -30,7 +30,7 @@ export default function BooksTable({ books, ratings }: Props) {
                         return (
                             <div className="flex justify-end">
                                 <button
-                                    className="rounded-md bg-slate-700 px-2 py-1 text-white text-xs hover:bg-slate-600"
+                                    className={`rounded-md px-2 py-1 text-xs text-[var(--color-white)] bg-[var(--btn-accent)] hover:bg-[var(--btn-accent-strong)] dark:bg-[var(--btn-accent-dark)]`}
                                     onClick={async () => {
                                         const newStatus = book.status === "COMPLETED" ? "NOT_STARTED" : "COMPLETED";
                                         try {
@@ -69,7 +69,7 @@ export default function BooksTable({ books, ratings }: Props) {
                         return typeof v === "number" ? (
                             <div className="flex items-center justify-end gap-2">
                                 <Stars value={v} />
-                                <span className="text-xs text-gray-500 dark:text-gray-400">{v.toFixed(1)}</span>
+                                <span className="text-xs text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300-dark)]">{v.toFixed(1)}</span>
                             </div>
                         ) : "—";
                     },
@@ -130,5 +130,5 @@ export default function BooksTable({ books, ratings }: Props) {
         setData(generateBookRows(booksData, ratingsData) ?? []);
     }, [booksData, ratingsData]);
 
-    return <Table data={data} columns={columns} className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700" caption="Books list" />;
+    return <Table data={data} columns={columns} className="overflow-x-auto rounded-lg border border-[var(--tw-prose-td-borders)] dark:border-[var(--tw-prose-invert-td-borders)] bg-[var(--background)]" caption="Books list" />;
 }
