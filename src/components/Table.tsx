@@ -47,7 +47,7 @@ export default function Table<T>({ data, columns, className, caption, onRowClick
                             {hg.headers.map((h) => (
                                 <th
                                     key={h.id}
-                                    className={`${'px-4 py-3 text-center text-xs font-medium text-white dark:text-[var(--color-norwegian-100)]'} ${headerClassNameFrom(h.column.columnDef) ?? ''}`}
+                                    className={`px-4 py-3 text-center text-xs font-medium text-white dark:text-[var(--color-norwegian-100)] ${headerClassNameFrom(h.column.columnDef) ?? ''}`}
                                 >
                                     {flexRender(h.column.columnDef.header, h.getContext())}
                                 </th>
@@ -71,11 +71,11 @@ export default function Table<T>({ data, columns, className, caption, onRowClick
                                     ? {
                                         role: 'link',
                                         tabIndex: 0,
-                                        onClick: () => onRowClick && onRowClick(rowData),
+                                        onClick: () => { if (onRowClick) onRowClick(rowData); },
                                         onKeyDown: (e: React.KeyboardEvent) => {
                                             if (e.key === 'Enter' || e.key === ' ') {
                                                 e.preventDefault();
-                                                onRowClick && onRowClick(rowData);
+                                                if (onRowClick) onRowClick(rowData);
                                             }
                                         },
                                         'aria-label': getRowAriaLabel ? getRowAriaLabel(rowData) : undefined,
@@ -83,7 +83,7 @@ export default function Table<T>({ data, columns, className, caption, onRowClick
                                     : {})}
                             >
                                 {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id} className={`${'px-4 py-4 whitespace-nowrap text-sm text-[var(--foreground)]'} ${cellClassNameFrom(cell.column.columnDef) ?? ''}`}>
+                                    <td key={cell.id} className={`px-4 py-4 whitespace-nowrap text-sm text-[var(--foreground)] ${cellClassNameFrom(cell.column.columnDef) ?? ''}`}>
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </td>
                                 ))}

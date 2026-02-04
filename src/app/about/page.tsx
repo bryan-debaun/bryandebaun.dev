@@ -24,6 +24,12 @@ export default function About() {
             <NowReading />
 
             <PhilosophyList />
+
+            <h3>Media</h3>
+            <p>
+                I keep a small, curated list of books, movies, games, and creators I enjoy.
+                You can view them on the <a href="/media" className="text-[var(--color-norwegian-600)] hover:underline">Media</a> page.
+            </p>
         </div>
     );
 }

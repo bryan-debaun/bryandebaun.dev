@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import type { BookWithAuthors, RatingWithDetails } from '@bryandebaun/mcp-client';
 import { ItemStatus } from '@bryandebaun/mcp-client';
 import * as repo from '@/lib/repositories/booksRepository';
@@ -13,7 +13,7 @@ const BOOKS_KEY = ['books'];
 export function useBooks(initialBooks?: BookRow[], initialRatings?: RatingWithDetails[]) {
     const qc = useQueryClient();
     // Local override map to track optimistic overlays and server-merged updates
-    const overridesRef = useRef<Map<number, Partial<BookRow & { _loading?: boolean; _error?: string }>>>(new Map());
+    const [overrides, setOverrides] = useState<Map<number, Partial<BookRow & { _loading?: boolean; _error?: string }>>>(() => new Map());
 
     const booksQuery = useQuery({
         queryKey: BOOKS_KEY,
@@ -47,7 +47,7 @@ export function useBooks(initialBooks?: BookRow[], initialRatings?: RatingWithDe
                 merged = { ...(r as BookRow), ...(ext ?? {}) } as BookRow & { _loading?: boolean; _error?: string };
             }
             // Apply any local overrides (optimistic/server merges) which may be tracked separately
-            const ov = overridesRef.current.get(r.id as number);
+            const ov = overrides.get(r.id as number);
             if (ov) merged = { ...merged, ...(ov as Partial<typeof merged>) };
             return merged;
         });
@@ -84,7 +84,11 @@ export function useBooks(initialBooks?: BookRow[], initialRatings?: RatingWithDe
             qc.setQueryData<BookWithAuthorsExt[]>(BOOKS_KEY, (old = previous ?? initialBooks ?? []) => {
                 const base = ((old as BookWithAuthorsExt[])?.length ? (old as BookWithAuthorsExt[]) : (initialBooks ?? []).map((b) => ({ ...(b as BookWithAuthorsExt) })));
                 // also track override state locally so UI renders even when derive step prefers initialBooks
-                overridesRef.current.set(book.id as number, { ...(overridesRef.current.get(book.id as number) ?? {}), status: toggledStatus(book.status as ItemStatus), _loading: true, _error: undefined });
+                setOverrides((prev) => {
+                    const n = new Map(prev);
+                    n.set(book.id as number, { ...(n.get(book.id as number) ?? {}), status: toggledStatus(book.status as ItemStatus), _loading: true, _error: undefined });
+                    return n;
+                });
                 return base.map((b) =>
                     b.id === book.id
                         ? ({ ...mergeBook(b, { ...b, status: toggledStatus(b.status as ItemStatus) }), _loading: true } as BookWithAuthorsExt)
@@ -104,7 +108,11 @@ export function useBooks(initialBooks?: BookRow[], initialRatings?: RatingWithDe
                     const base = ((old as BookWithAuthorsExt[])?.length ? (old as BookWithAuthorsExt[]) : (initialBooks ?? []).map((b) => ({ ...(b as BookWithAuthorsExt) })));
                     const next = base.map((b) => (b.id === variables.id ? ({ ...b, _loading: false, _error: 'Failed to update' } as BookWithAuthorsExt) : b));
                     // set local override so UI shows error immediately
-                    overridesRef.current.set(variables.id as number, { ...(overridesRef.current.get(variables.id as number) ?? {}), _loading: false, _error: 'Failed to update' });
+                    setOverrides((prev) => {
+                        const n = new Map(prev);
+                        n.set(variables.id as number, { ...(n.get(variables.id as number) ?? {}), _loading: false, _error: 'Failed to update' });
+                        return n;
+                    });
                     // touch cache to notify
                     qc.setQueryData<BookWithAuthorsExt[]>(BOOKS_KEY, (o = []) => o);
                     return next;
@@ -112,7 +120,7 @@ export function useBooks(initialBooks?: BookRow[], initialRatings?: RatingWithDe
             }
         },
 
-        onSuccess: (data: any) => {
+        onSuccess: (data: Partial<BookWithAuthorsExt> | undefined) => {
             // Merge server response into cache immediately (handles tests that stub the updated book payload)
             if (data?.id) {
                 // update cache and apply local override so derived rows reflect server response immediately
@@ -120,13 +128,18 @@ export function useBooks(initialBooks?: BookRow[], initialRatings?: RatingWithDe
                     const base = ((old as BookWithAuthorsExt[])?.length ? (old as BookWithAuthorsExt[]) : (initialBooks ?? []).map((b) => ({ ...(b as BookWithAuthorsExt) })));
                     const next = base.map((b) => (b.id === data.id ? ({ ...b, ...data, _loading: false, _error: undefined } as BookWithAuthorsExt) : b));
                     // set a local override to ensure that derive step (which may prefer initialBooks) picks up the server avg
-                    overridesRef.current.set(data.id as number, { ...(overridesRef.current.get(data.id as number) ?? {}), ...data, _loading: false, _error: undefined });
+                    setOverrides((prev) => {
+                        const n = new Map(prev);
+                        n.set(data.id as number, { ...(n.get(data.id as number) ?? {}), ...(data as Partial<BookWithAuthorsExt>), _loading: false, _error: undefined });
+                        return n;
+                    });
                     return next;
                 });
                 // touch query to notify subscribers
                 qc.setQueryData<BookWithAuthorsExt[]>(BOOKS_KEY, (old = []) => old);
             }
         },
+
 
         onSettled: () => {
             qc.invalidateQueries({ queryKey: BOOKS_KEY });

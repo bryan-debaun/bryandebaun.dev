@@ -44,7 +44,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                                         aria-label={`Toggle status for ${book.title}`}
                                         title="Toggle status"
                                         disabled={isLoading || !toggleStatus}
-                                        onClick={(e) => { e.stopPropagation(); toggleStatus && toggleStatus(book); }}
+                                        onClick={(e) => { e.stopPropagation(); if (toggleStatus) toggleStatus(book); }}
                                     >
                                         {isLoading ? (
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
