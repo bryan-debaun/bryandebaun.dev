@@ -21,7 +21,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
     const ratingsData = useMemo(() => ratings ?? [], [ratings]);
 
     const derived = useMemo(() => generateBookRows(booksData, ratingsData) ?? [], [booksData, ratingsData]);
-    const [optimistic, setOptimistic] = useState<Map<number, BookRow>>(() => new Map());
+    const [optimistic, setOptimistic] = useState<Map<number, BookRow & { _loading?: boolean; _error?: string }>>(() => new Map());
 
     // Derive displayed rows directly from server-derived data with an optimistic overlay.
     // This avoids imperative setState() calls inside effects while keeping UI responsive.
@@ -33,20 +33,34 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
             .map((cd) => {
                 if (cd.type === "actions") {
                     if (!isAdmin) return null;
-                    return {
-                        id: cd.id ?? "actions",
-                        header: cd.header,
-                        meta: { headerClassName: 'w-24 text-right', cellClassName: 'w-24 text-right' },
-                        cell: (info: CellContext<BookRow, unknown>) => {
-                            const book: BookRow = info.row.original;
-                            return (
-                                <div className="flex justify-end">
+
+                    // Small component to render actions so it subscribes correctly to BooksTable state
+                    function ActionsCell({ book }: { book: BookRow }) {
+                        const id = book.id as number;
+                        // Use a typed local helper for transient optimistic UI fields instead of `any`
+                        const ext = book as BookRow & { _loading?: boolean; _error?: string };
+                        const isLoading = !!ext._loading;
+                        const error = ext._error;
+                        return (
+                            <div className="flex flex-col items-end">
+                                <div>
                                     <button
-                                        className={`inline-flex items-center justify-center rounded-md p-2 text-xs text-[var(--color-white)] bg-gradient-to-b from-[var(--btn-accent-strong)] to-[var(--btn-accent)] hover:from-[var(--btn-accent)] hover:to-[var(--btn-accent-strong)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fjord-600)]`}
+                                        className={`inline-flex items-center justify-center rounded-md p-2 text-xs text-[var(--color-white)] bg-gradient-to-b from-[var(--btn-accent-strong)] to-[var(--btn-accent)] hover:from-[var(--btn-accent)] hover:to-[var(--btn-accent-strong)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fjord-600)] ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                                         aria-label={`Toggle status for ${book.title}`}
                                         title="Toggle status"
+                                        disabled={isLoading}
                                         onClick={async () => {
                                             const newStatus = book.status === "COMPLETED" ? "NOT_STARTED" : "COMPLETED";
+
+                                            // mark loading and clear previous errors by updating optimistic overlay
+                                            setOptimistic((m) => {
+                                                const copy = new Map(m);
+                                                const existing = copy.get(id) ?? (book as BookRow);
+                                                const updatedRow = { ...(existing as BookRow), _loading: true, _error: undefined } as BookRow & { _loading?: boolean; _error?: string };
+                                                copy.set(id, updatedRow);
+                                                return copy;
+                                            });
+
                                             try {
                                                 const res = await fetch(`/api/admin/books/${book.id}`, {
                                                     method: "PATCH",
@@ -55,26 +69,59 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                                                 });
                                                 if (res.ok) {
                                                     const updated = await res.json();
+                                                    // Merge server response into existing displayed row to preserve derived fields like averageRating
                                                     setOptimistic((m) => {
                                                         const copy = new Map(m);
-                                                        copy.set(updated.id, updated as BookRow);
+                                                        const existing = copy.get(id) ?? (book as BookRow);
+                                                        const merged = { ...existing, ...(updated as Partial<BookRow>), _loading: false, _error: undefined } as BookRow & { _loading?: boolean; _error?: string };
+                                                        copy.set(merged.id as number, merged);
                                                         return copy;
                                                     });
                                                 } else {
-                                                    console.error("Failed to update book", await res.text());
+                                                    const txt = await res.text();
+                                                    console.error("Failed to update book", txt);
+                                                    setOptimistic((m) => {
+                                                        const copy = new Map(m);
+                                                        const existing = copy.get(id) ?? (book as BookRow);
+                                                        const updatedRow = { ...(existing as BookRow), _loading: false, _error: 'Failed to update' } as BookRow & { _loading?: boolean; _error?: string };
+                                                        copy.set(id, updatedRow);
+                                                        return copy;
+                                                    });
                                                 }
                                             } catch (e) {
                                                 console.error(e);
+                                                setOptimistic((m) => {
+                                                    const copy = new Map(m);
+                                                    const existing = copy.get(id) ?? (book as BookRow);
+                                                    const updatedRow = { ...(existing as BookRow), _loading: false, _error: 'Failed to update' } as BookRow & { _loading?: boolean; _error?: string };
+                                                    copy.set(id, updatedRow);
+                                                    return copy;
+                                                });
                                             }
                                         }}
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-                                            <path d="M10 5a1 1 0 00-1 1v3H6a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V6a1 1 0 00-1-1z" />
-                                        </svg>
+                                        {isLoading ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                                <circle cx="12" cy="12" r="10" strokeWidth="4" className="opacity-25" />
+                                                <path d="M4 12a8 8 0 018-8" strokeWidth="4" className="opacity-75" />
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path d="M10 5a1 1 0 00-1 1v3H6a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V6a1 1 0 00-1-1z" />
+                                            </svg>
+                                        )}
                                     </button>
                                 </div>
-                            );
-                        },
+                                {error ? <div className="text-xs text-red-600 mt-1">{error}</div> : null}
+                            </div>
+                        );
+                    }
+
+                    return {
+                        id: cd.id ?? "actions",
+                        header: cd.header,
+                        meta: { headerClassName: 'w-24 text-right', cellClassName: 'w-24 text-right' },
+                        cell: (info: CellContext<BookRow, unknown>) => <ActionsCell book={info.row.original as BookRow} />,
                     } as ColumnDef<BookRow, unknown>;
                 }
 

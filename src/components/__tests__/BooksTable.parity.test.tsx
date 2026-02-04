@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { vi } from 'vitest';
 
 // Mock the internal books helpers so tests don't depend on path aliases resolving in the test runner
@@ -14,11 +14,12 @@ vi.mock('@/lib/books', () => ({
 }));
 
 import BooksTable from '../BooksTable';
+import { ItemStatus } from '@bryandebaun/mcp-client';
 
 const sampleBook = (id: number, avg?: number) => ({
     id,
     title: `Book ${id}`,
-    status: 'NOT_STARTED',
+    status: ItemStatus.NOT_STARTED,
     createdAt: '',
     updatedAt: '',
     authors: [],
@@ -59,5 +60,46 @@ describe('BooksTable parity and optimistic overlay', () => {
 
         // optimistic overlay should still show 9.0
         expect(screen.getByText('9.0')).toBeInTheDocument();
+    });
+
+    it('disables toggle while request pending and re-enables after', async () => {
+        let resolveFetch: any;
+        const fetchP = new Promise((res) => { resolveFetch = res; });
+        vi.stubGlobal('fetch', vi.fn().mockImplementation(() => fetchP as any));
+
+        render(<BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} isAdmin={true} />);
+        // Query fresh on each assertion to avoid stale element references
+        expect(screen.getByRole('button', { name: /toggle status for book 1/i })).toBeEnabled();
+
+        await act(async () => {
+            fireEvent.click(screen.getByRole('button', { name: /toggle status for book 1/i }));
+        });
+
+        // wait for loading state to be applied
+        await waitFor(() => expect(screen.getByRole('button', { name: /toggle status for book 1/i })).toBeDisabled());
+
+        // resolve the fetch
+        resolveFetch({ ok: true, json: async () => ({ id: 1, averageRating: 9.0 }) });
+
+        // wait for the update to be applied
+        expect(await screen.findByText('9.0')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /toggle status for book 1/i })).toBeEnabled();
+    });
+
+    it('shows error and does not set optimistic on failure', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, text: async () => 'server error' } as any));
+
+        render(<BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} isAdmin={true} />);
+        const toggle = screen.getByRole('button', { name: /toggle status for book 1/i });
+
+        await act(async () => {
+            fireEvent.click(toggle);
+        });
+
+        // error message should be shown
+        await waitFor(() => expect(screen.getByText(/failed to update/i)).toBeInTheDocument());
+
+        // original value remains
+        expect(screen.getByText('1.0')).toBeInTheDocument();
     });
 });
