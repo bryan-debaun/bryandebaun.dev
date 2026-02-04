@@ -34,12 +34,12 @@ describe('BooksTable parity and optimistic overlay', () => {
 
     it('reflects server updates when no optimistic changes', () => {
         const { rerender } = render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} /></Providers>);
-        // initial rating shows 1.0
-        expect(screen.getByText('1.0')).toBeInTheDocument();
+        // initial rating shows 1
+        expect(screen.getByText('1')).toBeInTheDocument();
 
-        // server updates average to 2.0 -> re-render with new props
+        // server updates average to 2 -> re-render with new props
         rerender(<Providers><BooksTable books={[sampleBook(1, 2.0)]} ratings={[]} /></Providers>);
-        expect(screen.getByText('2.0')).toBeInTheDocument();
+        expect(screen.getByText('2')).toBeInTheDocument();
     });
 
     it('applies optimistic status immediately and merges server response', async () => {
@@ -47,14 +47,14 @@ describe('BooksTable parity and optimistic overlay', () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 1, averageRating: 9.0 }) } as any));
 
         render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} isAdmin={true} /></Providers>);
-        expect(screen.getByText('1.0')).toBeInTheDocument();
+        expect(screen.getByText('1')).toBeInTheDocument();
 
         // click the toggle button to trigger optimistic status change
         const toggle = screen.getByRole('button', { name: /toggle status for book 1/i });
         fireEvent.click(toggle);
 
         // server response should be merged and update avg rating
-        expect(await screen.findByText('9.0')).toBeInTheDocument();
+        expect(await screen.findByText('9')).toBeInTheDocument();
     });
 
     it('disables toggle while request pending and re-enables after', async () => {
@@ -77,7 +77,7 @@ describe('BooksTable parity and optimistic overlay', () => {
         resolveFetch({ ok: true, json: async () => ({ id: 1, averageRating: 9.0 }) });
 
         // wait for the update to be applied
-        expect(await screen.findByText('9.0')).toBeInTheDocument();
+        expect(await screen.findByText('9')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /toggle status for book 1/i })).toBeEnabled();
     });
 
@@ -95,6 +95,6 @@ describe('BooksTable parity and optimistic overlay', () => {
         await waitFor(() => expect(screen.getByText(/failed to update/i)).toBeInTheDocument());
 
         // original value remains
-        expect(screen.getByText('1.0')).toBeInTheDocument();
+        expect(screen.getByText('1')).toBeInTheDocument();
     });
 });

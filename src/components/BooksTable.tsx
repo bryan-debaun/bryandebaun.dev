@@ -82,7 +82,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                             return typeof v === 'number' ? (
                                 <div className="flex items-center justify-end gap-2">
                                     <Stars value={v} />
-                                    <span className="text-xs text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300-dark)]">{v.toFixed(1)}</span>
+                                    <span className="text-xs text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300-dark)]">{Number.isInteger(v) ? String(v) : v.toFixed(1)}</span>
                                 </div>
                             ) : (
                                 '—'

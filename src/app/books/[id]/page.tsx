@@ -28,18 +28,28 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
 
         return (
             <main className="p-6">
-                <div className="mb-4">
-                    <div className="mb-3"><BackButton fallbackHref="/books" /></div>
-                    <h1 className="text-2xl font-semibold mb-2">{book.title}</h1>
-                    <div className="flex items-center gap-3">
-                        <StatusBadge status={book.status} />
-                        {typeof avg === 'number' ? (
-                            <div className="flex items-center gap-2">
-                                <Stars value={avg} />
-                                <span className="text-sm text-[var(--color-norwegian-600)]">{avg.toFixed(1)} / 10</span>
-                            </div>
-                        ) : null}
+                <div className="mb-4 grid grid-cols-1 md:grid-cols-3 items-center gap-4">
+                    <div className="flex items-center">
+                        <BackButton fallbackHref="/books" />
                     </div>
+
+                    <div className="text-center">
+                        <h1 className="text-2xl font-semibold">{book.title}</h1>
+                    </div>
+
+                    <div className="flex justify-end">
+                        {/* reserved for page actions */}
+                    </div>
+                </div>
+
+                <div className="mb-4 flex items-center justify-center gap-3">
+                    <StatusBadge status={book.status} />
+                    {typeof avg === 'number' ? (
+                        <div className="flex items-center gap-2">
+                            <Stars value={avg} />
+                            <span className="text-sm text-[var(--color-norwegian-600)]">{Number.isInteger(avg) ? String(avg) : avg.toFixed(1)} / 10</span>
+                        </div>
+                    ) : null}
                 </div>
 
                 <section className="mb-6">

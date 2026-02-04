@@ -19,7 +19,7 @@ export default function BackButton({ fallbackHref = '/', children = 'Back', clas
         <button
             type="button"
             onClick={handleClick}
-            className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm bg-[var(--color-norwegian-50)] hover:bg-[var(--color-norwegian-100)] dark:bg-[var(--background)] ${className}`}
+            className={`inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm cursor-pointer bg-[var(--color-norwegian-50)] hover:bg-[var(--color-norwegian-100)] dark:bg-[var(--background)] dark:hover:bg-[var(--color-norwegian-100-dark)] dark:hover:text-[var(--color-white)] border border-[var(--color-fjord-600)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fjord-600)] ${className}`}
             aria-label="Go back"
         >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>

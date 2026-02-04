@@ -14,11 +14,15 @@ const sampleBook = (id: number, avg?: number) => ({
     averageRating: avg,
 });
 
+function formatRating(v: number | undefined) {
+    return typeof v === 'number' ? (Number.isInteger(v) ? String(v) : v.toFixed(1)) : '';
+}
+
 function Harness({ books, ratings }: { books: any[]; ratings: any[] }) {
     const { rows, toggleStatus } = useBooks(books, ratings);
     return (
         <div>
-            <div data-testid="rating">{rows[0]?.averageRating?.toFixed(1)}</div>
+            <div data-testid="rating">{formatRating(rows[0]?.averageRating)}</div>
             <button onClick={() => toggleStatus(rows[0])}>toggle</button>
         </div>
     );
@@ -37,11 +41,11 @@ describe('useBooks override/merge behavior', () => {
         );
 
         // initial value
-        expect(screen.getByTestId('rating')).toHaveTextContent('1.0');
+        expect(screen.getByTestId('rating')).toHaveTextContent('1');
 
         // trigger optimistic toggle -> server responds with avg 9.0 -> override should update row even when using initialBooks
         fireEvent.click(screen.getByRole('button', { name: /toggle/i }));
 
-        expect(await screen.findByText('9.0')).toBeInTheDocument();
+        expect(await screen.findByText('9')).toBeInTheDocument();
     });
 });
