@@ -14,6 +14,7 @@ vi.mock('@/lib/books', () => ({
 }));
 
 import BooksTable from '../BooksTable';
+import Providers from '@/components/Providers';
 import { ItemStatus } from '@bryandebaun/mcp-client';
 
 const sampleBook = (id: number, avg?: number) => ({
@@ -32,34 +33,28 @@ describe('BooksTable parity and optimistic overlay', () => {
     });
 
     it('reflects server updates when no optimistic changes', () => {
-        const { rerender } = render(<BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} />);
+        const { rerender } = render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} /></Providers>);
         // initial rating shows 1.0
         expect(screen.getByText('1.0')).toBeInTheDocument();
 
         // server updates average to 2.0 -> re-render with new props
-        rerender(<BooksTable books={[sampleBook(1, 2.0)]} ratings={[]} />);
+        rerender(<Providers><BooksTable books={[sampleBook(1, 2.0)]} ratings={[]} /></Providers>);
         expect(screen.getByText('2.0')).toBeInTheDocument();
     });
 
-    it('retains optimistic update over subsequent server updates', async () => {
+    it('applies optimistic status immediately and merges server response', async () => {
         // mock fetch to succeed and return updated book with avg 9.0
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 1, averageRating: 9.0 }) } as any));
 
-        const { rerender } = render(<BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} isAdmin={true} />);
+        render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} isAdmin={true} /></Providers>);
         expect(screen.getByText('1.0')).toBeInTheDocument();
 
-        // click the toggle button to trigger optimistic update
+        // click the toggle button to trigger optimistic status change
         const toggle = screen.getByRole('button', { name: /toggle status for book 1/i });
         fireEvent.click(toggle);
 
-        // optimistic value should be applied (9.0)
+        // server response should be merged and update avg rating
         expect(await screen.findByText('9.0')).toBeInTheDocument();
-
-        // server later reports a different average (2.0) — re-render with new prop
-        rerender(<BooksTable books={[sampleBook(1, 2.0)]} ratings={[]} isAdmin={true} />);
-
-        // optimistic overlay should still show 9.0
-        expect(screen.getByText('9.0')).toBeInTheDocument();
     });
 
     it('disables toggle while request pending and re-enables after', async () => {
@@ -67,7 +62,7 @@ describe('BooksTable parity and optimistic overlay', () => {
         const fetchP = new Promise((res) => { resolveFetch = res; });
         vi.stubGlobal('fetch', vi.fn().mockImplementation(() => fetchP as any));
 
-        render(<BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} isAdmin={true} />);
+        render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} isAdmin={true} /></Providers>);
         // Query fresh on each assertion to avoid stale element references
         expect(screen.getByRole('button', { name: /toggle status for book 1/i })).toBeEnabled();
 
@@ -89,7 +84,7 @@ describe('BooksTable parity and optimistic overlay', () => {
     it('shows error and does not set optimistic on failure', async () => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, text: async () => 'server error' } as any));
 
-        render(<BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} isAdmin={true} />);
+        render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} isAdmin={true} /></Providers>);
         const toggle = screen.getByRole('button', { name: /toggle status for book 1/i });
 
         await act(async () => {

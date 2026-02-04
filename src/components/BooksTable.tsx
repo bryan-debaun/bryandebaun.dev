@@ -1,43 +1,36 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useMemo } from 'react';
 import Link from 'next/link';
-import type { ColumnDef, CellContext } from "@tanstack/react-table";
-import Table from "./Table";
-import Stars from "./Stars";
-import StatusBadge from "./StatusBadge";
-import { bookColumnDescriptors, generateBookRows, type BookRow } from '../lib/books';
-import { BookWithAuthors, RatingWithDetails } from "@bryandebaun/mcp-client";
+import type { ColumnDef, CellContext } from '@tanstack/react-table';
+import Table from './Table';
+import Stars from './Stars';
+import StatusBadge from './StatusBadge';
+import { bookColumnDescriptors, type BookRow } from '@/lib/books';
+import { useBooks } from '@/lib/hooks/useBooks';
+import type { BookWithAuthors, RatingWithDetails } from '@bryandebaun/mcp-client';
 
 type Props = {
-    books: BookWithAuthors[];
-    ratings: RatingWithDetails[];
+    books?: BookWithAuthors[];
+    ratings?: RatingWithDetails[];
     // When true, show admin-only actions (toggle status). Default false.
     isAdmin?: boolean;
 };
 
 export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
-    const booksData = useMemo(() => books ?? [], [books]);
-    const ratingsData = useMemo(() => ratings ?? [], [ratings]);
+    // Use the hook and seed with server-provided data when available
+    const { rows: hookRows, toggleStatus } = useBooks(books, ratings);
 
-    const derived = useMemo(() => generateBookRows(booksData, ratingsData) ?? [], [booksData, ratingsData]);
-    const [optimistic, setOptimistic] = useState<Map<number, BookRow & { _loading?: boolean; _error?: string }>>(() => new Map());
+    const rows: BookRow[] = hookRows ?? [];
 
-    // Derive displayed rows directly from server-derived data with an optimistic overlay.
-    // This avoids imperative setState() calls inside effects while keeping UI responsive.
-    const displayed = useMemo(() => derived.map(d => optimistic.get(d.id as number) ?? d), [derived, optimistic]);
-
+    // Build columns (same structure previously in BooksTableView)
     const columns = useMemo<ColumnDef<BookRow, unknown>[]>(() => {
-        // Build columns but filter out admin-only columns when not isAdmin
         const cols = bookColumnDescriptors
             .map((cd) => {
-                if (cd.type === "actions") {
+                if (cd.type === 'actions') {
                     if (!isAdmin) return null;
 
-                    // Small component to render actions so it subscribes correctly to BooksTable state
                     function ActionsCell({ book }: { book: BookRow }) {
-                        const id = book.id as number;
-                        // Use a typed local helper for transient optimistic UI fields instead of `any`
                         const ext = book as BookRow & { _loading?: boolean; _error?: string };
                         const isLoading = !!ext._loading;
                         const error = ext._error;
@@ -48,57 +41,8 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                                         className={`inline-flex items-center justify-center rounded-md p-2 text-xs text-[var(--color-white)] bg-gradient-to-b from-[var(--btn-accent-strong)] to-[var(--btn-accent)] hover:from-[var(--btn-accent)] hover:to-[var(--btn-accent-strong)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fjord-600)] ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                                         aria-label={`Toggle status for ${book.title}`}
                                         title="Toggle status"
-                                        disabled={isLoading}
-                                        onClick={async () => {
-                                            const newStatus = book.status === "COMPLETED" ? "NOT_STARTED" : "COMPLETED";
-
-                                            // mark loading and clear previous errors by updating optimistic overlay
-                                            setOptimistic((m) => {
-                                                const copy = new Map(m);
-                                                const existing = copy.get(id) ?? (book as BookRow);
-                                                const updatedRow = { ...(existing as BookRow), _loading: true, _error: undefined } as BookRow & { _loading?: boolean; _error?: string };
-                                                copy.set(id, updatedRow);
-                                                return copy;
-                                            });
-
-                                            try {
-                                                const res = await fetch(`/api/admin/books/${book.id}`, {
-                                                    method: "PATCH",
-                                                    headers: { "content-type": "application/json" },
-                                                    body: JSON.stringify({ status: newStatus }),
-                                                });
-                                                if (res.ok) {
-                                                    const updated = await res.json();
-                                                    // Merge server response into existing displayed row to preserve derived fields like averageRating
-                                                    setOptimistic((m) => {
-                                                        const copy = new Map(m);
-                                                        const existing = copy.get(id) ?? (book as BookRow);
-                                                        const merged = { ...existing, ...(updated as Partial<BookRow>), _loading: false, _error: undefined } as BookRow & { _loading?: boolean; _error?: string };
-                                                        copy.set(merged.id as number, merged);
-                                                        return copy;
-                                                    });
-                                                } else {
-                                                    const txt = await res.text();
-                                                    console.error("Failed to update book", txt);
-                                                    setOptimistic((m) => {
-                                                        const copy = new Map(m);
-                                                        const existing = copy.get(id) ?? (book as BookRow);
-                                                        const updatedRow = { ...(existing as BookRow), _loading: false, _error: 'Failed to update' } as BookRow & { _loading?: boolean; _error?: string };
-                                                        copy.set(id, updatedRow);
-                                                        return copy;
-                                                    });
-                                                }
-                                            } catch (e) {
-                                                console.error(e);
-                                                setOptimistic((m) => {
-                                                    const copy = new Map(m);
-                                                    const existing = copy.get(id) ?? (book as BookRow);
-                                                    const updatedRow = { ...(existing as BookRow), _loading: false, _error: 'Failed to update' } as BookRow & { _loading?: boolean; _error?: string };
-                                                    copy.set(id, updatedRow);
-                                                    return copy;
-                                                });
-                                            }
-                                        }}
+                                        disabled={isLoading || !toggleStatus}
+                                        onClick={() => toggleStatus && toggleStatus(book)}
                                     >
                                         {isLoading ? (
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
@@ -118,32 +62,34 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                     }
 
                     return {
-                        id: cd.id ?? "actions",
+                        id: cd.id ?? 'actions',
                         header: cd.header,
                         meta: { headerClassName: 'w-24 text-right', cellClassName: 'w-24 text-right' },
                         cell: (info: CellContext<BookRow, unknown>) => <ActionsCell book={info.row.original as BookRow} />,
                     } as ColumnDef<BookRow, unknown>;
                 }
 
-                if (cd.type === "rating") {
+                if (cd.type === 'rating') {
                     return {
-                        id: cd.id ?? "rating",
+                        id: cd.id ?? 'rating',
                         header: cd.header,
                         meta: { headerClassName: 'w-28 text-right', cellClassName: 'w-28 text-right' },
                         cell: (info: CellContext<BookRow, unknown>) => {
                             const book: BookRow = info.row.original;
                             const v = book.averageRating as number | undefined;
-                            return typeof v === "number" ? (
+                            return typeof v === 'number' ? (
                                 <div className="flex items-center justify-end gap-2">
                                     <Stars value={v} />
                                     <span className="text-xs text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300-dark)]">{v.toFixed(1)}</span>
                                 </div>
-                            ) : "—";
+                            ) : (
+                                '—'
+                            );
                         },
                     } as ColumnDef<BookRow, unknown>;
                 }
 
-                if (cd.accessor === "title") {
+                if (cd.accessor === 'title') {
                     return {
                         id: cd.accessor ? String(cd.accessor) : cd.id,
                         accessorKey: cd.accessor as string,
@@ -162,14 +108,14 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                     } as ColumnDef<BookRow, unknown>;
                 }
 
-                if (cd.id === "authors") {
+                if (cd.id === 'authors') {
                     return {
-                        id: "authors",
+                        id: 'authors',
                         header: cd.header,
                         meta: { headerClassName: 'w-1/3', cellClassName: 'truncate max-w-[20rem] text-center' },
                         cell: (info: CellContext<BookRow, unknown>) => {
                             const row = info.row.original as BookRow;
-                            if (!row.authors) return "Unknown";
+                            if (!row.authors) return 'Unknown';
                             type AuthorLink = { author?: { id?: number; name?: string }; id?: number; name?: string };
                             const parts = (row.authors as AuthorLink[])
                                 .map((a, idx) => {
@@ -186,7 +132,6 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                                         <span key={key}>{name}</span>
                                     );
                                 });
-                            // join with commas
                             const interleaved: React.ReactNode[] = [];
                             parts.forEach((p, i) => {
                                 if (i > 0) interleaved.push(<span key={`sep-${i}`}>, </span>);
@@ -197,7 +142,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                     } as ColumnDef<BookRow, unknown>;
                 }
 
-                if (cd.accessor === "status") {
+                if (cd.accessor === 'status') {
                     return {
                         id: cd.accessor ? String(cd.accessor) : cd.id,
                         accessorKey: cd.accessor as string,
@@ -209,7 +154,6 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                     } as ColumnDef<BookRow, unknown>;
                 }
 
-                // default text accessor (must provide accessorKey)
                 return {
                     id: cd.accessor ? String(cd.accessor) : cd.id,
                     accessorKey: cd.accessor as string,
@@ -217,12 +161,17 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                     cell: (info: CellContext<BookRow, unknown>) => info.getValue() as string,
                 } as ColumnDef<BookRow, unknown>;
             })
-            // filter out any nulls and ensure every column has an id (required when header is a node)
             .filter(Boolean)
             .map((c, i) => ({ ...(c as ColumnDef<BookRow, unknown>), id: (c as ColumnDef<BookRow, unknown>).id ?? String(i) })) as ColumnDef<BookRow, unknown>[];
         return cols;
-    }, [isAdmin]);
+    }, [isAdmin, toggleStatus]);
 
-
-    return <Table data={displayed} columns={columns} className="overflow-x-auto rounded-lg border border-[var(--tw-prose-td-borders)] dark:border-[var(--tw-prose-invert-td-borders)] bg-[var(--background)] shadow-sm ring-1 ring-[var(--tw-prose-td-borders)]" caption="Books list" />;
+    return (
+        <Table
+            data={rows}
+            columns={columns}
+            className="overflow-x-auto rounded-lg border border-[var(--tw-prose-td-borders)] dark:border-[var(--tw-prose-invert-td-borders)] bg-[var(--background)] shadow-sm ring-1 ring-[var(--tw-prose-td-borders)]"
+            caption="Books list"
+        />
+    );
 }

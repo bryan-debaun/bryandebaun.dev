@@ -13,6 +13,7 @@ vi.mock('@/lib/books', () => ({
 }));
 
 import BooksTable from '../BooksTable';
+import Providers from '@/components/Providers';
 
 const sampleBook: any = {
     id: 1,
@@ -25,14 +26,14 @@ const sampleBook: any = {
 };
 
 test('renders title linking to book detail', () => {
-    render(<BooksTable books={[sampleBook]} ratings={[]} />);
+    render(<Providers><BooksTable books={[sampleBook]} ratings={[]} /></Providers>);
     const link = screen.getByRole('link', { name: /test book/i });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/books/1');
 });
 
 test('renders author linking to author detail', () => {
-    render(<BooksTable books={[sampleBook]} ratings={[]} />);
+    render(<Providers><BooksTable books={[sampleBook]} ratings={[]} /></Providers>);
     const authorLink = screen.getByRole('link', { name: /alice author/i });
     expect(authorLink).toBeInTheDocument();
     expect(authorLink).toHaveAttribute('href', '/authors/2');
