@@ -15,7 +15,7 @@ export async function GET(request: Request, context: { params: { isbn: string } 
         const data = await fetchByIsbn(normalized);
         if (!data) return NextResponse.json({ message: `No data found on OpenLibrary for ISBN ${normalized}` }, { status: 404 });
         return NextResponse.json({ normalizedIsbn: normalized, ...data });
-    } catch (e) {
+    } catch {
         return NextResponse.json({ message: 'Failed to fetch metadata' }, { status: 502 });
     }
 }

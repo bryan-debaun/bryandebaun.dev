@@ -14,7 +14,7 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
         // Use the local proxy rather than calling the external MCP directly. This centralizes
         // base URL configuration and makes behavior more predictable in dev/test.
         // Use the server-safe fetch helper which retries with an absolute origin when needed.
-        const [{ getBookById }, { listRatings }] = await Promise.all([
+        const [, { listRatings }] = await Promise.all([
             import('@/lib/services/books'),
             import('@/lib/services/ratings'),
         ]);
@@ -31,13 +31,14 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
         const ratings = await listRatings({ bookId: id });
 
         // Try server-side enrichment via OpenLibrary so we can show suggestions immediately
-        let initialMetadata = null;
+        let initialMetadata: import('@/lib/services/openLibrary').OpenLibraryMetadata | null = null;
         try {
             const { fetchByIsbn } = await import('@/lib/services/openLibrary');
             initialMetadata = await fetchByIsbn(book.isbn);
-        } catch (e) {
+        } catch {
             // ignore enrichment failures — we still render the page
         }
+
 
         return (
             <main className="p-6">
@@ -82,11 +83,9 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
                                     <dt className="text-xs text-gray-500">Author</dt>
                                     <dd className="mt-1">
                                         {book.authors && book.authors.length ? (
-                                            book.authors.map((a: any, i: number) => {
-                                                type AuthorRef = { author?: { id?: number; name?: string }; id?: number; name?: string };
-                                                const ref = a as AuthorRef;
-                                                const authorId = ref?.author?.id ?? ref?.id;
-                                                const name = ref?.author?.name ?? ref?.name ?? 'Unknown';
+                                            book.authors.map((a: { author?: { id?: number; name?: string }; id?: number; name?: string }, i: number) => {
+                                                const authorId = a?.author?.id ?? a?.id;
+                                                const name = a?.author?.name ?? a?.name ?? 'Unknown';
                                                 return (
                                                     <span key={`${authorId ?? name}-${i}`}>
                                                         {authorId ? (
@@ -145,7 +144,7 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
             <main className="p-6">
                 <h2 className="text-lg font-semibold">Book not found</h2>
                 <p className="mt-2 text-sm text-red-600">{msg}</p>
-                <p className="mt-2">Go back to the <a href="/books" className="text-[var(--color-norwegian-600)] hover:underline">books list</a>.</p>
+                <p className="mt-2">Go back to the <Link href="/books" className="text-[var(--color-norwegian-600)] hover:underline">books list</Link>.</p>
             </main>
         );
     }

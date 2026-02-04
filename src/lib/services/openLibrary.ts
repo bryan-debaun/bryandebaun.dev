@@ -21,6 +21,23 @@ async function fetchJson(url: string) {
     return res.json();
 }
 
+type EditionDoc = {
+    authors?: Array<{ key?: string }>;
+    title?: string;
+    subtitle?: string;
+    publish_date?: string;
+    number_of_pages?: number;
+    publishers?: string[];
+    description?: string | { value?: string };
+    works?: Array<{ key?: string }>;
+};
+
+type WorkDoc = {
+    authors?: Array<{ author?: { key?: string } }>;
+};
+
+type AuthorDoc = { name?: string };
+
 export async function fetchByIsbn(isbnRaw?: string | null): Promise<OpenLibraryMetadata | null> {
     const isbn = normalizeIsbn(isbnRaw);
     if (!isbn) return null;
@@ -32,24 +49,20 @@ export async function fetchByIsbn(isbnRaw?: string | null): Promise<OpenLibraryM
     try {
         // OpenLibrary book endpoint: https://openlibrary.org/isbn/{ISBN}.json
         const url = `https://openlibrary.org/isbn/${isbn}.json`;
-        const book = await fetchJson(url);
+        const book = (await fetchJson(url)) as EditionDoc;
 
-        // Authors are referenced by keys, fetch names in parallel when present.
-        // Some ISBN editions don't include an "authors" array; in those cases we
-        // can fall back to the work record which usually lists author references.
+        // Authors are referenced by keys, fetch names in parallel
         const authors: string[] = [];
-
-        // Primary: edition-level authors
         if (Array.isArray(book.authors) && book.authors.length) {
             await Promise.all(
-                book.authors.map(async (a: any) => {
+                book.authors.map(async (a) => {
                     try {
                         const authorKey = a.key; // e.g., "/authors/OL12345A"
                         if (authorKey) {
-                            const ad = await fetchJson(`https://openlibrary.org${authorKey}.json`);
+                            const ad = (await fetchJson(`https://openlibrary.org${authorKey}.json`)) as AuthorDoc;
                             if (ad && ad.name) authors.push(String(ad.name));
                         }
-                    } catch (e) {
+                    } catch {
                         // ignore individual author failures
                     }
                 })
@@ -62,24 +75,24 @@ export async function fetchByIsbn(isbnRaw?: string | null): Promise<OpenLibraryM
                 // Use the first work entry — usually sufficient for author lookups
                 const workKey = book.works[0]?.key;
                 if (workKey) {
-                    const work = await fetchJson(`https://openlibrary.org${workKey}.json`);
+                    const work = (await fetchJson(`https://openlibrary.org${workKey}.json`)) as WorkDoc;
                     if (work && Array.isArray(work.authors)) {
                         await Promise.all(
-                            work.authors.map(async (wa: any) => {
+                            work.authors.map(async (wa) => {
                                 try {
-                                    const aKey = wa?.author?.key ?? wa?.key;
+                                    const aKey = wa?.author?.key;
                                     if (aKey) {
-                                        const ad = await fetchJson(`https://openlibrary.org${aKey}.json`);
+                                        const ad = (await fetchJson(`https://openlibrary.org${aKey}.json`)) as AuthorDoc;
                                         if (ad && ad.name) authors.push(String(ad.name));
                                     }
-                                } catch (e) {
+                                } catch {
                                     // ignore per-author failures
                                 }
                             })
                         );
                     }
                 }
-            } catch (e) {
+            } catch {
                 // ignore work-level failures
             }
         }
@@ -103,7 +116,7 @@ export async function fetchByIsbn(isbnRaw?: string | null): Promise<OpenLibraryM
 
         cache.set(isbn, { ts: now, data });
         return data;
-    } catch (e) {
+    } catch {
         // mark negative cache to avoid repeated failures
         cache.set(isbn, { ts: now, data: null });
         return null;

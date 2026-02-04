@@ -66,8 +66,8 @@ export default async function PhilosophyPage({ params }: { params?: { slug: stri
     }
 
     return (
-        <article className="prose prose-norwegian dark:prose-invert max-w-none site-bleed">
-            <h1 className="text-center">{post.title}</h1>
+        <article className="prose prose-norwegian dark:prose-invert max-w-none">
+            <h1 className="text-center scroll-mt-[var(--header-height)]">{post.title}</h1>
             <div>
                 {rendered ?? <div>Unable to render content.</div>}
             </div>

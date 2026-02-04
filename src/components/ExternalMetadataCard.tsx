@@ -1,13 +1,17 @@
 'use client';
 import React from 'react';
-
 import Link from 'next/link';
+import Image from 'next/image';
 
-export default function ExternalMetadataCard({ bookId, metadata, serverAuthors }: { bookId: number; metadata: any; serverAuthors?: any[] }) {
+import type { OpenLibraryMetadata } from '@/lib/services/openLibrary';
+
+type ServerAuthorRef = { author?: { id?: number; name?: string } };
+
+export default function ExternalMetadataCard({ bookId, metadata, serverAuthors }: { bookId: number; metadata: OpenLibraryMetadata; serverAuthors?: ServerAuthorRef[] }) {
     // Try to find a server-side author that matches any of the metadata author names.
     let matchedAuthor: { id?: number; name?: string } | null = null;
     if (serverAuthors && metadata?.authors?.length) {
-        const server = serverAuthors as any[];
+        const server = serverAuthors as ServerAuthorRef[];
 
         const normalizeName = (s: string) =>
             String(s)
@@ -19,22 +23,22 @@ export default function ExternalMetadataCard({ bookId, metadata, serverAuthors }
         for (const name of metadata.authors) {
             const norm = normalizeName(String(name));
             const found = server.find((s) => {
-                const sname = (s?.author?.name ?? s?.name ?? '') as string;
+                const sname = (s?.author?.name ?? '') as string;
                 return sname && normalizeName(sname) === norm;
             });
             if (found) {
-                const sname = found?.author?.name ?? found?.name;
-                matchedAuthor = { id: found?.author?.id ?? found?.id, name: sname };
+                const sname = found?.author?.name;
+                matchedAuthor = { id: found?.author?.id, name: sname };
                 break;
             }
         }
     }
 
     return (
-        <div className="mt-4 p-4 rounded bg-transparent dark:bg-transparent">
+        <div className="mt-4 p-4 rounded bg-transparent dark:bg-transparent" data-book-id={bookId}>
             <div className="flex gap-4">
                 {metadata.coverUrl ? (
-                    <img src={metadata.coverUrl} alt={`${metadata.title ?? 'Cover'} cover`} className="w-32 h-auto object-cover rounded" />
+                    <Image src={metadata.coverUrl} alt={`${metadata.title ?? 'Cover'} cover`} width={128} height={192} className="w-32 h-auto object-cover rounded" />
                 ) : (
                     <div className="w-32 h-40 bg-gray-100 rounded" />
                 )}
