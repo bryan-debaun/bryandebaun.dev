@@ -4,6 +4,18 @@ import React from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table";
 
+type ColumnMeta = {
+    headerClassName?: string;
+    cellClassName?: string;
+};
+
+function headerClassNameFrom(columnDef: unknown) {
+    return (columnDef as { meta?: ColumnMeta })?.meta?.headerClassName ?? '';
+}
+function cellClassNameFrom(columnDef: unknown) {
+    return (columnDef as { meta?: ColumnMeta })?.meta?.cellClassName ?? '';
+}
+
 export type TableProps<T> = {
     data: T[];
     columns: ColumnDef<T, unknown>[];
@@ -31,7 +43,7 @@ export default function Table<T>({ data, columns, className, caption }: TablePro
                             {hg.headers.map((h) => (
                                 <th
                                     key={h.id}
-                                    className={`${'px-4 py-3 text-center text-xs font-medium text-white dark:text-[var(--color-norwegian-100)]'} ${(h.column.columnDef as any).meta?.headerClassName ?? ''}`}
+                                    className={`${'px-4 py-3 text-center text-xs font-medium text-white dark:text-[var(--color-norwegian-100)]'} ${headerClassNameFrom(h.column.columnDef) ?? ''}`}
                                 >
                                     {flexRender(h.column.columnDef.header, h.getContext())}
                                 </th>
@@ -43,7 +55,7 @@ export default function Table<T>({ data, columns, className, caption }: TablePro
                     {table.getRowModel().rows.map((row) => (
                         <tr key={row.id} className="bg-[var(--color-norwegian-50)] dark:bg-[var(--background)] hover:bg-[var(--color-norwegian-100)] dark:hover:bg-[var(--color-norwegian-700)]">
                             {row.getVisibleCells().map((cell) => (
-                                <td key={cell.id} className={`${'px-4 py-4 whitespace-nowrap text-sm text-[var(--foreground)]'} ${(cell.column.columnDef as any).meta?.cellClassName ?? ''}`}>
+                                <td key={cell.id} className={`${'px-4 py-4 whitespace-nowrap text-sm text-[var(--foreground)]'} ${cellClassNameFrom(cell.column.columnDef) ?? ''}`}>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </td>
                             ))}

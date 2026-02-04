@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { Api, UpdateBookRequest } from '@bryandebaun/mcp-client';
+import { UpdateBookRequest } from '@bryandebaun/mcp-client';
 function unwrapApiResponse<T>(res: unknown): T {
     if (typeof res === 'object' && res !== null && 'data' in res) {
         return (res as { data: T }).data;
@@ -7,9 +7,9 @@ function unwrapApiResponse<T>(res: unknown): T {
     return res as T;
 }
 
+import { createApi as _createApi } from '@/lib/mcp';
 export function createApi() {
-    const baseURL = process.env.MCP_BASE_URL || 'https://bad-mcp.onrender.com';
-    return new Api({ baseURL });
+    return _createApi();
 }
 
 // NOTE: This route is intentionally minimal for the prototype. Add auth/role checks here.

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { Api, ListAuthorsResponse } from '@bryandebaun/mcp-client';
-import { unwrapApiResponse } from '../../../../lib/api-response';
+import { ListAuthorsResponse } from '@bryandebaun/mcp-client';
+import { proxyCall } from '@/lib/mcp-proxy';
 
+import { createApi as _createApi } from '@/lib/mcp';
 export function createApi() {
-    const baseURL = process.env.MCP_BASE_URL || 'https://bad-mcp.onrender.com';
-    return new Api({ baseURL });
+    return _createApi();
 }
 
 export async function GET() {
@@ -13,10 +13,8 @@ export async function GET() {
     const api = mod.createApi();
 
     try {
-        const res = await api.api.listAuthors();
-        // The generated client returns an AxiosResponse — normalize to the expected payload shape
-        const payload = unwrapApiResponse<ListAuthorsResponse>(res);
-        return NextResponse.json(payload);
+        const result = await proxyCall<ListAuthorsResponse>((a) => a.api.listAuthors(), api);
+        return NextResponse.json(result.body, { status: result.status });
     } catch (e) {
         console.error('MCP: failed to fetch authors', e);
         return NextResponse.json({ error: 'Failed to fetch authors' }, { status: 502 });

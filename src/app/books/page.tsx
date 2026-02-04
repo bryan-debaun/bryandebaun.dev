@@ -1,19 +1,13 @@
-import type { BookWithAuthors } from '@bryandebaun/mcp-client';
-import { fetchWithFallback } from '@/lib/server-fetch';
-import type { RatingWithDetails } from '@bryandebaun/mcp-client';
 import BooksTable from '@/components/BooksTable';
 
 
 export default async function Page() {
-    // Server-side fetch to our API routes
-    const booksRes = await fetchWithFallback('/api/mcp/books');
+    // Server-side fetch to our API routes via services
+    const [books, ratings] = await Promise.all([
+        import('@/lib/services/books').then(m => m.listBooks()),
+        import('@/lib/services/ratings').then(m => m.listRatings()),
+    ]);
 
-    // Fetch centralized ratings once and compute averages per book
-    const ratingsRes = await fetchWithFallback('/api/mcp/ratings');
-
-    const [booksData, ratingsData] = await Promise.all([booksRes.json(), ratingsRes.json()]);
-    const books: BookWithAuthors[] = booksData?.books ?? [];
-    const ratings: RatingWithDetails[] = ratingsData?.ratings ?? [];
 
     return (
         <main className="p-6">

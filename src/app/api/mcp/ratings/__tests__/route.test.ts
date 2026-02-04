@@ -9,10 +9,21 @@ describe('GET /api/mcp/ratings', () => {
 
         const spy = vi.spyOn(route as { createApi: () => Api<unknown> }, 'createApi').mockImplementation(() => fakeApi);
 
-        const res = (await route.GET()) as Response;
+        const res = (await route.GET(new Request('http://localhost/api/mcp/ratings'))) as Response;
         const json = await res.json();
         expect(json.total).toBe(1);
         expect(json.ratings[0].rating).toBe(5);
+
+        spy.mockRestore();
+    });
+
+    it('forwards the bookId query param to the generated client', async () => {
+        const listRatings = vi.fn().mockResolvedValue({ data: { ratings: [], total: 0 } });
+        const fakeApi = { api: { listRatings } } as any;
+        const spy = vi.spyOn(route as { createApi: () => Api<unknown> }, 'createApi').mockImplementation(() => fakeApi);
+
+        await route.GET(new Request('http://localhost/api/mcp/ratings?bookId=2'));
+        expect(listRatings).toHaveBeenCalledWith({ bookId: 2 });
 
         spy.mockRestore();
     });

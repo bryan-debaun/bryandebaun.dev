@@ -1,4 +1,5 @@
 import type { BookWithAuthors, RatingWithDetails } from '@bryandebaun/mcp-client';
+import { averageByKey } from './aggregates';
 
 export type BookRow = BookWithAuthors & { averageRating?: number };
 type ColumnDescriptor = {
@@ -17,24 +18,14 @@ export const bookColumnDescriptors: ColumnDescriptor[] = [
 ];
 
 export function generateBookRows(books: BookWithAuthors[], ratings: RatingWithDetails[]): BookRow[] {
-    // Compute accurate averages using grouping (coerce ids to strings for map keys).
-    const sums = new Map<string, { sum: number; count: number }>();
-    for (const r of ratings) {
-        const id = String(r.bookId);
-        const s = sums.get(id) ?? { sum: 0, count: 0 };
-        s.sum += r.rating;
-        s.count += 1;
-        sums.set(id, s);
-    }
-
-    const avg = new Map<string, number>();
-    for (const [k, v] of sums.entries()) {
-        avg.set(k, v.sum / v.count);
-    }
+    // Compute accurate averages using the shared helper which applies rounding to 0.1 precision.
+    const avgByKey = averageByKey(ratings, (r) => r.bookId, (r) => r.rating);
+    // averageByKey returns Map<number, number>
 
     return books.map((b) => {
         const br = b as BookWithAuthors & Partial<{ averageRating?: number }>;
-        const a = typeof br.averageRating === 'number' && !Number.isNaN(br.averageRating) ? br.averageRating : avg.get(String(b.id));
+        const fromRatings = avgByKey.get(b.id as number);
+        const a = typeof br.averageRating === 'number' && !Number.isNaN(br.averageRating) ? br.averageRating : fromRatings;
         return { ...b, averageRating: a };
     });
 }
