@@ -40,9 +40,9 @@ export async function fetchWithFallback(path: string, init?: RequestInit, timeou
         // When `DEBUG_FETCH=1` is set in env, include an escaped message to assist diagnosis
         // in preview environments (do not expose detailed errors by default in production).
         const debug = process.env.DEBUG_FETCH === '1' || process.env.NODE_ENV !== 'production' && process.env.DEBUG_FETCH !== '0';
-        const body: any = { error: 'Failed to fetch' };
+        const body: { error: string; debug?: string } = { error: 'Failed to fetch' };
         if (debug) {
-            body.debug = String(err);
+            (body as { error: string; debug?: string }).debug = String(err);
         }
 
         return new Response(JSON.stringify(body), {
