@@ -18,13 +18,22 @@ export async function fetchWithFallback(path: string, init?: RequestInit, timeou
         if (typeof err === 'object' && err !== null) {
             const message = (err as { message?: unknown }).message;
             if (typeof message === 'string' && message.includes('Failed to parse URL')) {
-                const origin = process.env.NEXT_PUBLIC_SITE_URL || `http://localhost:${process.env.PORT || 3000}`;
+                // Prefer a configured public URL (NEXT_PUBLIC_SITE_URL). If running on Vercel,
+                // the VERCEL_URL env var contains the deployment hostname (preview domains).
+                const origin = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3000}`);
+                let retryErr: unknown;
                 try {
                     return await makeRequest(`${origin}${path}`, init);
                 } catch (err2) {
                     // Include diagnostic logging for the retry failure so preview builds can show details
+                    retryErr = err2;
                     console.error('fetchWithFallback retry failed', { path, origin, err: err2 });
                     // fall through to return a safe fallback response below
+                }
+
+                // Attach retry error info so debug output can include both the original and retry error
+                if (retryErr) {
+                    try { (err as any).retryError = retryErr; } catch { /* ignore */ }
                 }
             }
         }
@@ -42,7 +51,9 @@ export async function fetchWithFallback(path: string, init?: RequestInit, timeou
         const debug = process.env.DEBUG_FETCH === '1' || process.env.NODE_ENV !== 'production' && process.env.DEBUG_FETCH !== '0';
         const body: { error: string; debug?: string } = { error: 'Failed to fetch' };
         if (debug) {
-            (body as { error: string; debug?: string }).debug = String(err);
+            const original = String(err);
+            const retryInfo = (err as any)?.retryError ? String((err as any).retryError) : undefined;
+            body.debug = retryInfo ? `${original}; retry: ${retryInfo}` : original;
         }
 
         return new Response(JSON.stringify(body), {
