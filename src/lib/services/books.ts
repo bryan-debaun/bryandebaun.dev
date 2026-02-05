@@ -1,4 +1,5 @@
-import type { BookWithAuthors } from '@bryandebaun/mcp-client';
+import type { BookWithAuthors, ListBooksResponse } from '@bryandebaun/mcp-client';
+import type { AxiosResponse } from 'axios';
 import { fetchWithFallback } from '@/lib/server-fetch';
 import { createApi } from '@/lib/mcp';
 
@@ -9,8 +10,10 @@ export async function listBooks(): Promise<BookWithAuthors[]> {
         try {
             const api = createApi();
             const res = await api.api.listBooks();
-            const payload = (res as any).data ?? res;
-            return payload?.books ?? [];
+            if (res && typeof res === 'object' && 'data' in res) {
+                return (res as AxiosResponse<ListBooksResponse>).data?.books ?? [];
+            }
+            return (res as ListBooksResponse).books ?? []; 
         } catch (e) {
             console.error('listBooks direct MCP call failed', e);
             return [];
@@ -28,8 +31,10 @@ export async function getBookById(id: number): Promise<BookWithAuthors | null> {
         try {
             const api = createApi();
             const res = await api.api.getBook(id);
-            const payload = (res as any).data ?? res;
-            return payload ?? null;
+            if (res && typeof res === 'object' && 'data' in res) {
+                return (res as AxiosResponse<BookWithAuthors>).data ?? null;
+            }
+            return (res as BookWithAuthors) ?? null;
         } catch (e) {
             console.error('getBookById direct MCP call failed', e);
             return null;

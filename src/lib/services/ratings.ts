@@ -1,4 +1,5 @@
-import type { RatingWithDetails } from '@bryandebaun/mcp-client';
+import type { RatingWithDetails, ListRatingsResponse } from '@bryandebaun/mcp-client';
+import type { AxiosResponse } from 'axios';
 import { fetchWithFallback } from '@/lib/server-fetch';
 import { createApi } from '@/lib/mcp';
 
@@ -8,8 +9,10 @@ export async function listRatings(query?: { bookId?: number }): Promise<RatingWi
         try {
             const api = createApi();
             const res = await api.api.listRatings(query ? { bookId: query.bookId } : undefined);
-            const payload = (res as any).data ?? res;
-            return payload?.ratings ?? [];
+            if (res && typeof res === 'object' && 'data' in res) {
+                return (res as AxiosResponse<ListRatingsResponse>).data?.ratings ?? [];
+            }
+            return (res as ListRatingsResponse).ratings ?? [];
         } catch (e) {
             console.error('listRatings direct MCP call failed', e);
             return [];
