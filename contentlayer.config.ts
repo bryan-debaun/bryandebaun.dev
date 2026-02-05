@@ -1,4 +1,4 @@
-import { defineDocumentType, makeSource } from 'contentlayer2/source-files'
+import { defineDocumentType, makeSource } from 'contentlayer2/source-files';
 
 export const Post = defineDocumentType(() => ({
     name: 'Post',
@@ -20,7 +20,7 @@ export const Post = defineDocumentType(() => ({
             resolve: (doc) => doc._raw.flattenedPath,
         },
     },
-}))
+}));
 
 export const Philosophy = defineDocumentType(() => ({
     name: 'Philosophy',
@@ -41,10 +41,10 @@ export const Philosophy = defineDocumentType(() => ({
             resolve: (doc) => doc._raw.flattenedPath,
         },
     },
-}))
+}));
 
 export default makeSource({
     contentDirPath: 'src/content',
     documentTypes: [Post, Philosophy],
     disableImportAliasWarning: true,
-})
+});

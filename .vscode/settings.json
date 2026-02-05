@@ -4,5 +4,6 @@
     },
     "emmet.includeLanguages": {
         "mdx": "html"
-    }
+    },
+    "typescript.tsdk": "node_modules\\typescript\\lib"
 }

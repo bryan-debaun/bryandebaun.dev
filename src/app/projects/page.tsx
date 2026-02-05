@@ -1,5 +1,5 @@
-import type { Repo } from "../../lib/github"
-import { getShowcaseRepos } from "../../lib/github"
+import type { Repo } from "../../lib/github";
+import { getShowcaseRepos } from "../../lib/github";
 
 const curatedFallback: Repo[] = [
     {
@@ -29,18 +29,18 @@ const curatedFallback: Repo[] = [
         fork: false,
         topics: [],
     },
-]
+];
 
 export default async function Projects() {
-    let repos = curatedFallback
+    let repos = curatedFallback;
     try {
-        const fetched = await getShowcaseRepos('bryan-debaun', { revalidateSeconds: 86400 })
+        const fetched = await getShowcaseRepos('bryan-debaun', { revalidateSeconds: 86400 });
         if (fetched && fetched.length > 0) {
-            repos = fetched
+            repos = fetched;
         }
     } catch (err) {
         // Swallow errors and keep the curated fallback
-        console.warn('Failed to fetch GitHub repos for Projects page:', err)
+        console.warn('Failed to fetch GitHub repos for Projects page:', err);
     }
 
     // Format repo names with brand-safe corrections
@@ -83,5 +83,5 @@ export default async function Projects() {
                 ))}
             </div>
         </div>
-    )
+    );
 }

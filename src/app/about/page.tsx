@@ -1,10 +1,10 @@
-import NowReading from '@/components/NowReading'
-import PhilosophyList from '@/components/PhilosophyList'
-import WorkPassions from '@/components/WorkPassions'
+import NowReading from '@/components/NowReading';
+import PhilosophyList from '@/components/PhilosophyList';
+import WorkPassions from '@/components/WorkPassions';
 
 export default function About() {
     return (
-        <div className="prose prose-norwegian dark:prose-invert">
+        <div className="prose prose-norwegian dark:prose-invert max-w-none">
             <h2>About</h2>
             <p>
                 I&apos;m Bryan DeBaun — a Senior Software Engineer who focuses on web
@@ -24,6 +24,12 @@ export default function About() {
             <NowReading />
 
             <PhilosophyList />
+
+            <h3>Media</h3>
+            <p>
+                I keep a small, curated list of books, movies, games, and creators I enjoy.
+                You can view them on the <a href="/media" className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]">Media</a> page.
+            </p>
         </div>
     );
 }

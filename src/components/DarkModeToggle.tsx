@@ -5,15 +5,15 @@ import { useEffect, useState } from "react";
 export default function DarkModeToggle() {
     // Defer real theme detection to the client to avoid SSR/client hydration mismatch.
     // `isDark === null` indicates we haven't mounted yet.
-    const [isDark, setIsDark] = useState<boolean | null>(null)
+    const [isDark, setIsDark] = useState<boolean | null>(null);
 
     function applyTheme(isDarkVal: boolean) {
         if (isDarkVal) {
-            document.documentElement.classList.add("dark")
-            document.documentElement.classList.remove("light")
+            document.documentElement.classList.add("dark");
+            document.documentElement.classList.remove("light");
         } else {
-            document.documentElement.classList.add("light")
-            document.documentElement.classList.remove("dark")
+            document.documentElement.classList.add("light");
+            document.documentElement.classList.remove("dark");
         }
         // Broadcast theme change so other mounted toggle instances stay in sync
         try {
@@ -27,50 +27,50 @@ export default function DarkModeToggle() {
     // Initialize on mount only (client-side) to avoid differing server/client markup
     useEffect(() => {
         try {
-            const stored = typeof window !== 'undefined' && window.localStorage ? window.localStorage.getItem("theme") : null
-            const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+            const stored = typeof window !== 'undefined' && window.localStorage ? window.localStorage.getItem("theme") : null;
+            const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
 
             // Determine the authoritative initial theme in this order:
             // 1. localStorage (explicit user choice)
             // 2. document class if already set by another instance
             // 3. prefers-color-scheme media query
-            let initial: boolean
-            if (stored === 'dark') initial = true
-            else if (stored === 'light') initial = false
-            else if (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')) initial = true
-            else if (typeof document !== 'undefined' && document.documentElement.classList.contains('light')) initial = false
-            else initial = !!prefersDark
+            let initial: boolean;
+            if (stored === 'dark') initial = true;
+            else if (stored === 'light') initial = false;
+            else if (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')) initial = true;
+            else if (typeof document !== 'undefined' && document.documentElement.classList.contains('light')) initial = false;
+            else initial = !!prefersDark;
 
             // Apply and set state together to avoid races between instances
             requestAnimationFrame(() => {
-                setIsDark(initial)
-                applyTheme(initial)
-            })
+                setIsDark(initial);
+                applyTheme(initial);
+            });
 
             // Keep multiple mounted instances in sync via a custom event
             function onThemeChange(e: Event) {
-                const detail = (e as CustomEvent)?.detail
+                const detail = (e as CustomEvent)?.detail;
                 if (detail && typeof detail.isDark === 'boolean') {
-                    requestAnimationFrame(() => setIsDark(detail.isDark))
+                    requestAnimationFrame(() => setIsDark(detail.isDark));
                 }
             }
-            window.addEventListener('themechange', onThemeChange as EventListener)
-            return () => window.removeEventListener('themechange', onThemeChange as EventListener)
+            window.addEventListener('themechange', onThemeChange as EventListener);
+            return () => window.removeEventListener('themechange', onThemeChange as EventListener);
         } catch {
-            requestAnimationFrame(() => setIsDark(false))
+            requestAnimationFrame(() => setIsDark(false));
         }
-    }, [])
+    }, []);
 
     function toggleTheme() {
         setIsDark((prev) => {
-            const current = prev ?? false
-            const next = !current
+            const current = prev ?? false;
+            const next = !current;
             try {
-                if (typeof window !== 'undefined' && window.localStorage) window.localStorage.setItem("theme", next ? "dark" : "light")
-                applyTheme(next)
+                if (typeof window !== 'undefined' && window.localStorage) window.localStorage.setItem("theme", next ? "dark" : "light");
+                applyTheme(next);
             } catch { }
-            return next
-        })
+            return next;
+        });
     }
 
     return (
@@ -78,8 +78,8 @@ export default function DarkModeToggle() {
             onClick={toggleTheme}
             onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    toggleTheme()
+                    e.preventDefault();
+                    toggleTheme();
                 }
             }}
             role="switch"

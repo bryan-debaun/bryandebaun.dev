@@ -28,36 +28,54 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Install Inter system font for deterministic rendering (prefer @fontsource)
+      - name: Install Inter system font for deterministic rendering (download+install+verify)
         run: |
           set -e
           echo "Installing Inter fonts to /usr/share/fonts/truetype/inter"
           sudo mkdir -p /usr/share/fonts/truetype/inter
 
-          # Prefer deterministic install from node_modules (installed by npm ci) when available
-          if [ -d "node_modules/@fontsource/inter/files" ]; then
-            echo "Found @fontsource/inter in node_modules — copying any TTF/WOFF/WOFF2 files"
-            shopt -s nullglob
-            files=(node_modules/@fontsource/inter/files/*.{ttf,woff,woff2})
-            if [ "${#files[@]}" -gt 0 ]; then
-              sudo cp -f "${files[@]}" /usr/share/fonts/truetype/inter/ || true
-            else
-              echo "No TTF/WOFF/WOFF2 files found in @fontsource; attempting archive download fallback"
-              curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/download/v3.19/Inter-3.19.zip" || curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/latest/download/Inter.zip" || true
-              if [ -f /tmp/inter.zip ]; then
-                unzip -o /tmp/inter.zip -d /tmp/inter || true
-                # Copy any TTF files found
-                sudo find /tmp/inter -type f -name "*.ttf" -exec cp -f {} /usr/share/fonts/truetype/inter/ \; || true
-              fi
-            fi
-          else
-            echo "@fontsource/inter not present in node_modules; attempting archive download fallback"
-            curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/download/v3.19/Inter-3.19.zip" || curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/latest/download/Inter.zip" || true
+          # Ensure unzip is available for extracting zips
+          if command -v apt-get >/dev/null 2>&1; then
+            sudo apt-get update -y || true
+            sudo apt-get install -y unzip || true
+          fi
+
+          # Helper to attempt direct download of Inter zip and extract TTFs
+          fetch_inter_zip() {
+            echo "Attempting to download Inter zip to /tmp/inter.zip"
+            curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/download/v3.19/Inter-3.19.zip" || curl -L -o /tmp/inter.zip "https://github.com/rsms/inter/releases/latest/download/Inter.zip" || return 1
             if [ -f /tmp/inter.zip ]; then
-              unzip -o /tmp/inter.zip -d /tmp/inter || true
+              echo "Downloaded Inter zip; extracting TTF files"
+              mkdir -p /tmp/inter
+              unzip -o /tmp/inter.zip -d /tmp/inter || return 1
               # Copy any TTF files found
               sudo find /tmp/inter -type f -name "*.ttf" -exec cp -f {} /usr/share/fonts/truetype/inter/ \; || true
+              return 0
             fi
+            return 1
+          }
+
+          # Preferred: install Inter from system packages (if available)
+          if command -v apt-get >/dev/null 2>&1; then
+            echo "Attempting apt-get install fonts-inter (if available)"
+            sudo apt-get install -y fonts-inter || true
+          fi
+
+          # Try copying from @fontsource if present
+          if [ -d "node_modules/@fontsource/inter" ]; then
+            echo "Found @fontsource/inter in node_modules — copying files"
+            sudo mkdir -p /usr/share/fonts/truetype/inter
+            shopt -s nullglob || true
+            files=(node_modules/@fontsource/inter/files/*.{ttf,woff,woff2} node_modules/@fontsource/inter/index.css)
+            if [ "${#files[@]}" -gt 0 ]; then
+              sudo cp -f ${files[@]} /usr/share/fonts/truetype/inter/ || true
+            fi
+          fi
+
+          # If Inter not present yet, attempt direct download
+          if ! fc-list | grep -i inter >/dev/null 2>&1; then
+            echo "Inter not present after package or @fontsource attempt; trying direct download"
+            fetch_inter_zip || echo "Direct download failed or produced no TTFs"
           fi
 
           # Refresh font cache and provide diagnostics
@@ -67,8 +85,11 @@ jobs:
             echo "Inter font not found in system fonts. Listing potential sources for debugging:";
             ls -la node_modules/@fontsource/inter || true;
             ls -la /usr/share/fonts/truetype/inter || true;
+            echo "Printing first 200 lines of /var/log/syslog for diagnostic context (if available):";
+            sudo tail -n 200 /var/log/syslog || true;
             exit 1
           )
+          echo "Inter installation successful"
 
       - name: Build
         run: npm run build

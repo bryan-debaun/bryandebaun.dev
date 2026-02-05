@@ -6,5 +6,5 @@ export default function WorkPassions() {
             <h3>Work & Passions</h3>
             <p>Selected work, passions, and advocacy are surfaced in the sections below.</p>
         </section>
-    )
+    );
 }
