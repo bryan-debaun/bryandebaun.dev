@@ -20,12 +20,6 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-export var ItemStatus;
-(function (ItemStatus) {
-    ItemStatus["NOT_STARTED"] = "NOT_STARTED";
-    ItemStatus["IN_PROGRESS"] = "IN_PROGRESS";
-    ItemStatus["COMPLETED"] = "COMPLETED";
-})(ItemStatus || (ItemStatus = {}));
 import axios from "axios";
 export var ContentType;
 (function (ContentType) {
@@ -140,30 +134,6 @@ export class Api extends HttpClient {
              * @secure
              */
             deleteRating: (id, params = {}) => this.request(Object.assign({ path: `/api/ratings/${id}`, method: "DELETE", secure: true, format: "json" }, params)),
-            /**
-             * @description Send a magic link email (returns 202 accepted)
-             *
-             * @tags Auth
-             * @name Send
-             * @request POST:/api/auth/magic-link
-             */
-            send: (data, params = {}) => this.request(Object.assign({ path: `/api/auth/magic-link`, method: "POST", body: data, type: ContentType.Json, format: "json" }, params)),
-            /**
-             * @description Verify a magic link token (GET redirect style)
-             *
-             * @tags Auth
-             * @name VerifyGet
-             * @request GET:/api/auth/magic-link/verify
-             */
-            verifyGet: (query, params = {}) => this.request(Object.assign({ path: `/api/auth/magic-link/verify`, method: "GET", query: query }, params)),
-            /**
-             * @description Verify a magic link token (POST JSON style)
-             *
-             * @tags Auth
-             * @name VerifyPost
-             * @request POST:/api/auth/magic-link/verify
-             */
-            verifyPost: (data, params = {}) => this.request(Object.assign({ path: `/api/auth/magic-link/verify`, method: "POST", body: data, type: ContentType.Json, format: "json" }, params)),
             /**
              * @description List books with optional filtering
              *
