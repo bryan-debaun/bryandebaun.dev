@@ -63,7 +63,14 @@ export async function proxyCall<T = unknown>(
 
         // Use a shared helper to detect HTML-like payloads (Cloudflare challenge pages, etc.)
         if (await looksLikeHtmlPayload(payload)) {
-            console.error('MCP Proxy error: upstream returned HTML (possible Cloudflare challenge)');
+            // Log a small sample of the upstream payload to aid diagnosis (do not log full HTML)
+            try {
+                const sample = String((payload as unknown) ?? '').slice(0, 512).replace(/\s+/g, ' ');
+                console.error('MCP Proxy error: upstream returned HTML (possible Cloudflare challenge)', { sample });
+            } catch {
+                console.error('MCP Proxy error: upstream returned HTML (possible Cloudflare challenge)');
+            }
+
             return { status: 502, body: { error: 'Failed to fetch from MCP' } };
         }
 

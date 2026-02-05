@@ -13,8 +13,21 @@ export function createApi() {
 
     // If an MCP API key is present in env, send it as an Authorization bearer token
     // in server-to-server requests so the MCP server can validate the caller.
-    if (process.env.MCP_API_KEY) {
+    const hasAuth = Boolean(process.env.MCP_API_KEY);
+    if (hasAuth) {
         headers['Authorization'] = `Bearer ${process.env.MCP_API_KEY}`;
+    }
+
+    // DEV / DEBUG: log resolved baseURL and whether we will send Authorization header.
+    // Controlled by DEBUG_MCP=1 to avoid leaking info in production.
+    try {
+        const debug = process.env.DEBUG_MCP === '1' || (process.env.NODE_ENV !== 'production' && process.env.DEBUG_MCP !== '0');
+        if (debug) {
+            // Do NOT log the API key itself — only indicate presence of auth and the base URL.
+            console.info('createApi', { baseURL, hasAuth });
+        }
+    } catch {
+        // ignore logging errors
     }
 
     return new Api({ baseURL, headers });
