@@ -18,6 +18,31 @@ export async function fetchWithFallback(path: string, init?: RequestInit, timeou
         if (typeof err === 'object' && err !== null) {
             const message = (err as { message?: unknown }).message;
             if (typeof message === 'string' && message.includes('Failed to parse URL')) {
+                // Special-case: if the failed path is our MCP proxy route, retry directly
+                // against the configured MCP_BASE_URL instead of the preview origin. This
+                // avoids calling the protected preview domain (which may require SSO).
+                if (typeof path === 'string' && path.startsWith('/api/mcp/')) {
+                    const mcpBase = (process.env.MCP_BASE_URL || '').replace(/\/+$/u, '');
+                    if (mcpBase) {
+                        const upstreamPath = path.replace(/^\/api\/mcp/, '/api');
+                        const url = `${mcpBase}${upstreamPath}`;
+                        const upstreamInit = { ...init } as RequestInit;
+                        // If an MCP API key is available in env, include it for server-to-server calls
+                        const mcpKey = process.env.MCP_API_KEY;
+                        if (mcpKey) {
+                            upstreamInit.headers = { ...(upstreamInit.headers as Record<string, unknown>), Authorization: `Bearer ${mcpKey}` };
+                        }
+
+                        try {
+                            console.info('fetchWithFallback: retrying directly to MCP upstream', { url, hasAuth: Boolean(mcpKey) });
+                            return await makeRequest(url, upstreamInit);
+                        } catch (err2) {
+                            console.error('fetchWithFallback upstream retry failed', { path, url, err: err2 });
+                            try { (err as Record<string, unknown>).retryError = err2; } catch { /* ignore */ }
+                        }
+                    }
+                }
+
                 // Prefer a configured public URL (NEXT_PUBLIC_SITE_URL). If running on Vercel,
                 // the VERCEL_URL env var contains the deployment hostname (preview domains).
                 const origin = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${process.env.PORT || 3000}`);
@@ -33,7 +58,7 @@ export async function fetchWithFallback(path: string, init?: RequestInit, timeou
 
                 // Attach retry error info so debug output can include both the original and retry error
                 if (retryErr) {
-                    try { (err as any).retryError = retryErr; } catch { /* ignore */ }
+                    try { (err as Record<string, unknown>).retryError = retryErr; } catch { /* ignore */ }
                 }
             }
         }
@@ -52,7 +77,8 @@ export async function fetchWithFallback(path: string, init?: RequestInit, timeou
         const body: { error: string; debug?: string } = { error: 'Failed to fetch' };
         if (debug) {
             const original = String(err);
-            const retryInfo = (err as any)?.retryError ? String((err as any).retryError) : undefined;
+            const errRec = err as Record<string, unknown>;
+            const retryInfo = errRec.retryError ? String(errRec.retryError) : undefined;
             body.debug = retryInfo ? `${original}; retry: ${retryInfo}` : original;
         }
 

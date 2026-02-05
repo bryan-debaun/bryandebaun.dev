@@ -25,6 +25,20 @@ describe('fetchWithFallback', () => {
         expect(secondCall).toBe('https://bryandebaun-dev.vercel.app/api/test');
     });
 
+    it('retries directly to MCP upstream when path is /api/mcp/* and MCP_BASE_URL is configured', async () => {
+        process.env.MCP_BASE_URL = 'https://bad-mcp.onrender.com';
+        process.env.MCP_API_KEY = 'fake-key';
+
+        global.fetch = vi.fn()
+            .mockImplementationOnce(() => Promise.reject(new Error('Failed to parse URL')))
+            .mockImplementationOnce((url, init) => Promise.resolve(new Response(JSON.stringify({ upstream: String(url), auth: (init as any)?.headers?.Authorization ?? null }), { status: 200 })));
+
+        const res = await fetchWithFallback('/api/mcp/books/1', undefined, 1000);
+        const json = await res.json();
+        expect(json.upstream).toBe('https://bad-mcp.onrender.com/api/books/1');
+        expect(json.auth).toBe('Bearer fake-key');
+    });
+
     it('returns the response when fetch succeeds', async () => {
         const body = { ok: true };
         global.fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' } }));

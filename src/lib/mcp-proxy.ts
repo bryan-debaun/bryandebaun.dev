@@ -63,16 +63,22 @@ export async function proxyCall<T = unknown>(
     let callInfo: { method?: string; args?: unknown[] } | undefined;
 
     // If debug is enabled, wrap the `api.api` object so we can record method invocations and args.
+    type ApiLike = {
+        api?: Record<string, (...args: unknown[]) => unknown>;
+        instance?: { defaults?: { headers?: Record<string, unknown>; baseURL?: string } };
+    };
+    const apiAny = api as ApiLike;
+
     const apiToCall = debug
         ? ({
               ...api,
-              api: new Proxy((api as any).api as object, {
+              api: new Proxy((apiAny.api ?? {}) as object, {
                   get(target, prop) {
-                      const orig = (target as any)[prop as string];
+                      const orig = (target as Record<string, unknown>)[String(prop)];
                       if (typeof orig === 'function') {
                           return (...args: unknown[]) => {
                               callInfo = { method: String(prop), args };
-                              return orig.apply(target, args);
+                              return (orig as (...args: unknown[]) => unknown).apply(target, args);
                           };
                       }
                       return orig;
@@ -84,9 +90,10 @@ export async function proxyCall<T = unknown>(
     try {
         if (debug && callInfo === undefined) {
             // Pre-notify that we're about to call the client (method will be recorded by the proxy wrapper)
-            const hasAuthHeader = Boolean((api as any).instance?.defaults?.headers?.Authorization || (api as any).instance?.defaults?.headers?.authorization);
-            const debugHeader = (api as any).instance?.defaults?.headers?.['X-Debug-MCP'];
-            console.info('MCP Proxy debug: prepared to call generated client', { baseURL: (api as any).instance?.defaults?.baseURL, hasAuth: hasAuthHeader, debugHeader });
+            const defaults = apiAny.instance?.defaults;
+            const hasAuthHeader = Boolean(defaults?.headers?.Authorization || defaults?.headers?.authorization);
+            const debugHeader = defaults?.headers?.['X-Debug-MCP'];
+            console.info('MCP Proxy debug: prepared to call generated client', { baseURL: defaults?.baseURL, hasAuth: hasAuthHeader, debugHeader });
         }
 
         const res = await fn(apiToCall);
@@ -139,7 +146,7 @@ export async function proxyCall<T = unknown>(
 
             const resolvedStatus = status ?? 502;
             return { status: resolvedStatus, body: { error: 'Failed to fetch from MCP' } };
-        } catch (logErr) {
+        } catch {
             // If our diagnostic logging fails for any reason, fall back to a minimal log and 502
             console.error('MCP Proxy error', e);
             return { status: 502, body: { error: 'Failed to fetch from MCP' } };
