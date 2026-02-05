@@ -21,15 +21,31 @@ export async function fetchWithFallback(path: string, init?: RequestInit, timeou
                 const origin = process.env.NEXT_PUBLIC_SITE_URL || `http://localhost:${process.env.PORT || 3000}`;
                 try {
                     return await makeRequest(`${origin}${path}`, init);
-                } catch {
+                } catch (err2) {
+                    // Include diagnostic logging for the retry failure so preview builds can show details
+                    console.error('fetchWithFallback retry failed', { path, origin, err: err2 });
                     // fall through to return a safe fallback response below
                 }
             }
         }
 
-        // On timeout or other network-related failures, return an empty JSON response
-        // with a 504 status so builds and SSR can proceed gracefully.
-        return new Response(JSON.stringify({}), {
+        // Log the original error so we can diagnose preview failures (will appear in server logs)
+        try {
+            console.error('fetchWithFallback error', { path, err });
+        } catch {
+            // ignore logging failures
+        }
+
+        // On timeout or other network-related failures, return a JSON response with 504 status.
+        // When `DEBUG_FETCH=1` is set in env, include an escaped message to assist diagnosis
+        // in preview environments (do not expose detailed errors by default in production).
+        const debug = process.env.DEBUG_FETCH === '1' || process.env.NODE_ENV !== 'production' && process.env.DEBUG_FETCH !== '0';
+        const body: any = { error: 'Failed to fetch' };
+        if (debug) {
+            body.debug = String(err);
+        }
+
+        return new Response(JSON.stringify(body), {
             status: 504,
             headers: { 'content-type': 'application/json' },
         });

@@ -51,7 +51,9 @@ describe('fetchWithFallback', () => {
         await vi.advanceTimersByTimeAsync(20);
         const res = await p;
         expect(res.status).toBe(504);
-        expect(await res.json()).toEqual({});
+        const body = await res.json();
+        // Production behavior returns an empty fallback; in dev/debug we include an error key.
+        expect(body).toHaveProperty('error', 'Failed to fetch');
 
         vi.useRealTimers();
     });
