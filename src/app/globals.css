@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+@import "@fontsource/inter/variable.css";
+/* ensure Inter is bundled for deterministic rendering */
 
 /* Allow toggling dark mode via the `.dark` class on the <html> element */
 @custom-variant dark (&:where(.dark, .dark *));
