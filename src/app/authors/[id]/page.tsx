@@ -46,6 +46,13 @@ export default async function AuthorPage({ params }: { params: { id: string } | 
         );
     } catch (e: unknown) {
         console.error('Failed to fetch author', e);
-        return <main className="p-6">Author not found</main>;
+        const msg = e instanceof Error ? e.message : String(e);
+        return (
+            <main className="p-6">
+                <h2 className="text-lg font-semibold">Author not found</h2>
+                <p className="mt-2 text-sm text-red-600">{msg}</p>
+                <p className="mt-2">Go back to the <Link href="/authors" className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]">authors list</Link>.</p>
+            </main>
+        );
     }
 }
