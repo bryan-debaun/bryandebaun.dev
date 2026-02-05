@@ -11,10 +11,10 @@ export function createApi() {
         'User-Agent': process.env.MCP_USER_AGENT || 'bryandebaun.dev'
     };
 
-    // If an MCP API key is present in env, send it as a server-only header to identify
-    // requests originating from this site. The MCP server should validate this header.
+    // If an MCP API key is present in env, send it as an Authorization bearer token
+    // in server-to-server requests so the MCP server can validate the caller.
     if (process.env.MCP_API_KEY) {
-        headers['x-mcp-api-key'] = process.env.MCP_API_KEY;
+        headers['Authorization'] = `Bearer ${process.env.MCP_API_KEY}`;
     }
 
     return new Api({ baseURL, headers });

@@ -15,15 +15,17 @@ export async function looksLikeHtmlPayload(payload: unknown): Promise<boolean> {
         }
 
         if (typeof payload === 'object' && payload !== null) {
-            const maybeData = (payload as any).data;
+            const maybeData = (payload as { data?: unknown }).data;
             if (typeof maybeData === 'string') {
                 const trimmed = maybeData.trim().toLowerCase();
                 if (trimmed.startsWith('<!doctype') || trimmed.startsWith('<html')) return true;
             }
 
-            if (typeof (payload as any).text === 'function') {
+            const textFn = (payload as { text?: unknown }).text;
+            if (typeof textFn === 'function') {
                 try {
-                    const txt = await (payload as any).text();
+                    // `textFn` may be synchronous or return a Promise (Response-like). Await its result.
+                    const txt = await (textFn as () => Promise<unknown>)();
                     if (typeof txt === 'string') {
                         const trimmed = txt.trim().toLowerCase();
                         return trimmed.startsWith('<!doctype') || trimmed.startsWith('<html');

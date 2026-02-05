@@ -1,5 +1,4 @@
 import type { RatingWithDetails, ListRatingsResponse } from '@bryandebaun/mcp-client';
-import type { AxiosResponse } from 'axios';
 import { fetchWithFallback } from '@/lib/server-fetch';
 import { createApi } from '@/lib/mcp';
 import { unwrapApiResponse } from '@/lib/api-response';
