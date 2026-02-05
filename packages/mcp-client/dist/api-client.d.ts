@@ -1,8 +1,3 @@
-export declare enum ItemStatus {
-    NOT_STARTED = "NOT_STARTED",
-    IN_PROGRESS = "IN_PROGRESS",
-    COMPLETED = "COMPLETED"
-}
 /** Rating with book and user details */
 export interface RatingWithDetails {
     /** @format double */
@@ -55,9 +50,6 @@ export interface CreateRatingRequest {
     rating: number;
     review?: string;
 }
-export interface SendMagicLinkRequest {
-    email: string;
-}
 /** Book with author information */
 export interface BookWithAuthors {
     /** @format double */
@@ -66,7 +58,6 @@ export interface BookWithAuthors {
     description?: string;
     isbn?: string;
     publishedAt?: string;
-    status: ItemStatus;
     createdAt: string;
     updatedAt: string;
     authors?: {
@@ -89,14 +80,12 @@ export interface Book {
     description?: string;
     isbn?: string;
     publishedAt?: string;
-    status: ItemStatus;
     createdAt: string;
     updatedAt: string;
 }
 /** Create book request */
 export interface CreateBookRequest {
     title: string;
-    status?: ItemStatus;
     description?: string;
     isbn?: string;
     publishedAt?: string;
@@ -105,7 +94,6 @@ export interface CreateBookRequest {
 /** Update book request */
 export interface UpdateBookRequest {
     title?: string;
-    status?: ItemStatus;
     description?: string;
     isbn?: string;
     publishedAt?: string;
@@ -263,38 +251,6 @@ export declare class Api<SecurityDataType extends unknown> extends HttpClient<Se
             success: boolean;
         }, any, {}>>;
         /**
-         * @description Send a magic link email (returns 202 accepted)
-         *
-         * @tags Auth
-         * @name Send
-         * @request POST:/api/auth/magic-link
-         */
-        send: (data: SendMagicLinkRequest, params?: RequestParams) => Promise<AxiosResponse<{
-            status: "accepted";
-        }, any, {}>>;
-        /**
-         * @description Verify a magic link token (GET redirect style)
-         *
-         * @tags Auth
-         * @name VerifyGet
-         * @request GET:/api/auth/magic-link/verify
-         */
-        verifyGet: (query: {
-            token: string;
-        }, params?: RequestParams) => Promise<AxiosResponse<void, any, {}>>;
-        /**
-         * @description Verify a magic link token (POST JSON style)
-         *
-         * @tags Auth
-         * @name VerifyPost
-         * @request POST:/api/auth/magic-link/verify
-         */
-        verifyPost: (data: {
-            token?: string;
-        }, params?: RequestParams) => Promise<AxiosResponse<{
-            status: "ok";
-        }, any, {}>>;
-        /**
          * @description List books with optional filtering
          *
          * @tags Books
@@ -315,7 +271,6 @@ export declare class Api<SecurityDataType extends unknown> extends HttpClient<Se
             minRating?: number;
             /** Search in title and description */
             search?: string;
-            status?: ItemStatus;
             /**
              * Maximum number of results (default 50)
              * @format double

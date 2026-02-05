@@ -9,6 +9,34 @@ describe('fetchWithFallback', () => {
     afterEach(() => {
         global.fetch = realFetch;
         delete process.env.NEXT_PUBLIC_SITE_URL;
+        delete process.env.VERCEL_URL;
+    });
+
+    it('retries using VERCEL_URL when NEXT_PUBLIC_SITE_URL is not set', async () => {
+        process.env.VERCEL_URL = 'bryandebaun-dev.vercel.app';
+        global.fetch = vi.fn()
+            .mockImplementationOnce(() => Promise.reject(new Error('Failed to parse URL')))
+            .mockImplementationOnce(() => Promise.resolve(new Response(JSON.stringify({ origin: 'vercel' }), { status: 200 })));
+
+        const res = await fetchWithFallback('/api/test', undefined, 1000);
+        expect(await res.json()).toEqual({ origin: 'vercel' });
+        expect((global.fetch as any).mock.calls.length).toBeGreaterThanOrEqual(2);
+        const secondCall = (global.fetch as any).mock.calls[1][0];
+        expect(secondCall).toBe('https://bryandebaun-dev.vercel.app/api/test');
+    });
+
+    it('retries directly to MCP upstream when path is /api/mcp/* and MCP_BASE_URL is configured', async () => {
+        process.env.MCP_BASE_URL = 'https://bad-mcp.onrender.com';
+        process.env.MCP_API_KEY = 'fake-key';
+
+        global.fetch = vi.fn()
+            .mockImplementationOnce(() => Promise.reject(new Error('Failed to parse URL')))
+            .mockImplementationOnce((url, init) => Promise.resolve(new Response(JSON.stringify({ upstream: String(url), auth: (init as any)?.headers?.Authorization ?? null }), { status: 200 })));
+
+        const res = await fetchWithFallback('/api/mcp/books/1', undefined, 1000);
+        const json = await res.json();
+        expect(json.upstream).toBe('https://bad-mcp.onrender.com/api/books/1');
+        expect(json.auth).toBe('Bearer fake-key');
     });
 
     it('returns the response when fetch succeeds', async () => {
@@ -51,7 +79,9 @@ describe('fetchWithFallback', () => {
         await vi.advanceTimersByTimeAsync(20);
         const res = await p;
         expect(res.status).toBe(504);
-        expect(await res.json()).toEqual({});
+        const body = await res.json();
+        // Production behavior returns an empty fallback; in dev/debug we include an error key.
+        expect(body).toHaveProperty('error', 'Failed to fetch');
 
         vi.useRealTimers();
     });

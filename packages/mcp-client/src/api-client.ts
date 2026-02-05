@@ -10,12 +10,6 @@
  * ---------------------------------------------------------------
  */
 
-export enum ItemStatus {
-  NOT_STARTED = "NOT_STARTED",
-  IN_PROGRESS = "IN_PROGRESS",
-  COMPLETED = "COMPLETED",
-}
-
 /** Rating with book and user details */
 export interface RatingWithDetails {
   /** @format double */
@@ -72,10 +66,6 @@ export interface CreateRatingRequest {
   review?: string;
 }
 
-export interface SendMagicLinkRequest {
-  email: string;
-}
-
 /** Book with author information */
 export interface BookWithAuthors {
   /** @format double */
@@ -84,7 +74,6 @@ export interface BookWithAuthors {
   description?: string;
   isbn?: string;
   publishedAt?: string;
-  status: ItemStatus;
   createdAt: string;
   updatedAt: string;
   authors?: {
@@ -109,7 +98,6 @@ export interface Book {
   description?: string;
   isbn?: string;
   publishedAt?: string;
-  status: ItemStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -117,7 +105,6 @@ export interface Book {
 /** Create book request */
 export interface CreateBookRequest {
   title: string;
-  status?: ItemStatus;
   description?: string;
   isbn?: string;
   publishedAt?: string;
@@ -127,7 +114,6 @@ export interface CreateBookRequest {
 /** Update book request */
 export interface UpdateBookRequest {
   title?: string;
-  status?: ItemStatus;
   description?: string;
   isbn?: string;
   publishedAt?: string;
@@ -458,75 +444,6 @@ export class Api<
       }),
 
     /**
-     * @description Send a magic link email (returns 202 accepted)
-     *
-     * @tags Auth
-     * @name Send
-     * @request POST:/api/auth/magic-link
-     */
-    send: (data: SendMagicLinkRequest, params: RequestParams = {}) =>
-      this.request<
-        {
-          status: "accepted";
-        },
-        void
-      >({
-        path: `/api/auth/magic-link`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Verify a magic link token (GET redirect style)
-     *
-     * @tags Auth
-     * @name VerifyGet
-     * @request GET:/api/auth/magic-link/verify
-     */
-    verifyGet: (
-      query: {
-        token: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, void>({
-        path: `/api/auth/magic-link/verify`,
-        method: "GET",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * @description Verify a magic link token (POST JSON style)
-     *
-     * @tags Auth
-     * @name VerifyPost
-     * @request POST:/api/auth/magic-link/verify
-     */
-    verifyPost: (
-      data: {
-        token?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<
-        {
-          status: "ok";
-        },
-        void
-      >({
-        path: `/api/auth/magic-link/verify`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
      * @description List books with optional filtering
      *
      * @tags Books
@@ -548,7 +465,6 @@ export class Api<
         minRating?: number;
         /** Search in title and description */
         search?: string;
-        status?: ItemStatus;
         /**
          * Maximum number of results (default 50)
          * @format double

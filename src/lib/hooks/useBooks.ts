@@ -6,7 +6,7 @@ import * as repo from '@/lib/repositories/booksRepository';
 import { generateBookRows, type BookRow } from '@/lib/books';
 import { mergeBook, toggledStatus } from '@/lib/managers/booksManager';
 
-type BookWithAuthorsExt = BookWithAuthors & { averageRating?: number; _loading?: boolean; _error?: string };
+type BookWithAuthorsExt = BookWithAuthors & { averageRating?: number; _loading?: boolean; _error?: string; status?: import('@bryandebaun/mcp-client').ItemStatus | string };
 
 const BOOKS_KEY = ['books'];
 

@@ -1,9 +1,9 @@
 import type { BookWithAuthors, RatingWithDetails } from '@bryandebaun/mcp-client';
 import { averageByKey } from './aggregates';
 
-export type BookRow = BookWithAuthors & { averageRating?: number };
+export type BookRow = BookWithAuthors & { averageRating?: number; status?: import('@bryandebaun/mcp-client').ItemStatus | string };
 type ColumnDescriptor = {
-    accessor?: keyof BookRow;
+    accessor?: keyof BookRow | string;
     header: string;
     id?: string;
     type?: "text" | "rating" | "actions";

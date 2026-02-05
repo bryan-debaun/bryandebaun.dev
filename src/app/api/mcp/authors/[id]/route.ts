@@ -1,10 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { Api, AuthorWithBooks } from '@bryandebaun/mcp-client';
+import { AuthorWithBooks } from '@bryandebaun/mcp-client';
 import { proxyCall } from '@/lib/mcp-proxy';
-
+import { createApi as _createApi } from '@/lib/mcp';
 export function createApi() {
-    const baseURL = process.env.MCP_BASE_URL || 'https://bad-mcp.onrender.com';
-    return new Api({ baseURL });
+    return _createApi();
 }
 
 export async function GET(req: NextRequest, context: { params: { id: string } | Promise<{ id: string }> }) {

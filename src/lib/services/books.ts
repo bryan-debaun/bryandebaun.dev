@@ -5,9 +5,10 @@ import { unwrapApiResponse } from '@/lib/api-response';
 import { looksLikeHtmlPayload } from '@/lib/mcp-proxy';
 
 export async function listBooks(): Promise<BookWithAuthors[]> {
-    // When running server-side, call the generated MCP client directly so we avoid
-    // making an HTTP request to our own API route (which can fail in preview builds).
-    if (typeof window === 'undefined') {
+    // When running server-side, prefer a *direct* MCP client call only if an explicit
+    // MCP_BASE_URL is configured. This prevents accidental calls to a production origin
+    // (which can return Cloudflare HTML challenges) when running locally without env.
+    if (typeof window === 'undefined' && process.env.MCP_BASE_URL) {
         try {
             const api = createApi();
             const res = await api.api.listBooks();
@@ -29,6 +30,7 @@ export async function listBooks(): Promise<BookWithAuthors[]> {
         }
     }
 
+    // Default: call our proxy route so requests always come from the same origin.
     const res = await fetchWithFallback('/api/mcp/books');
     if (!res.ok) return [];
     const payload = await res.json();
@@ -36,7 +38,8 @@ export async function listBooks(): Promise<BookWithAuthors[]> {
 }
 
 export async function getBookById(id: number): Promise<BookWithAuthors | null> {
-    if (typeof window === 'undefined') {
+    // Prefer direct MCP calls only when MCP_BASE_URL is explicitly configured.
+    if (typeof window === 'undefined' && process.env.MCP_BASE_URL) {
         try {
             const api = createApi();
             const res = await api.api.getBook(id);
