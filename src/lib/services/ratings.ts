@@ -2,6 +2,8 @@ import type { RatingWithDetails, ListRatingsResponse } from '@bryandebaun/mcp-cl
 import type { AxiosResponse } from 'axios';
 import { fetchWithFallback } from '@/lib/server-fetch';
 import { createApi } from '@/lib/mcp';
+import { unwrapApiResponse } from '@/lib/api-response';
+import { looksLikeHtmlPayload } from '@/lib/mcp-proxy';
 
 export async function listRatings(query?: { bookId?: number }): Promise<RatingWithDetails[]> {
     // Server-side direct call to MCP client for reliability in preview builds
@@ -9,13 +11,21 @@ export async function listRatings(query?: { bookId?: number }): Promise<RatingWi
         try {
             const api = createApi();
             const res = await api.api.listRatings(query ? { bookId: query.bookId } : undefined);
-            if (res && typeof res === 'object' && 'data' in res) {
-                return (res as AxiosResponse<ListRatingsResponse>).data?.ratings ?? [];
+            const payload = unwrapApiResponse<ListRatingsResponse>(res);
+
+            if (await looksLikeHtmlPayload(payload)) {
+                console.error('listRatings: detected HTML payload from MCP; falling back to proxy');
+                throw new Error('Upstream returned HTML');
             }
-            return (res as ListRatingsResponse).ratings ?? [];
+
+            return payload?.ratings ?? [];
         } catch (e) {
-            console.error('listRatings direct MCP call failed', e);
-            return [];
+            console.error('listRatings direct MCP call failed; falling back to proxy', e);
+            const qs = query?.bookId ? `?bookId=${query.bookId}` : '';
+            const resProxy = await fetchWithFallback(`/api/mcp/ratings${qs}`);
+            if (!resProxy || !resProxy.ok) return [];
+            const payload = await resProxy.json();
+            return payload?.ratings ?? [];
         }
     }
 
