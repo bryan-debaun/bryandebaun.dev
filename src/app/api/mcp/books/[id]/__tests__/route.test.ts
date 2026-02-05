@@ -24,4 +24,17 @@ describe('GET /api/mcp/books/[id]', () => {
 
         spy.mockRestore();
     });
+
+    it('returns 502 when the upstream returns HTML (Cloudflare challenge)', async () => {
+        const html = '<!DOCTYPE html><html><body>Enable JavaScript and cookies</body></html>';
+        const fakeApi = { api: { getBook: vi.fn().mockResolvedValue({ data: html }) } } as any;
+        const spy = vi.spyOn(route as { createApi: () => Api<unknown> }, 'createApi').mockImplementation(() => fakeApi);
+
+        const res = (await route.GET(new Request('http://localhost/api/mcp/books/1'), { params: { id: '1' } as any })) as Response;
+        expect(res.status).toBe(502);
+        const json = await res.json();
+        expect(json).toEqual({ error: 'Failed to fetch from MCP' });
+
+        spy.mockRestore();
+    });
 });

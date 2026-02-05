@@ -20,6 +20,16 @@ export async function proxyCall<T = unknown>(
     try {
         const res = await fn(api);
         const payload = unwrapApiResponse<T>(res);
+
+        // Detect unexpected HTML responses (Cloudflare challenge page / bot mitigation)
+        if (typeof payload === 'string') {
+            const trimmed = payload.trim().toLowerCase();
+            if (trimmed.startsWith('<!doctype') || trimmed.startsWith('<html')) {
+                console.error('MCP Proxy error: upstream returned HTML (possible Cloudflare challenge)');
+                return { status: 502, body: { error: 'Failed to fetch from MCP' } };
+            }
+        }
+
         return { status: 200, body: payload };
     } catch (e: unknown) {
         console.error('MCP Proxy error', e);
