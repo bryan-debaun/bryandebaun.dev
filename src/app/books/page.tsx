@@ -11,7 +11,7 @@ export default async function Page() {
     // If the upstream already provides `averageRating` for every book, skip fetching
     // the separate ratings list — the UI and helpers will prefer the server value.
     let ratings: RatingWithDetails[] = [];
-    const allHaveAvg = Array.isArray(books) && books.length > 0 && books.every((b: BookWithAuthors) => typeof b.averageRating === 'number');
+    const allHaveAvg = Array.isArray(books) && books.length > 0 && books.every((b: BookWithAuthors) => typeof (b as BookWithAuthors & { averageRating?: number | null }).averageRating === 'number');
     if (!allHaveAvg) {
         ratings = await import('@/lib/services/ratings').then((m) => m.listRatings());
     }
