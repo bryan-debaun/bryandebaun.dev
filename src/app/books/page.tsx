@@ -1,14 +1,20 @@
 import BooksTable from '@/components/BooksTable';
+import type { BookWithAuthors, RatingWithDetails } from '@bryandebaun/mcp-client';
 
 // Force dynamic rendering so preview builds always render live data instead of stale SSG
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
     // Server-side fetch to our API routes via services
-    const [books, ratings] = await Promise.all([
-        import('@/lib/services/books').then(m => m.listBooks()),
-        import('@/lib/services/ratings').then(m => m.listRatings()),
-    ]);
+    const books = await import('@/lib/services/books').then((m) => m.listBooks());
+
+    // If the upstream already provides `averageRating` for every book, skip fetching
+    // the separate ratings list — the UI and helpers will prefer the server value.
+    let ratings: RatingWithDetails[] = [];
+    const allHaveAvg = Array.isArray(books) && books.length > 0 && books.every((b: BookWithAuthors) => typeof b.averageRating === 'number');
+    if (!allHaveAvg) {
+        ratings = await import('@/lib/services/ratings').then((m) => m.listRatings());
+    }
 
     // Helpful server-side debug log for preview builds — removed when not needed
     if (!books || books.length === 0) console.warn('Books: empty response at render', { length: books?.length ?? 0, origin: process.env.NEXT_PUBLIC_SITE_URL });
