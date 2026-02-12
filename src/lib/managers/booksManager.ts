@@ -1,5 +1,5 @@
 import type { BookWithAuthors } from '@bryandebaun/mcp-client';
-import { ItemStatus } from '@bryandebaun/mcp-client';
+import { ItemStatus } from '@/lib/types';
 
 export function mergeBook(existing: BookWithAuthors, updated: Partial<BookWithAuthors> | Record<string, unknown>): BookWithAuthors {
     // Preserve derived fields like averageRating if not supplied by server

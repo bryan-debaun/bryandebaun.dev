@@ -41,3 +41,15 @@ vi.mock('next/link', () => ({
         return React.createElement('a', { href, ...rest } as Record<string, unknown>, children as React.ReactNode);
     }
 }));
+
+// Suppress a noisy Vite deprecation warning emitted when Vitest uses Vite's CJS Node API.
+// This is a test-only suppression; prefer upgrading Vitest/Vite in future to remove the root cause.
+if (typeof process !== 'undefined' && typeof process.on === 'function') {
+    process.on('warning', (warning: unknown) => {
+        const rawMessage = (warning as { message?: unknown })?.message;
+        const msg = typeof rawMessage === 'string' ? rawMessage : String(rawMessage ?? warning);
+        if (msg.includes("CJS build of Vite's Node API is deprecated")) return;
+        // otherwise let Node print the warning as usual
+        console.warn(warning);
+    });
+}
