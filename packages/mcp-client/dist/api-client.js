@@ -20,6 +20,12 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+export var ItemStatus;
+(function (ItemStatus) {
+    ItemStatus["NOT_STARTED"] = "NOT_STARTED";
+    ItemStatus["IN_PROGRESS"] = "IN_PROGRESS";
+    ItemStatus["COMPLETED"] = "COMPLETED";
+})(ItemStatus || (ItemStatus = {}));
 import axios from "axios";
 export var ContentType;
 (function (ContentType) {
@@ -106,6 +112,57 @@ export class Api extends HttpClient {
         super(...arguments);
         this.api = {
             /**
+             * No description
+             *
+             * @tags VideoGames
+             * @name ListVideoGames
+             * @request GET:/api/videogames
+             */
+            listVideoGames: (query, params = {}) => this.request(Object.assign({ path: `/api/videogames`, method: "GET", query: query, format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags VideoGames
+             * @name CreateVideoGame
+             * @request POST:/api/videogames
+             * @secure
+             */
+            createVideoGame: (data, params = {}) => this.request(Object.assign({ path: `/api/videogames`, method: "POST", body: data, secure: true, type: ContentType.Json, format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags VideoGames
+             * @name GetVideoGame
+             * @request GET:/api/videogames/{id}
+             */
+            getVideoGame: (id, params = {}) => this.request(Object.assign({ path: `/api/videogames/${id}`, method: "GET", format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags VideoGames
+             * @name UpdateVideoGame
+             * @request PUT:/api/videogames/{id}
+             * @secure
+             */
+            updateVideoGame: (id, data, params = {}) => this.request(Object.assign({ path: `/api/videogames/${id}`, method: "PUT", body: data, secure: true, type: ContentType.Json, format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags VideoGames
+             * @name DeleteVideoGame
+             * @request DELETE:/api/videogames/{id}
+             * @secure
+             */
+            deleteVideoGame: (id, params = {}) => this.request(Object.assign({ path: `/api/videogames/${id}`, method: "DELETE", secure: true, format: "json" }, params)),
+            /**
+             * @description Returns current user session (based on `session` cookie).
+             *
+             * @tags Auth
+             * @name Get
+             * @request GET:/api/auth/session
+             */
+            get: (params = {}) => this.request(Object.assign({ path: `/api/auth/session`, method: "GET", format: "json" }, params)),
+            /**
              * @description List ratings with optional filtering
              *
              * @tags Ratings
@@ -134,6 +191,124 @@ export class Api extends HttpClient {
              * @secure
              */
             deleteRating: (id, params = {}) => this.request(Object.assign({ path: `/api/ratings/${id}`, method: "DELETE", secure: true, format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags Movies
+             * @name ListMovies
+             * @request GET:/api/movies
+             */
+            listMovies: (query, params = {}) => this.request(Object.assign({ path: `/api/movies`, method: "GET", query: query, format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags Movies
+             * @name CreateMovie
+             * @request POST:/api/movies
+             * @secure
+             */
+            createMovie: (data, params = {}) => this.request(Object.assign({ path: `/api/movies`, method: "POST", body: data, secure: true, type: ContentType.Json, format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags Movies
+             * @name GetMovie
+             * @request GET:/api/movies/{id}
+             */
+            getMovie: (id, params = {}) => this.request(Object.assign({ path: `/api/movies/${id}`, method: "GET", format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags Movies
+             * @name UpdateMovie
+             * @request PUT:/api/movies/{id}
+             * @secure
+             */
+            updateMovie: (id, data, params = {}) => this.request(Object.assign({ path: `/api/movies/${id}`, method: "PUT", body: data, secure: true, type: ContentType.Json, format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags Movies
+             * @name DeleteMovie
+             * @request DELETE:/api/movies/{id}
+             * @secure
+             */
+            deleteMovie: (id, params = {}) => this.request(Object.assign({ path: `/api/movies/${id}`, method: "DELETE", secure: true, format: "json" }, params)),
+            /**
+             * @description Send a magic link email (returns 202 accepted)
+             *
+             * @tags Auth
+             * @name Send
+             * @request POST:/api/auth/magic-link
+             */
+            send: (data, params = {}) => this.request(Object.assign({ path: `/api/auth/magic-link`, method: "POST", body: data, type: ContentType.Json, format: "json" }, params)),
+            /**
+             * @description Public registration endpoint
+             *
+             * @tags Auth
+             * @name Register
+             * @request POST:/api/auth/magic-link/register
+             */
+            register: (data, params = {}) => this.request(Object.assign({ path: `/api/auth/magic-link/register`, method: "POST", body: data, type: ContentType.Json, format: "json" }, params)),
+            /**
+             * @description Verify a magic link token (GET redirect style)
+             *
+             * @tags Auth
+             * @name VerifyGet
+             * @request GET:/api/auth/magic-link/verify
+             */
+            verifyGet: (query, params = {}) => this.request(Object.assign({ path: `/api/auth/magic-link/verify`, method: "GET", query: query }, params)),
+            /**
+             * @description Verify a magic link token (POST JSON style)
+             *
+             * @tags Auth
+             * @name VerifyPost
+             * @request POST:/api/auth/magic-link/verify
+             */
+            verifyPost: (data, params = {}) => this.request(Object.assign({ path: `/api/auth/magic-link/verify`, method: "POST", body: data, type: ContentType.Json, format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags ContentCreators
+             * @name ListContentCreators
+             * @request GET:/api/content-creators
+             */
+            listContentCreators: (query, params = {}) => this.request(Object.assign({ path: `/api/content-creators`, method: "GET", query: query, format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags ContentCreators
+             * @name CreateContentCreator
+             * @request POST:/api/content-creators
+             * @secure
+             */
+            createContentCreator: (data, params = {}) => this.request(Object.assign({ path: `/api/content-creators`, method: "POST", body: data, secure: true, type: ContentType.Json, format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags ContentCreators
+             * @name GetContentCreator
+             * @request GET:/api/content-creators/{id}
+             */
+            getContentCreator: (id, params = {}) => this.request(Object.assign({ path: `/api/content-creators/${id}`, method: "GET", format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags ContentCreators
+             * @name UpdateContentCreator
+             * @request PUT:/api/content-creators/{id}
+             * @secure
+             */
+            updateContentCreator: (id, data, params = {}) => this.request(Object.assign({ path: `/api/content-creators/${id}`, method: "PUT", body: data, secure: true, type: ContentType.Json, format: "json" }, params)),
+            /**
+             * No description
+             *
+             * @tags ContentCreators
+             * @name DeleteContentCreator
+             * @request DELETE:/api/content-creators/{id}
+             * @secure
+             */
+            deleteContentCreator: (id, params = {}) => this.request(Object.assign({ path: `/api/content-creators/${id}`, method: "DELETE", secure: true, format: "json" }, params)),
             /**
              * @description List books with optional filtering
              *
@@ -230,6 +405,24 @@ export class Api extends HttpClient {
              * @secure
              */
             deleteAuthor: (id, params = {}) => this.request(Object.assign({ path: `/api/authors/${id}`, method: "DELETE", secure: true, format: "json" }, params)),
+            /**
+             * @description Update a user's role or blocked state (admin only)
+             *
+             * @tags Admin
+             * @name PatchUser
+             * @request PATCH:/api/admin/users/{id}
+             * @secure
+             */
+            patchUser: (id, data, params = {}) => this.request(Object.assign({ path: `/api/admin/users/${id}`, method: "PATCH", body: data, secure: true, type: ContentType.Json, format: "json" }, params)),
+            /**
+             * @description Delete a user (soft-delete by default). Use ?hard=1 to attempt hard delete.
+             *
+             * @tags Admin
+             * @name DeleteUser
+             * @request DELETE:/api/admin/users/{id}
+             * @secure
+             */
+            deleteUser: (id, params = {}) => this.request(Object.assign({ path: `/api/admin/users/${id}`, method: "DELETE", secure: true, format: "json" }, params)),
         };
     }
 }
