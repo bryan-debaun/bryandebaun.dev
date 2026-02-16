@@ -46,11 +46,11 @@ export default function LoginPage() {
             <form onSubmit={submit} className="space-y-4">
                 <div>
                     <label htmlFor="login-email" className="block text-sm">Email</label>
-                    <input id="login-email" data-testid="login-email" className="mt-1 w-full" value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
+                    <input id="login-email" data-testid="login-email" placeholder="you@example.com" autoComplete="email" className="mt-1 w-full form-input" value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
                 </div>
                 <div>
                     <label htmlFor="login-password" className="block text-sm">Password</label>
-                    <input id="login-password" data-testid="login-password" className="mt-1 w-full" value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
+                    <input id="login-password" data-testid="login-password" placeholder="••••••••" autoComplete="current-password" className="mt-1 w-full form-input" value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
                 </div>
                 {error ? <div className="text-sm text-red-600">{error}</div> : null}
                 <div>
