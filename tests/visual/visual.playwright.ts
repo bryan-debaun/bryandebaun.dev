@@ -139,9 +139,12 @@ async function compareWithBaseline(name: string, buffer: Buffer) {
     expect(ratio).toBeLessThan(maxDiff);
 }
 
+// NOTE: `/about` has frequent content updates which makes PR-level
+// visual snapshots brittle. Short-term: only snapshot stable pages here.
+// Long-term options: add a deterministic `/visual-snap` page or run
+// full-site visual tests only on `main`.
 const pages = [
     { url: '/', baseline: 'home-desktop-light.png' },
-    { url: '/about', baseline: 'about-desktop-light.png' },
     { url: '/philosophy', baseline: 'philosophy-desktop-light.png' },
 ];
 
