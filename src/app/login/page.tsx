@@ -53,8 +53,8 @@ export default function LoginPage() {
                     <input id="login-password" data-testid="login-password" placeholder="••••••••" autoComplete="current-password" className="mt-1 w-full form-input" value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
                 </div>
                 {error ? <div className="text-sm text-red-600">{error}</div> : null}
-                <div>
-                    <button data-testid="login-submit" className="btn" type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
+                <div className="form-actions">
+                    <button data-testid="login-submit" className="btn btn--primary w-full md:w-auto" type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
                 </div>
             </form>
         </div>
