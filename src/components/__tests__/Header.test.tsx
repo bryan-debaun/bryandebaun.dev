@@ -1,3 +1,6 @@
+const pushMock = vi.fn();
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: pushMock }) }));
+
 import { render, screen } from '@testing-library/react';
 import Header from '../Header';
 import { axe } from 'vitest-axe';

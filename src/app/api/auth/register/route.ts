@@ -4,7 +4,7 @@ import { fetchWithFallback } from '@/lib/server-fetch';
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const res = await fetchWithFallback('/api/mcp/auth/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+        const res = await fetchWithFallback('/api/mcp/auth/magic-link/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
         const text = await res.text();
         // Mirror upstream status and body
         const headers: Record<string, string> = {};
