@@ -305,6 +305,40 @@ a:focus-visible {
   outline-offset: 3px;
 }
 
+/* Auth links separator — show only on mobile (top border above hamburger menu auth links). Desktop: no divider. */
+.site-nav .auth-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px solid var(--color-norwegian-200);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 768px) {
+
+  /* Remove separator on desktop — keep auth links visually integrated with nav */
+  .site-nav .auth-status {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+    /* ensure no leftover divider */
+  }
+}
+
+html.dark .site-nav .auth-status {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+@media (min-width: 768px) {
+  html.dark .site-nav .auth-status {
+    border-left-color: transparent;
+  }
+}
+
 /* Preserve dark mode behavior */
 .dark .site-header {
   /* Use the dark background variable so the header obscures content correctly in dark mode */

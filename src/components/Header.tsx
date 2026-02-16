@@ -24,15 +24,16 @@ function AuthStatus() {
 
     if (!isAuthenticated) {
         return (
-            <div className="flex items-center gap-3">
+            <div className="auth-status flex items-center gap-3">
                 <Link href="/login" className="text-sm">Sign in</Link>
+                <span aria-hidden="true" className="inline-flex h-6 items-center text-sm text-[var(--color-norwegian-400)] px-1 select-none md:hidden">|</span>
                 <Link href="/register" className="text-sm">Register</Link>
             </div>
         );
     }
 
     return (
-        <div className="flex items-center gap-3">
+        <div className="auth-status flex items-center gap-3">
             {user?.email ? <span className="text-sm truncate max-w-[10rem]">{user.email}</span> : null}
             {user?.isAdmin ? <Link href="/admin" className="text-sm">Admin</Link> : null}
             <button className="text-sm" onClick={onLogout} disabled={busy}>{busy ? 'Signing out…' : 'Sign out'}</button>
@@ -95,7 +96,7 @@ export default function Header() {
                         aria-controls={menuId}
                         aria-expanded={open}
                         onClick={() => setOpen((s) => !s)}
-                        className="p-3 h-11 w-11 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-fjord-600)]"
+                        className="p-3 h-11 w-11 rounded cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-fjord-600)]"
                         aria-label={open ? "Close navigation" : "Open navigation"}
                     >
                         <span className="sr-only">{open ? 'Close navigation' : 'Open navigation'}</span>
