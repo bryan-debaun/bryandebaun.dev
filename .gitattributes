@@ -1,0 +1,28 @@
+# Normalize line endings to LF for source files to avoid Windows/Linux diffs
+* text=auto
+
+# Explicitly enforce LF for common text/source file types
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.svg text eol=lf
+
+# Ensure generated MCP client source is normalized
+/packages/mcp-client/src/* text eol=lf
+
+# Binary files (do not attempt to normalize)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary
+*.woff binary
+*.woff2 binary
