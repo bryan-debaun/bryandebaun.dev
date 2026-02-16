@@ -9,17 +9,57 @@ const DIFF_DIR = path.join(process.cwd(), 'artifacts/a11y/diffs');
 
 // Utility: disable animations, force deterministic font stack, hide transient UI, and wait for fonts to load
 async function stabilizePage(page: Page) {
-    // Inject a deterministic webfont (Inter) to reduce font variation across runner environments
-    await page.addScriptTag({
-        content: `(function(){
-            try {
-                const l = document.createElement('link');
-                l.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap';
-                l.rel = 'stylesheet';
-                document.head.appendChild(l);
-            } catch(e){ /* ignore */ }
-        })()`,
-    });
+    // Preferred: inject a deterministic, self-hosted Inter font from @fontsource when available
+    // This avoids relying on system fonts or external network fetches (reduces CI flakiness).
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        const filesDir = path.join(process.cwd(), 'node_modules', '@fontsource', 'inter', 'files');
+        const woff400 = path.join(filesDir, 'inter-latin-400-normal.woff2');
+        const woff600 = path.join(filesDir, 'inter-latin-600-normal.woff2');
+        const injectedFonts: string[] = [];
+
+        if (fs.existsSync(woff400)) {
+            const buf = fs.readFileSync(woff400);
+            const b64 = buf.toString('base64');
+            injectedFonts.push(`@font-face{font-family:Inter;font-style:normal;font-weight:400;src: url(data:font/woff2;base64,${b64}) format('woff2');font-display:swap;}`);
+        }
+        if (fs.existsSync(woff600)) {
+            const buf = fs.readFileSync(woff600);
+            const b64 = buf.toString('base64');
+            injectedFonts.push(`@font-face{font-family:Inter;font-style:normal;font-weight:600;src: url(data:font/woff2;base64,${b64}) format('woff2');font-display:swap;}`);
+        }
+
+        if (injectedFonts.length > 0) {
+            await page.addStyleTag({ content: injectedFonts.join('\n') });
+        } else {
+            // Fallback: request Inter from Google Fonts (best-effort)
+            await page.addScriptTag({
+                content: `(function(){
+                    try {
+                        const l = document.createElement('link');
+                        l.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap';
+                        l.rel = 'stylesheet';
+                        document.head.appendChild(l);
+                    } catch(e){ /* ignore */ }
+                })()`,
+            });
+        }
+    } catch (e) {
+        // If anything goes wrong reading files, fall back to Google Fonts link
+        try {
+            await page.addScriptTag({
+                content: `(function(){
+                    try {
+                        const l = document.createElement('link');
+                        l.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap';
+                        l.rel = 'stylesheet';
+                        document.head.appendChild(l);
+                    } catch(e){ /* ignore */ }
+                })()`,
+            });
+        } catch {}
+    }
 
     await page.addStyleTag({
         content: `
@@ -32,6 +72,7 @@ async function stabilizePage(page: Page) {
     :root{color-scheme: light}
   `,
     });
+
     // Wait for fonts to be loaded to avoid snapshotting before font swap
     try {
         await page.evaluate(async () => {
