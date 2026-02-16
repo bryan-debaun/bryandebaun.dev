@@ -12,8 +12,6 @@ async function stabilizePage(page: Page) {
     // Preferred: inject a deterministic, self-hosted Inter font from @fontsource when available
     // This avoids relying on system fonts or external network fetches (reduces CI flakiness).
     try {
-        const fs = require('fs');
-        const path = require('path');
         const filesDir = path.join(process.cwd(), 'node_modules', '@fontsource', 'inter', 'files');
         const woff400 = path.join(filesDir, 'inter-latin-400-normal.woff2');
         const woff600 = path.join(filesDir, 'inter-latin-600-normal.woff2');
@@ -45,7 +43,7 @@ async function stabilizePage(page: Page) {
                 })()`,
             });
         }
-    } catch (e) {
+    } catch {
         // If anything goes wrong reading files, fall back to Google Fonts link
         try {
             await page.addScriptTag({
@@ -58,7 +56,7 @@ async function stabilizePage(page: Page) {
                     } catch(e){ /* ignore */ }
                 })()`,
             });
-        } catch {}
+        } catch { }
     }
 
     await page.addStyleTag({
