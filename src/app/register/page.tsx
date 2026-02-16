@@ -48,15 +48,15 @@ export default function RegisterPage() {
             <form onSubmit={submit} className="space-y-4">
                 <div>
                     <label htmlFor="register-email" className="block text-sm">Email</label>
-                    <input id="register-email" data-testid="register-email" className="mt-1 w-full" value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
+                    <input id="register-email" data-testid="register-email" className="mt-1 w-full form-input" value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
                 </div>
                 <div>
                     <label htmlFor="register-password" className="block text-sm">Password</label>
-                    <input id="register-password" data-testid="register-password" className="mt-1 w-full" value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
+                    <input id="register-password" data-testid="register-password" className="mt-1 w-full form-input" value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
                 </div>
                 <div>
                     <label htmlFor="register-confirm" className="block text-sm">Confirm password</label>
-                    <input id="register-confirm" data-testid="register-confirm" className="mt-1 w-full" value={confirm} onChange={(e) => setConfirm(e.target.value)} type="password" />
+                    <input id="register-confirm" data-testid="register-confirm" className="mt-1 w-full form-input" value={confirm} onChange={(e) => setConfirm(e.target.value)} type="password" />
                 </div>
                 {error ? <div className="text-sm text-red-600">{error}</div> : null}
                 <div>
