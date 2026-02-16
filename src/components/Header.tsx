@@ -1,9 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from 'next/navigation';
 import DarkModeToggle from "./DarkModeToggle";
+import { AuthContext } from '@/lib/auth';
+
+function AuthStatus() {
+    const { user, logout, isAuthenticated } = useContext(AuthContext);
+    const [busy, setBusy] = useState(false);
+    const router = useRouter();
+
+    const onLogout = async () => {
+        setBusy(true);
+        try {
+            await logout();
+            router.push('/login');
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    if (!isAuthenticated) {
+        return (
+            <div className="auth-status flex items-center gap-3">
+                <Link href="/login" className="text-sm">Sign in</Link>
+                <span aria-hidden="true" className="inline-flex h-6 items-center text-sm text-[var(--color-norwegian-400)] px-1 select-none md:hidden">|</span>
+                <Link href="/register" className="text-sm">Register</Link>
+            </div>
+        );
+    }
+
+    return (
+        <div className="auth-status flex items-center gap-3">
+            {user?.email ? <span className="text-sm truncate max-w-[10rem]">{user.email}</span> : null}
+            {user?.isAdmin ? <Link href="/admin" className="text-sm">Admin</Link> : null}
+            <button className="text-sm" onClick={onLogout} disabled={busy}>{busy ? 'Signing out…' : 'Sign out'}</button>
+        </div>
+    );
+}
 
 export default function Header() {
     const [open, setOpen] = useState(false);
@@ -46,7 +82,10 @@ export default function Header() {
                 <nav className="hidden md:flex site-nav items-center gap-6 prose prose-norwegian dark:prose-invert">
                     <Link href="/about" className="text-sm">About</Link>
                     <Link href="/projects" className="text-sm">Projects</Link>
+                    <Link href="/account" className="text-sm">Account</Link>
                     <DarkModeToggle />
+                    {/* Auth state will be injected client-side; show login/register when unauthenticated */}
+                    <AuthStatus />
                 </nav>
 
                 {/* Mobile controls */}
@@ -57,7 +96,7 @@ export default function Header() {
                         aria-controls={menuId}
                         aria-expanded={open}
                         onClick={() => setOpen((s) => !s)}
-                        className="p-3 h-11 w-11 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-fjord-600)]"
+                        className="p-3 h-11 w-11 rounded cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-fjord-600)]"
                         aria-label={open ? "Close navigation" : "Open navigation"}
                     >
                         <span className="sr-only">{open ? 'Close navigation' : 'Open navigation'}</span>
@@ -76,8 +115,10 @@ export default function Header() {
             <div id={menuId} className={`md:hidden border-t ${open ? "block" : "hidden"}`} role="menu" aria-labelledby={toggleId} aria-hidden={!open}>
                 <div className="px-6 py-3 space-y-2 flex flex-col items-center site-nav prose prose-norwegian dark:prose-invert">
                     <Link href="/about" id="mobile-nav-about" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">About</Link>
-                    <Link href="/projects" id="mobile-nav-projects" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">Projects</Link>
-                </div>
+                    <Link href="/projects" id="mobile-nav-projects" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">Projects</Link>                    <Link href="/account" id="mobile-nav-account" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">Account</Link>
+                    <div className="px-3 py-2">
+                        <AuthStatus />
+                    </div>                </div>
             </div>
         </header>
     );

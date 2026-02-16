@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import Providers from '@/components/Providers';
-import { ItemStatus } from '@bryandebaun/mcp-client';
+import { ItemStatus } from '@/lib/types';
 import { useBooks } from '../useBooks';
 
 const sampleBook = (id: number, avg?: number) => ({

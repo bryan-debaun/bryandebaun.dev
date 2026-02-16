@@ -29,6 +29,7 @@
     "a11y:ci": "tsx scripts/a11y/verify-a11y.ts --url http://localhost:3000 --outDir artifacts/a11y --ci",
     "playwright:install": "npx playwright install --with-deps",
     "visual:test": "npx playwright test --config=playwright.config.ts",
+    "visual:baseline": "tsx scripts/generate-visual-baseline.ts",
     "inspect:ci": "tsx scripts/inspect-diff-ci-run.ts",
     "ci:lighthouse": "lhci autorun",
     "lint:mdx": "node -e \"const glob=require('glob'); const files=glob.sync('src/content/**/*.{md,mdx}'); if(!files.length){console.log('No MDX files to lint (none or all ignored)'); process.exit(0);} const cp=require('child_process').spawnSync('eslint',['--ext','.mdx','src/content/**/*.{md,mdx}'],{stdio:'inherit'}); process.exit(cp.status);\"",
@@ -63,11 +64,14 @@
     "@playwright/test": "^1.40.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/forms": "^0.5.4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@testing-library/dom": "^10.0.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "@types/jsdom": "^27.0.0",
+    "@opentelemetry/api": "^1.9.0",
     "@types/node": "^20",
     "@types/pixelmatch": "^5.2.6",
     "@types/pngjs": "^6.0.5",
@@ -99,7 +103,7 @@
     "tailwindcss": "^4.1.18",
     "tsx": "^4.18.0",
     "typescript": "5.9.3",
-    "vitest": "^1.6.1",
+    "vitest": "^4.0.18",
     "vitest-axe": "^0.1.0"
   }
 }

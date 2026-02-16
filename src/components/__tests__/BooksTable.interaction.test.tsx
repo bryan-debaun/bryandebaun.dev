@@ -18,7 +18,7 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
 
 import BooksTable from '../BooksTable';
 import Providers from '@/components/Providers';
-import { ItemStatus } from '@bryandebaun/mcp-client';
+import { ItemStatus } from '@/lib/types';
 
 const sampleBook = (id: number, avg?: number) => ({
     id,

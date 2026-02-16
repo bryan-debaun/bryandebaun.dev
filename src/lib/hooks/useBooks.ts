@@ -1,16 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import type { BookWithAuthors, RatingWithDetails } from '@bryandebaun/mcp-client';
-import { ItemStatus } from '@bryandebaun/mcp-client';
+import { ItemStatus } from '@/lib/types';
 import * as repo from '@/lib/repositories/booksRepository';
 import { generateBookRows, type BookRow } from '@/lib/books';
 import { mergeBook, toggledStatus } from '@/lib/managers/booksManager';
 
-type BookWithAuthorsExt = BookWithAuthors & { averageRating?: number; _loading?: boolean; _error?: string; status?: import('@bryandebaun/mcp-client').ItemStatus | string };
+type BookWithAuthorsExt = BookWithAuthors & { averageRating?: number | null; _loading?: boolean; _error?: string; status?: ItemStatus | string };
 
 const BOOKS_KEY = ['books'];
 
-export function useBooks(initialBooks?: BookRow[], initialRatings?: RatingWithDetails[]) {
+export function useBooks(initialBooks?: BookWithAuthors[], initialRatings?: RatingWithDetails[]) {
     const qc = useQueryClient();
     // Local override map to track optimistic overlays and server-merged updates
     const [overrides, setOverrides] = useState<Map<number, Partial<BookRow & { _loading?: boolean; _error?: string }>>>(() => new Map());

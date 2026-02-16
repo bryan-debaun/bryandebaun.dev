@@ -1,5 +1,5 @@
 import React from 'react';
-import { ItemStatus } from '@bryandebaun/mcp-client';
+import { ItemStatus } from '@/lib/types';
 
 export default function StatusBadge({ status }: { status?: ItemStatus | string | undefined }) {
     const s = status as ItemStatus | undefined;

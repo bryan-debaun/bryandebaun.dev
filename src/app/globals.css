@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
+/* Tailwind plugins are registered in tailwind.config.mjs */
 @import "@fontsource/inter/variable.css";
 /* ensure Inter is bundled for deterministic rendering */
 
@@ -305,6 +305,40 @@ a:focus-visible {
   outline-offset: 3px;
 }
 
+/* Auth links separator — show only on mobile (top border above hamburger menu auth links). Desktop: no divider. */
+.site-nav .auth-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px solid var(--color-norwegian-200);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 768px) {
+
+  /* Remove separator on desktop — keep auth links visually integrated with nav */
+  .site-nav .auth-status {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+    /* ensure no leftover divider */
+  }
+}
+
+html.dark .site-nav .auth-status {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+@media (min-width: 768px) {
+  html.dark .site-nav .auth-status {
+    border-left-color: transparent;
+  }
+}
+
 /* Preserve dark mode behavior */
 .dark .site-header {
   /* Use the dark background variable so the header obscures content correctly in dark mode */
@@ -386,12 +420,28 @@ main a,
   transition: color .12s ease, background-color .12s ease, text-decoration-color .12s ease;
 }
 
-/* Button styles (accent solid in dark mode) */
+/* Polished global button base — rounded, roomy, accessible */
 .btn {
-  /* Buttons use the display font to match header navigation and brand */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  /* allows icon + text spacing */
+  min-height: 2.5rem;
+  /* comfortable touch target */
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--btn-radius);
+  cursor: pointer;
   font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
   text-decoration: none;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
   transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, color .12s ease;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-norwegian-700);
 }
 
 .btn:hover,
@@ -399,19 +449,27 @@ main a,
   text-decoration: none;
 }
 
-/* Use a box-shadow for focus so the ring follows the button's rounded corners */
+/* Focus ring follows rounded corners */
 .btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(16, 143, 139, 0.12);
+  box-shadow: 0 0 0 4px rgba(16, 143, 139, 0.12);
 }
 
-/* Dark-mode accent: solid teal button */
+/* Disabled state */
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Dark-mode base (keeps strong contrast) */
 .dark .btn {
   background: var(--color-norwegian-400-dark);
   color: var(--color-white);
-  border: 1px solid var(--color-norwegian-300-dark);
+  border-color: var(--color-norwegian-300-dark);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
-  -webkit-font-smoothing: antialiased;
 }
 
 .dark .btn:hover {
@@ -420,14 +478,7 @@ main a,
   border-color: var(--color-norwegian-200-dark);
 }
 
-/* Light-mode neutral button (keeps existing bordered look) */
-.btn {
-  background: transparent;
-  color: var(--color-norwegian-700);
-  border: 1px solid var(--color-norwegian-300);
-  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, color .12s ease;
-}
-
+/* Light-mode hover */
 .btn:hover {
   transform: translateY(-1px);
   background: rgba(0, 0, 0, 0.03);
@@ -437,6 +488,7 @@ main a,
 /* Neon outline variant for a poppy, minimal CTA */
 .btn--neon {
   background: transparent;
+  border-radius: var(--btn-radius);
   /* use the Fjord blue for light mode so the CTA shows up on pale backgrounds */
   color: var(--color-fjord-600);
   border: 1px solid var(--color-fjord-600);
@@ -446,6 +498,7 @@ main a,
 .dark .btn--neon {
   color: var(--color-fjord-neon);
   border-color: var(--color-fjord-neon);
+  border-radius: var(--btn-radius);
   /* subtle neon fill to separate from page background */
   background: rgba(230, 251, 244, 0.06);
   /* soft mint fill */
@@ -476,9 +529,11 @@ main a,
 
 /* Primary (filled) button for light mode */
 .btn--primary {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.5rem 0.875rem;
-  border-radius: 0.375rem;
+  border-radius: var(--btn-radius);
   font-weight: 600;
   color: var(--color-white);
   background: linear-gradient(180deg, var(--btn-accent), var(--btn-accent-strong));
@@ -524,6 +579,7 @@ html.dark .btn--primary:hover {
 /* Outline / secondary CTA */
 .btn--outline {
   background: transparent;
+  border-radius: var(--btn-radius);
   color: var(--btn-accent);
   border: 1px solid var(--btn-accent);
 }
@@ -844,6 +900,63 @@ p {
   transition: color .15s ease-in-out;
   line-height: 1.75;
 }
+
+/* Enhanced form control styling — improves contrast / focus for inputs (light & dark) */
+.form-input,
+.form-textarea,
+.form-select,
+.form-multiselect {
+  background-color: var(--color-norwegian-50);
+  border: 1px solid var(--color-norwegian-300);
+  color: var(--color-norwegian-700);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  transition: box-shadow .12s ease, border-color .12s ease, background-color .12s ease;
+  box-shadow: none;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: rgb(15 23 42 / 0.45);
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-fjord-600);
+  box-shadow: 0 0 0 4px rgb(16 143 139 / 0.08);
+  background-color: var(--color-white);
+}
+
+html.dark .form-input,
+html.dark .form-textarea,
+html.dark .form-select,
+html.dark .form-multiselect {
+  background-color: rgba(255, 255, 255, 0.02);
+  border-color: var(--color-norwegian-600);
+  color: var(--tw-prose-invert-body);
+}
+
+html.dark .form-input::placeholder,
+html.dark .form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Form action layout — center on mobile, right-align on md+ */
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .form-actions {
+    justify-content: flex-end;
+  }
+}
+
 
 /* Lead / intro paragraph (judgemented for emphasis) */
 main p.lead,

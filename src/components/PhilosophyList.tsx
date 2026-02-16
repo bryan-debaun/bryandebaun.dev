@@ -20,9 +20,6 @@ export default function PhilosophyList({ limit = 5 }: { limit?: number }) {
                     );
                 })}
             </ul>
-            <div>
-                <Link href="/philosophy">Read more</Link>
-            </div>
         </section>
     );
 }

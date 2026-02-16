@@ -43,6 +43,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# generated MCP client artifacts (keep vendor/dist out of VCS)
+/packages/mcp-client/dist/*.js
+/packages/mcp-client/dist/*.d.ts
+
+# Lighthouse CI run artifacts (local/CI cache)
+/.lighthouseci/
+
 # contentlayer
 /.contentlayer
 
