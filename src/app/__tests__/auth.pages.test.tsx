@@ -49,6 +49,20 @@ describe('Auth pages', () => {
         fetchSpy.mockRestore();
     });
 
+    it('register proxy uses JSON content-type and correct path', async () => {
+        const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce({ ok: true, json: async () => ({}) } as any);
+        render(<RegisterPage />);
+        fireEvent.change(screen.getByTestId('register-email'), { target: { value: 'proxy@example.com' } });
+        fireEvent.change(screen.getByTestId('register-password'), { target: { value: 'password123' } });
+        fireEvent.change(screen.getByTestId('register-confirm'), { target: { value: 'password123' } });
+        fireEvent.click(screen.getByTestId('register-submit'));
+        await waitFor(() => expect(fetchSpy).toHaveBeenCalled());
+        const [url, init] = (fetchSpy as any).mock.calls[0];
+        expect(url).toBe('/api/auth/register');
+        expect(init?.headers?.['content-type']).toMatch(/application\/json/);
+        fetchSpy.mockRestore();
+    });
+
     it('login success calls refresh and redirects to /', async () => {
         const mockRefresh = vi.fn(async () => { });
         const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce({ ok: true, json: async () => ({}) } as any);
