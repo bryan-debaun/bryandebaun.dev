@@ -10,6 +10,140 @@
  * ---------------------------------------------------------------
  */
 
+export enum ItemStatus {
+  NOT_STARTED = "NOT_STARTED",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+}
+
+export interface VideoGame {
+  /** @format double */
+  id: number;
+  title: string;
+  status: string;
+  description?: string;
+  platform: string;
+  igdbId?: string;
+  releasedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListVideoGamesResponse {
+  videoGames: VideoGame[];
+  /** @format double */
+  total: number;
+}
+
+export interface CreateVideoGameRequest {
+  title: string;
+  platform: string;
+  description?: string;
+  igdbId?: string;
+  releasedAt?: string;
+  status?: string;
+}
+
+export interface UpdateVideoGameRequest {
+  /** @format double */
+  id: number;
+  title?: string;
+  platform?: string;
+  description?: string;
+  igdbId?: string;
+  releasedAt?: string;
+  status?: string;
+}
+
+export interface Track {
+  /** @format double */
+  duration_ms: number;
+  album?: string | null;
+  artists: string[];
+  title: string;
+  id: string;
+}
+
+export interface Device {
+  /** @format double */
+  volume_percent?: number;
+  name?: string;
+  id?: string;
+}
+
+export interface PlaybackState {
+  shuffle_state?: boolean | null;
+  repeat_state?: "track" | "context" | "off" | null;
+  device?: Device | null;
+  track?: Track | null;
+  /** @format double */
+  progress_ms?: number | null;
+  is_playing: boolean;
+  timestamp: string;
+  source: "spotify";
+}
+
+/**
+ * Minimal typed responses for client generation. These intentionally mirror
+ * the subset of fields the website currently needs — the adapter returns
+ * the full Spotify payload for liked/playlists and we cast to these shapes.
+ */
+export interface LikedTrackItem {
+  added_at: string;
+  track: {
+    /** @format double */
+    duration_ms: number;
+    album?: {
+      name?: string;
+    } | null;
+    artists: {
+      name: string;
+    }[];
+    name: string;
+    id: string;
+  };
+}
+
+export interface LikedTracksResponse {
+  items: LikedTrackItem[];
+  /** @format double */
+  total: number;
+  /** @format double */
+  limit: number;
+  /** @format double */
+  offset: number;
+}
+
+export interface PlaylistItem {
+  id: string;
+  name: string;
+  tracks: {
+    /** @format double */
+    total: number;
+  };
+}
+
+export interface PlaylistsResponse {
+  items: PlaylistItem[];
+  /** @format double */
+  total: number;
+  /** @format double */
+  limit: number;
+  /** @format double */
+  offset: number;
+}
+
+export interface SeedResponse {
+  success: boolean;
+  persistedToEnvFile?: boolean;
+  message?: string;
+}
+
+export interface SeedRequest {
+  code?: string;
+  refreshToken?: string;
+}
+
 /** Rating with book and user details */
 export interface RatingWithDetails {
   /** @format double */
@@ -66,6 +200,85 @@ export interface CreateRatingRequest {
   review?: string;
 }
 
+export interface Movie {
+  /** @format double */
+  id: number;
+  title: string;
+  status: string;
+  description?: string;
+  iasn?: string;
+  imdbId?: string;
+  releasedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListMoviesResponse {
+  movies: Movie[];
+  /** @format double */
+  total: number;
+}
+
+export interface CreateMovieRequest {
+  title: string;
+  description?: string;
+  iasn?: string;
+  imdbId?: string;
+  releasedAt?: string;
+  status?: string;
+}
+
+export interface UpdateMovieRequest {
+  /** @format double */
+  id: number;
+  title?: string;
+  description?: string;
+  iasn?: string;
+  imdbId?: string;
+  releasedAt?: string;
+  status?: string;
+}
+
+export interface SendMagicLinkRequest {
+  email: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  name?: string;
+  password?: string;
+}
+
+export interface ContentCreator {
+  /** @format double */
+  id: number;
+  name: string;
+  description?: string;
+  website?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListContentCreatorsResponse {
+  creators: ContentCreator[];
+  /** @format double */
+  total: number;
+}
+
+export interface CreateContentCreatorRequest {
+  name: string;
+  description?: string;
+  website?: string;
+}
+
+export interface UpdateContentCreatorRequest {
+  /** @format double */
+  id: number;
+  name?: string;
+  description?: string;
+  website?: string;
+}
+
 /** Book with author information */
 export interface BookWithAuthors {
   /** @format double */
@@ -74,8 +287,13 @@ export interface BookWithAuthors {
   description?: string;
   isbn?: string;
   publishedAt?: string;
+  status: ItemStatus;
   createdAt: string;
   updatedAt: string;
+  /** @format double */
+  averageRating?: number | null;
+  /** @format double */
+  ratingCount?: number;
   authors?: {
     name: string;
     /** @format double */
@@ -98,13 +316,19 @@ export interface Book {
   description?: string;
   isbn?: string;
   publishedAt?: string;
+  status: ItemStatus;
   createdAt: string;
   updatedAt: string;
+  /** @format double */
+  averageRating?: number | null;
+  /** @format double */
+  ratingCount?: number;
 }
 
 /** Create book request */
 export interface CreateBookRequest {
   title: string;
+  status?: ItemStatus;
   description?: string;
   isbn?: string;
   publishedAt?: string;
@@ -114,6 +338,7 @@ export interface CreateBookRequest {
 /** Update book request */
 export interface UpdateBookRequest {
   title?: string;
+  status?: ItemStatus;
   description?: string;
   isbn?: string;
   publishedAt?: string;
@@ -164,6 +389,21 @@ export interface UpdateAuthorRequest {
   name?: string;
   bio?: string;
   website?: string;
+}
+
+export interface AdminUser {
+  /** @format double */
+  id: number;
+  email: string;
+  name?: string | null;
+  role?: string | null;
+  blocked?: boolean;
+  isAdmin?: boolean;
+}
+
+export interface UpdateAdminUserRequest {
+  role?: string;
+  blocked?: boolean;
 }
 
 import type {
@@ -355,6 +595,209 @@ export class Api<
 > extends HttpClient<SecurityDataType> {
   api = {
     /**
+     * No description
+     *
+     * @tags VideoGames
+     * @name ListVideoGames
+     * @request GET:/api/videogames
+     */
+    listVideoGames: (
+      query?: {
+        platform?: string;
+        search?: string;
+        /** @format double */
+        limit?: number;
+        /** @format double */
+        offset?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListVideoGamesResponse, any>({
+        path: `/api/videogames`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags VideoGames
+     * @name CreateVideoGame
+     * @request POST:/api/videogames
+     * @secure
+     */
+    createVideoGame: (
+      data: CreateVideoGameRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<VideoGame, any>({
+        path: `/api/videogames`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags VideoGames
+     * @name GetVideoGame
+     * @request GET:/api/videogames/{id}
+     */
+    getVideoGame: (id: number, params: RequestParams = {}) =>
+      this.request<VideoGame, void>({
+        path: `/api/videogames/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags VideoGames
+     * @name UpdateVideoGame
+     * @request PUT:/api/videogames/{id}
+     * @secure
+     */
+    updateVideoGame: (
+      id: number,
+      data: UpdateVideoGameRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<VideoGame, void>({
+        path: `/api/videogames/${id}`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags VideoGames
+     * @name DeleteVideoGame
+     * @request DELETE:/api/videogames/{id}
+     * @secure
+     */
+    deleteVideoGame: (id: number, params: RequestParams = {}) =>
+      this.request<
+        {
+          success: boolean;
+        },
+        any
+      >({
+        path: `/api/videogames/${id}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Spotify
+     * @name NowPlaying
+     * @request GET:/api/spotify/now-playing
+     */
+    nowPlaying: (params: RequestParams = {}) =>
+      this.request<PlaybackState, any>({
+        path: `/api/spotify/now-playing`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Spotify
+     * @name Liked
+     * @request GET:/api/spotify/liked
+     */
+    liked: (
+      query?: {
+        /** @format double */
+        limit?: number;
+        /** @format double */
+        offset?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<LikedTracksResponse, void>({
+        path: `/api/spotify/liked`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Spotify
+     * @name Playlists
+     * @request GET:/api/spotify/playlists
+     */
+    playlists: (
+      query?: {
+        /** @format double */
+        limit?: number;
+        /** @format double */
+        offset?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<PlaylistsResponse, void>({
+        path: `/api/spotify/playlists`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Accept a Spotify OAuth `code` (server-side exchange) or a `refreshToken` and seed the server's SPOTIFY_REFRESH_TOKEN value so the adapter can start. Notes: - This endpoint is intended as a one-time admin helper. In production prefer setting `SPOTIFY_REFRESH_TOKEN` via your host/secret manager (Render, etc.). - When running in `development` this will also persist the token to `.env.local`.
+     *
+     * @tags Admin
+     * @name SeedRefreshToken
+     * @request POST:/api/admin/spotify/oauth-callback
+     */
+    seedRefreshToken: (data: SeedRequest, params: RequestParams = {}) =>
+      this.request<SeedResponse, void>({
+        path: `/api/admin/spotify/oauth-callback`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Returns current user session (based on `session` cookie).
+     *
+     * @tags Auth
+     * @name Get
+     * @request GET:/api/auth/session
+     */
+    get: (params: RequestParams = {}) =>
+      this.request<any, void>({
+        path: `/api/auth/session`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description List ratings with optional filtering
      *
      * @tags Ratings
@@ -444,6 +887,304 @@ export class Api<
       }),
 
     /**
+     * No description
+     *
+     * @tags Movies
+     * @name ListMovies
+     * @request GET:/api/movies
+     */
+    listMovies: (
+      query?: {
+        status?: string;
+        search?: string;
+        /** @format double */
+        limit?: number;
+        /** @format double */
+        offset?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListMoviesResponse, any>({
+        path: `/api/movies`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Movies
+     * @name CreateMovie
+     * @request POST:/api/movies
+     * @secure
+     */
+    createMovie: (data: CreateMovieRequest, params: RequestParams = {}) =>
+      this.request<Movie, any>({
+        path: `/api/movies`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Movies
+     * @name GetMovie
+     * @request GET:/api/movies/{id}
+     */
+    getMovie: (id: number, params: RequestParams = {}) =>
+      this.request<Movie, void>({
+        path: `/api/movies/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Movies
+     * @name UpdateMovie
+     * @request PUT:/api/movies/{id}
+     * @secure
+     */
+    updateMovie: (
+      id: number,
+      data: UpdateMovieRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<Movie, void>({
+        path: `/api/movies/${id}`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Movies
+     * @name DeleteMovie
+     * @request DELETE:/api/movies/{id}
+     * @secure
+     */
+    deleteMovie: (id: number, params: RequestParams = {}) =>
+      this.request<
+        {
+          success: boolean;
+        },
+        any
+      >({
+        path: `/api/movies/${id}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Send a magic link email (returns 202 accepted)
+     *
+     * @tags Auth
+     * @name Send
+     * @request POST:/api/auth/magic-link
+     */
+    send: (data: SendMagicLinkRequest, params: RequestParams = {}) =>
+      this.request<
+        {
+          status: "accepted";
+        },
+        void
+      >({
+        path: `/api/auth/magic-link`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Public registration endpoint
+     *
+     * @tags Auth
+     * @name Register
+     * @request POST:/api/auth/magic-link/register
+     */
+    register: (data: RegisterRequest, params: RequestParams = {}) =>
+      this.request<any, void>({
+        path: `/api/auth/magic-link/register`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Verify a magic link token (GET redirect style)
+     *
+     * @tags Auth
+     * @name VerifyGet
+     * @request GET:/api/auth/magic-link/verify
+     */
+    verifyGet: (
+      query: {
+        token: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, void>({
+        path: `/api/auth/magic-link/verify`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description Verify a magic link token (POST JSON style)
+     *
+     * @tags Auth
+     * @name VerifyPost
+     * @request POST:/api/auth/magic-link/verify
+     */
+    verifyPost: (
+      data: {
+        token?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<
+        {
+          status: "ok";
+        },
+        void
+      >({
+        path: `/api/auth/magic-link/verify`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags ContentCreators
+     * @name ListContentCreators
+     * @request GET:/api/content-creators
+     */
+    listContentCreators: (
+      query?: {
+        search?: string;
+        /** @format double */
+        limit?: number;
+        /** @format double */
+        offset?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListContentCreatorsResponse, any>({
+        path: `/api/content-creators`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags ContentCreators
+     * @name CreateContentCreator
+     * @request POST:/api/content-creators
+     * @secure
+     */
+    createContentCreator: (
+      data: CreateContentCreatorRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ContentCreator, any>({
+        path: `/api/content-creators`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags ContentCreators
+     * @name GetContentCreator
+     * @request GET:/api/content-creators/{id}
+     */
+    getContentCreator: (id: number, params: RequestParams = {}) =>
+      this.request<ContentCreator, void>({
+        path: `/api/content-creators/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags ContentCreators
+     * @name UpdateContentCreator
+     * @request PUT:/api/content-creators/{id}
+     * @secure
+     */
+    updateContentCreator: (
+      id: number,
+      data: UpdateContentCreatorRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<ContentCreator, void>({
+        path: `/api/content-creators/${id}`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags ContentCreators
+     * @name DeleteContentCreator
+     * @request DELETE:/api/content-creators/{id}
+     * @secure
+     */
+    deleteContentCreator: (id: number, params: RequestParams = {}) =>
+      this.request<
+        {
+          success: boolean;
+        },
+        any
+      >({
+        path: `/api/content-creators/${id}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description List books with optional filtering
      *
      * @tags Books
@@ -465,6 +1206,7 @@ export class Api<
         minRating?: number;
         /** Search in title and description */
         search?: string;
+        status?: ItemStatus;
         /**
          * Maximum number of results (default 50)
          * @format double
@@ -679,6 +1421,51 @@ export class Api<
         void
       >({
         path: `/api/authors/${id}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Update a user's role or blocked state (admin only)
+     *
+     * @tags Admin
+     * @name PatchUser
+     * @request PATCH:/api/admin/users/{id}
+     * @secure
+     */
+    patchUser: (
+      id: number,
+      data: UpdateAdminUserRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<AdminUser, void>({
+        path: `/api/admin/users/${id}`,
+        method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Delete a user (soft-delete by default). Use ?hard=1 to attempt hard delete.
+     *
+     * @tags Admin
+     * @name DeleteUser
+     * @request DELETE:/api/admin/users/{id}
+     * @secure
+     */
+    deleteUser: (id: number, params: RequestParams = {}) =>
+      this.request<
+        {
+          success: boolean;
+        },
+        void
+      >({
+        path: `/api/admin/users/${id}`,
         method: "DELETE",
         secure: true,
         format: "json",

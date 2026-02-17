@@ -31,24 +31,53 @@ async function tryGenerate(spec: string) {
     return await spawnCmdCapture('npx', args);
 }
 
+async function downloadSpecWithAuth(url: string, outPath: string) {
+    const apiKey = process.env.MCP_API_KEY;
+    const headers: Record<string, string> = { 'Accept': 'application/json' };
+    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+
+    console.log(`Fetching OpenAPI spec from ${url} ${apiKey ? '(using MCP_API_KEY header)' : ''}`);
+    const res = await fetch(url, { method: 'GET', headers });
+    if (!res.ok) throw new Error(`Failed to fetch spec: ${res.status} ${res.statusText}`);
+    const text = await res.text();
+    fs.writeFileSync(outPath, text, 'utf8');
+    return outPath;
+}
+
 async function main(): Promise<void> {
     try {
         if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
 
         console.log(`Downloading and generating MCP client from: ${OPENAPI_URL}`);
 
-        // Try remote generation with retries
+        // If OPENAPI_URL is remote and an MCP_API_KEY is available, fetch the spec
+        // using Authorization header and pass the local file to the generator.
+        const isRemote = /^https?:\/\//i.test(OPENAPI_URL);
+        let specToUse = OPENAPI_URL;
+        if (isRemote && process.env.MCP_API_KEY) {
+            try {
+                const tmpPath = path.join(process.cwd(), 'artifacts', 'openapi', 'mcp-remote-spec.json');
+                await downloadSpecWithAuth(OPENAPI_URL, tmpPath);
+                specToUse = tmpPath;
+                console.log('Using downloaded spec for generation:', specToUse);
+            } catch (e) {
+                console.warn('Failed to download remote spec with auth, will fall back to direct generation attempt:', (e as any).message);
+                // fall through to attempt direct generation (existing behavior)
+            }
+        }
+
+        // Try remote generation with retries (or local downloaded spec)
         const maxAttempts = 3;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-            console.log(`Attempt ${attempt} of ${maxAttempts} using remote spec URL...`);
-            const res = await tryGenerate(OPENAPI_URL);
+            console.log(`Attempt ${attempt} of ${maxAttempts} using spec: ${specToUse}...`);
+            const res = await tryGenerate(specToUse);
             if (res.code === 0) {
                 console.log('MCP client generation complete. Output:', OUT_DIR);
                 await ensureIndex();
                 process.exit(0);
             }
 
-            console.warn('Generation attempt failed (remote):', res.stderr || res.stdout);
+            console.warn('Generation attempt failed:', res.stderr || res.stdout);
             if (attempt < maxAttempts) await delay(2000 * attempt);
         }
 
