@@ -12,6 +12,14 @@ Reproduce
 2. Submit a registration for the target email (e.g. `brn.dbn@gmail.com`).
 3. Inspect site logs (server-side) and the MCP server logs for the `/api/mcp/auth/magic-link/register` call.
 
+Forgot password / magic-link
+---------------------------
+
+- Open `/login` and click the **Forgot password?** link (or go to `/forgot-password`).
+- Submit an email and verify the site POSTs to `/api/auth/magic-link` and the proxy forwards to `/api/mcp/auth/magic-link`.
+- Expected UX: neutral confirmation message (do not reveal whether the email exists).
+- For staging diagnostics, enable `DEBUG_AUTH=1` to see upstream bodies in server logs.
+
 Key checks
 ----------
 

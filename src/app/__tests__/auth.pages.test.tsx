@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import RegisterPage from '@/app/register/page';
 import LoginPage from '@/app/login/page';
+import ForgotPasswordPage from '@/app/forgot-password/page';
 import { describe, it, expect, vi } from 'vitest';
 import { AuthContext } from '@/lib/auth';
 
@@ -22,6 +23,25 @@ describe('Auth pages', () => {
         expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+        expect(screen.getByText(/forgot password\?/i)).toBeInTheDocument();
+    });
+
+    it('renders forgot-password form', () => {
+        render(<ForgotPasswordPage />);
+        expect(screen.getByTestId('magiclink-email')).toBeInTheDocument();
+        expect(screen.getByTestId('magiclink-submit')).toBeInTheDocument();
+    });
+
+    it('magic link POSTs to /api/auth/magic-link', async () => {
+        const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce({ ok: true, json: async () => ({}) } as any);
+        render(<ForgotPasswordPage />);
+        fireEvent.change(screen.getByTestId('magiclink-email'), { target: { value: 'me@example.com' } });
+        fireEvent.click(screen.getByTestId('magiclink-submit'));
+        await waitFor(() => expect(fetchSpy).toHaveBeenCalled());
+        const [url, init] = (fetchSpy as any).mock.calls[0];
+        expect(url).toBe('/api/auth/magic-link');
+        expect(init?.headers?.['content-type']).toMatch(/application\/json/);
+        fetchSpy.mockRestore();
     });
 
     it('shows client validation errors for register and login', async () => {

@@ -56,6 +56,9 @@ export default function LoginPage() {
                 <div className="form-actions">
                     <button data-testid="login-submit" className="btn btn--primary w-full md:w-auto" type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
                 </div>
+                <div className="mt-2 text-sm">
+                    <a href="/forgot-password" className="text-[var(--color-norwegian-700)] hover:underline">Forgot password?</a>
+                </div>
             </form>
         </div>
     );
