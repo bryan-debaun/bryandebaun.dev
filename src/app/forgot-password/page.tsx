@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
             }
             setMessage(`If an account with that email exists, we've sent a magic link to sign in.`);
             setLoading(false);
-        } catch (err) {
+        } catch {
             setError('Failed to send magic link');
             setLoading(false);
         }

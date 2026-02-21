@@ -9,7 +9,7 @@ vi.mock('@/lib/books', () => ({
         { type: 'rating', header: 'Rating' },
         { accessor: 'status', header: 'Status' },
     ],
-    generateBookRows: (books: any[]) => books.map((b) => ({ id: b.id, title: b.title, authors: b.authors, averageRating: b.averageRating, status: b.status })),
+    generateBookRows: (books: any[]) => books.map((b) => ({ id: b.id, title: b.title, authors: b.authors, rating: b.rating, status: b.status })),
 }));
 
 import BooksTable from '../BooksTable';
@@ -26,7 +26,7 @@ const sampleBook: any = {
 };
 
 test('renders title linking to book detail', () => {
-    render(<Providers><BooksTable books={[sampleBook]} ratings={[]} /></Providers>);
+    render(<Providers><BooksTable books={[sampleBook]} /></Providers>);
     // There are two "link" role elements that may match (the row and the anchor). Find the anchor by href.
     const links = screen.getAllByRole('link', { name: /test book/i });
     const anchor = links.find((l) => l.tagName === 'A' && (l as HTMLAnchorElement).getAttribute('href') === '/books/1');
@@ -34,7 +34,7 @@ test('renders title linking to book detail', () => {
 });
 
 test('renders author linking to author detail', () => {
-    render(<Providers><BooksTable books={[sampleBook]} ratings={[]} /></Providers>);
+    render(<Providers><BooksTable books={[sampleBook]} /></Providers>);
     const authorLink = screen.getByRole('link', { name: /alice author/i });
     expect(authorLink).toBeInTheDocument();
     expect(authorLink).toHaveAttribute('href', '/authors/2');

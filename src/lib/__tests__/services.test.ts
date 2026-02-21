@@ -14,9 +14,9 @@ describe('services', () => {
         expect(books).toEqual([]);
     });
 
-    it('listRatings returns ratings array', async () => {
-        (fetchWithFallback as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(new Response(JSON.stringify({ ratings: [{ id: 1, rating: 5 }] }), { status: 200 }));
+    it('listRatings returns empty array (deprecated)', async () => {
+        // Ratings service is deprecated and returns empty arrays
         const r = await ratingsSvc.listRatings();
-        expect(r.length).toBe(1);
+        expect(r).toEqual([]);
     });
 });

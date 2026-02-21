@@ -27,6 +27,10 @@ export interface VideoGame {
   releasedAt?: string;
   createdAt: string;
   updatedAt: string;
+  /** @format double */
+  rating?: number | null;
+  review?: string | null;
+  ratedAt?: string | null;
 }
 
 export interface ListVideoGamesResponse {
@@ -144,62 +148,6 @@ export interface SeedRequest {
   refreshToken?: string;
 }
 
-/** Rating with book and user details */
-export interface RatingWithDetails {
-  /** @format double */
-  id: number;
-  /** @format double */
-  bookId: number;
-  /** @format double */
-  userId: number;
-  /** @format double */
-  rating: number;
-  review?: string;
-  createdAt: string;
-  updatedAt: string;
-  book?: {
-    title: string;
-    /** @format double */
-    id: number;
-  };
-  user?: {
-    email: string;
-    /** @format double */
-    id: number;
-  };
-}
-
-/** List ratings response */
-export interface ListRatingsResponse {
-  ratings: RatingWithDetails[];
-  /** @format double */
-  total: number;
-}
-
-/** Rating representation */
-export interface Rating {
-  /** @format double */
-  id: number;
-  /** @format double */
-  bookId: number;
-  /** @format double */
-  userId: number;
-  /** @format double */
-  rating: number;
-  review?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-/** Create or update rating request */
-export interface CreateRatingRequest {
-  /** @format double */
-  bookId: number;
-  /** @format double */
-  rating: number;
-  review?: string;
-}
-
 export interface Movie {
   /** @format double */
   id: number;
@@ -211,6 +159,10 @@ export interface Movie {
   releasedAt?: string;
   createdAt: string;
   updatedAt: string;
+  /** @format double */
+  rating?: number | null;
+  review?: string | null;
+  ratedAt?: string | null;
 }
 
 export interface ListMoviesResponse {
@@ -291,9 +243,9 @@ export interface BookWithAuthors {
   createdAt: string;
   updatedAt: string;
   /** @format double */
-  averageRating?: number | null;
-  /** @format double */
-  ratingCount?: number;
+  rating?: number | null;
+  review?: string | null;
+  ratedAt?: string | null;
   authors?: {
     name: string;
     /** @format double */
@@ -308,7 +260,7 @@ export interface ListBooksResponse {
   total: number;
 }
 
-/** Book representation */
+/** Book representation - force TSOA refresh */
 export interface Book {
   /** @format double */
   id: number;
@@ -320,9 +272,9 @@ export interface Book {
   createdAt: string;
   updatedAt: string;
   /** @format double */
-  averageRating?: number | null;
-  /** @format double */
-  ratingCount?: number;
+  rating?: number | null;
+  review?: string | null;
+  ratedAt?: string | null;
 }
 
 /** Create book request */
@@ -389,21 +341,6 @@ export interface UpdateAuthorRequest {
   name?: string;
   bio?: string;
   website?: string;
-}
-
-export interface AdminUser {
-  /** @format double */
-  id: number;
-  email: string;
-  name?: string | null;
-  role?: string | null;
-  blocked?: boolean;
-  isAdmin?: boolean;
-}
-
-export interface UpdateAdminUserRequest {
-  role?: string;
-  blocked?: boolean;
 }
 
 import type {
@@ -798,90 +735,56 @@ export class Api<
       }),
 
     /**
-     * @description List ratings with optional filtering
+     * @description Request a password reset (Supabase-backed)
      *
-     * @tags Ratings
-     * @name ListRatings
-     * @summary Get a list of ratings
-     * @request GET:/api/ratings
+     * @tags Auth
+     * @name PasswordResetRequest
+     * @request POST:/api/auth/password/reset-request
      */
-    listRatings: (
-      query?: {
-        /**
-         * Filter by book ID
-         * @format double
-         */
-        bookId?: number;
-        /**
-         * Filter by user ID
-         * @format double
-         */
-        userId?: number;
-        /**
-         * Minimum rating value (1-10)
-         * @format double
-         */
-        minRating?: number;
-        /**
-         * Maximum number of results (default 50)
-         * @format double
-         */
-        limit?: number;
-        /**
-         * Number of results to skip (default 0)
-         * @format double
-         */
-        offset?: number;
+    passwordResetRequest: (
+      data: {
+        email?: string;
       },
       params: RequestParams = {},
     ) =>
-      this.request<ListRatingsResponse, void>({
-        path: `/api/ratings`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Create or update a rating (authenticated users)
-     *
-     * @tags Ratings
-     * @name CreateRating
-     * @summary Create or update a rating for a book
-     * @request POST:/api/ratings
-     * @secure
-     */
-    createRating: (data: CreateRatingRequest, params: RequestParams = {}) =>
-      this.request<Rating, void>({
-        path: `/api/ratings`,
+      this.request<
+        {
+          status: "ok";
+        },
+        void
+      >({
+        path: `/api/auth/password/reset-request`,
         method: "POST",
         body: data,
-        secure: true,
         type: ContentType.Json,
         format: "json",
         ...params,
       }),
 
     /**
-     * @description Delete a rating (owner or admin only)
+     * @description Server-side credential login (email + password, Supabase-backed)
      *
-     * @tags Ratings
-     * @name DeleteRating
-     * @summary Delete a rating by ID
-     * @request DELETE:/api/ratings/{id}
-     * @secure
+     * @tags Auth
+     * @name PasswordLogin
+     * @request POST:/api/auth/password/login
      */
-    deleteRating: (id: number, params: RequestParams = {}) =>
+    passwordLogin: (
+      data: {
+        password?: string;
+        email?: string;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<
         {
-          success: boolean;
+          status: "ok";
         },
         void
       >({
-        path: `/api/ratings/${id}`,
-        method: "DELETE",
-        secure: true,
+        path: `/api/auth/password/login`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -1421,51 +1324,6 @@ export class Api<
         void
       >({
         path: `/api/authors/${id}`,
-        method: "DELETE",
-        secure: true,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Update a user's role or blocked state (admin only)
-     *
-     * @tags Admin
-     * @name PatchUser
-     * @request PATCH:/api/admin/users/{id}
-     * @secure
-     */
-    patchUser: (
-      id: number,
-      data: UpdateAdminUserRequest,
-      params: RequestParams = {},
-    ) =>
-      this.request<AdminUser, void>({
-        path: `/api/admin/users/${id}`,
-        method: "PATCH",
-        body: data,
-        secure: true,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Delete a user (soft-delete by default). Use ?hard=1 to attempt hard delete.
-     *
-     * @tags Admin
-     * @name DeleteUser
-     * @request DELETE:/api/admin/users/{id}
-     * @secure
-     */
-    deleteUser: (id: number, params: RequestParams = {}) =>
-      this.request<
-        {
-          success: boolean;
-        },
-        void
-      >({
-        path: `/api/admin/users/${id}`,
         method: "DELETE",
         secure: true,
         format: "json",

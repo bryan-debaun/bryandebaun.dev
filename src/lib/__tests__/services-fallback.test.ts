@@ -75,10 +75,9 @@ describe('services fallback behavior (server-side)', () => {
         expect(book).toEqual({ id: 1, title: 'proxied book' });
     });
 
-    it('falls back to proxy when listRatings returns HTML-like payload', async () => {
-        (createApi as any).mockImplementation(() => ({ api: { listRatings: async () => ({ data: '<html>bot</html>' }) } }));
-
+    it('listRatings returns empty array (deprecated endpoint)', async () => {
+        // listRatings is deprecated and no longer makes API calls
         const ratings = await listRatings({ bookId: 1 });
-        expect(ratings).toEqual([{ id: 1, rating: 7 }]);
+        expect(ratings).toEqual([]);
     });
 });

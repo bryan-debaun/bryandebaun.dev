@@ -1,19 +1,12 @@
 import BooksTable from '@/components/BooksTable';
 import Tabs from '@/components/Tabs';
-import type { BookWithAuthors, RatingWithDetails } from '@bryandebaun/mcp-client';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
     const books = await import('@/lib/services/books').then((m) => m.listBooks());
 
-    // Prefer server-provided `averageRating` when available for every book; otherwise fetch ratings.
-    let ratings: RatingWithDetails[] = [];
-    const allHaveAvg = Array.isArray(books) && books.length > 0 && books.every((b: BookWithAuthors) => typeof (b as BookWithAuthors & { averageRating?: number | null }).averageRating === 'number');
-    if (!allHaveAvg) {
-        ratings = await import('@/lib/services/ratings').then((m) => m.listRatings());
-    }
-
+    // Books now have embedded personal rating field
     if (!books || books.length === 0) console.warn('Media: empty response at render', { length: books?.length ?? 0, origin: process.env.NEXT_PUBLIC_SITE_URL });
 
     const tabs = [
@@ -22,7 +15,7 @@ export default async function Page() {
             label: 'Books',
             panel: (
                 <div>
-                    <BooksTable books={books} ratings={ratings} />
+                    <BooksTable books={books} />
                 </div>
             ),
         },

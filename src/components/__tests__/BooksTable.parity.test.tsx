@@ -10,21 +10,21 @@ vi.mock('@/lib/books', () => ({
         { accessor: 'status', header: 'Status' },
         { id: 'actions', type: 'actions', header: '' },
     ],
-    generateBookRows: (books: any[]) => books.map((b) => ({ id: b.id, title: b.title, authors: b.authors, averageRating: b.averageRating, status: b.status })),
+    generateBookRows: (books: any[]) => books.map((b) => ({ id: b.id, title: b.title, authors: b.authors, rating: b.rating, status: b.status })),
 }));
 
 import BooksTable from '../BooksTable';
 import Providers from '@/components/Providers';
 import { ItemStatus } from '@/lib/types';
 
-const sampleBook = (id: number, avg?: number) => ({
+const sampleBook = (id: number, rating?: number) => ({
     id,
     title: `Book ${id}`,
     status: ItemStatus.NOT_STARTED,
     createdAt: '',
     updatedAt: '',
     authors: [],
-    averageRating: avg,
+    rating,
 });
 
 describe('BooksTable parity and optimistic overlay', () => {
@@ -33,27 +33,27 @@ describe('BooksTable parity and optimistic overlay', () => {
     });
 
     it('reflects server updates when no optimistic changes', () => {
-        const { rerender } = render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} /></Providers>);
+        const { rerender } = render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} /></Providers>);
         // initial rating shows 1
         expect(screen.getByText('1')).toBeInTheDocument();
 
-        // server updates average to 2 -> re-render with new props
-        rerender(<Providers><BooksTable books={[sampleBook(1, 2.0)]} ratings={[]} /></Providers>);
+        // server updates rating to 2 -> re-render with new props
+        rerender(<Providers><BooksTable books={[sampleBook(1, 2.0)]} /></Providers>);
         expect(screen.getByText('2')).toBeInTheDocument();
     });
 
     it('applies optimistic status immediately and merges server response', async () => {
-        // mock fetch to succeed and return updated book with avg 9.0
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 1, averageRating: 9.0 }) } as any));
+        // mock fetch to succeed and return updated book with rating 9.0
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 1, rating: 9.0 }) } as any));
 
-        render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} isAdmin={true} /></Providers>);
+        render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} isAdmin={true} /></Providers>);
         expect(screen.getByText('1')).toBeInTheDocument();
 
         // click the toggle button to trigger optimistic status change
         const toggle = screen.getByRole('button', { name: /toggle status for book 1/i });
         fireEvent.click(toggle);
 
-        // server response should be merged and update avg rating
+        // server response should be merged and update rating
         expect(await screen.findByText('9')).toBeInTheDocument();
     });
 
@@ -62,7 +62,7 @@ describe('BooksTable parity and optimistic overlay', () => {
         const fetchP = new Promise((res) => { resolveFetch = res; });
         vi.stubGlobal('fetch', vi.fn().mockImplementation(() => fetchP as any));
 
-        render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} isAdmin={true} /></Providers>);
+        render(<Providers><BooksTable books={[sampleBook(1, 1.0)]} isAdmin={true} /></Providers>);
         // Query fresh on each assertion to avoid stale element references
         expect(screen.getByRole('button', { name: /toggle status for book 1/i })).toBeEnabled();
 
@@ -74,7 +74,7 @@ describe('BooksTable parity and optimistic overlay', () => {
         await waitFor(() => expect(screen.getByRole('button', { name: /toggle status for book 1/i })).toBeDisabled());
 
         // resolve the fetch
-        resolveFetch({ ok: true, json: async () => ({ id: 1, averageRating: 9.0 }) });
+        resolveFetch({ ok: true, json: async () => ({ id: 1, rating: 9.0 }) });
 
         // wait for the update to be applied
         expect(await screen.findByText('9')).toBeInTheDocument();

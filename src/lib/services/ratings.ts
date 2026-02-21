@@ -1,36 +1,26 @@
-import type { RatingWithDetails, ListRatingsResponse } from '@bryandebaun/mcp-client';
-import { fetchWithFallback } from '@/lib/server-fetch';
-import { createApi } from '@/lib/mcp';
-import { unwrapApiResponse } from '@/lib/api-response';
-import { looksLikeHtmlPayload } from '@/lib/mcp-proxy';
+/**
+ * ⚠️ DEPRECATED: The MCP server no longer provides standalone ratings endpoints.
+ * Ratings are now embedded directly in entities (Book, Movie, VideoGame) as personal ratings.
+ * Each entity has: rating, review, ratedAt fields.
+ * 
+ * This service is kept for backward compatibility but returns empty arrays.
+ */
 
-export async function listRatings(query?: { bookId?: number }): Promise<RatingWithDetails[]> {
-    // Server-side direct call to MCP client for reliability in preview builds
-    if (typeof window === 'undefined') {
-        try {
-            const api = createApi();
-            const res = await api.api.listRatings(query ? { bookId: query.bookId } : undefined);
-            const payload = unwrapApiResponse<ListRatingsResponse>(res);
+export type DeprecatedRatingWithDetails = {
+    id: number;
+    bookId: number;
+    userId: number;
+    rating: number;
+    review?: string;
+    createdAt: string;
+    updatedAt: string;
+    book?: { title: string; id: number };
+    user?: { email: string; id: number };
+};
 
-            if (await looksLikeHtmlPayload(payload)) {
-                console.error('listRatings: detected HTML payload from MCP; falling back to proxy');
-                throw new Error('Upstream returned HTML');
-            }
-
-            return payload?.ratings ?? [];
-        } catch (e) {
-            console.error('listRatings direct MCP call failed; falling back to proxy', e);
-            const qs = query?.bookId ? `?bookId=${query.bookId}` : '';
-            const resProxy = await fetchWithFallback(`/api/mcp/ratings${qs}`);
-            if (!resProxy || !resProxy.ok) return [];
-            const payload = await resProxy.json();
-            return payload?.ratings ?? [];
-        }
-    }
-
-    const qs = query?.bookId ? `?bookId=${query.bookId}` : '';
-    const res = await fetchWithFallback(`/api/mcp/ratings${qs}`);
-    if (!res.ok) return [];
-    const payload = await res.json();
-    return payload?.ratings ?? [];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function listRatings(_query?: { bookId?: number }): Promise<DeprecatedRatingWithDetails[]> {
+    // The ratings endpoint no longer exists - return empty array
+    console.warn('listRatings is deprecated. Ratings are now embedded in entities.');
+    return [];
 }
