@@ -33,20 +33,12 @@ const proxyResponses = (url: string) => {
         });
     }
 
-    if (url.startsWith('/api/mcp/ratings')) {
-        return new Response(JSON.stringify({ ratings: [{ id: 1, rating: 7 }] }), {
-            status: 200,
-            headers: { 'content-type': 'application/json' },
-        });
-    }
-
     return new Response('{}', { status: 404 });
 };
 
 
 import { createApi } from '@/lib/mcp';
 import { listBooks, getBookById } from '@/lib/services/books';
-import { listRatings } from '@/lib/services/ratings';
 
 describe('services fallback behavior (server-side)', () => {
     beforeEach(() => {
@@ -73,12 +65,5 @@ describe('services fallback behavior (server-side)', () => {
 
         const book = await getBookById(1);
         expect(book).toEqual({ id: 1, title: 'proxied book' });
-    });
-
-    it('falls back to proxy when listRatings returns HTML-like payload', async () => {
-        (createApi as any).mockImplementation(() => ({ api: { listRatings: async () => ({ data: '<html>bot</html>' }) } }));
-
-        const ratings = await listRatings({ bookId: 1 });
-        expect(ratings).toEqual([{ id: 1, rating: 7 }]);
     });
 });

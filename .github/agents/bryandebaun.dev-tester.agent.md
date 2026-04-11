@@ -30,10 +30,49 @@ Actionable guidance for test implementation, validation, and CI validation. Use 
 - Check the related issue: `gh issue list --repo bryan-debaun/bryandebaun.dev` and `gh issue view [number]`.
 - Ensure an implementation issue exists and includes areas needing tests; if missing, propose one and ask for approval.
 
+## Test Infrastructure
+- **Framework**: Vitest 4.0.18
+- **Current baseline**: 114 tests passing (52 test files)
+- **E2E**: Playwright (with a11y and touch target validation)
+- **Location**: `src/**/__tests__/*.test.ts(x)`, `tests/e2e/*.spec.ts`
+
 ## Before starting work
-1. Establish a test baseline on `main`: `git checkout main && git pull` and run the full test suite.
-2. Record which tests pass/fail and current coverage metrics.
+1. Establish a test baseline on `main`: `git checkout main && git pull && npm test`
+2. Record which tests pass/fail (should be 114/114 passing)
 3. Create a branch: `feature/add-tests-[short-desc]` and push upstream for CI runs.
+
+## Common Test Patterns
+
+### API Route Tests
+```typescript
+import { describe, it, expect, vi } from 'vitest'
+import { GET } from './route'
+
+vi.mock('@/lib/mcp-proxy', () => ({
+  proxyCall: vi.fn()
+}))
+
+describe('GET /api/endpoint', () => {
+  it('should return data on success', async () => {
+    // Mock, act, assert
+  })
+})
+```
+
+### Service Layer Tests
+```typescript
+vi.mock('../server-fetch', () => ({
+  fetchWithFallback: vi.fn()
+}))
+
+// Test both direct MCP and fallback paths
+```
+
+### Component Tests
+```typescript
+import { render } from '@testing-library/react'
+// Test rendering, interactions, accessibility
+```
 
 ## Testing workflow
 - Reproduce bugs locally and write a failing test first when appropriate.

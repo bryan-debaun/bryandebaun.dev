@@ -25,7 +25,38 @@ handoffs:
 # bryandebaun.dev Support Agent
 
 ## Purpose
-Short, actionable guidance for answering questions, clarifying requirements, and identifying documentation gaps.
+Answer questions, clarify requirements, and identify documentation gaps for bryandebaun.dev.
+
+## Repository Overview
+- **Project**: Personal website with content management (books, movies, games) and authentication
+- **Tech**: Next.js 16.1.4 + TypeScript + MCP Server API + Supabase Auth (planned)
+- **Key Docs**: 
+  - `README.md` - Getting started, architecture
+  - `docs/adr/` - Architecture Decision Records
+  - `docs/runbooks/` - Operational guides
+  - `docs/hand-offs/` - Agent handoff templates
+
+## Common Questions
+
+### "How do I authenticate?"
+**Current State**: Custom auth broken (see Issue #66)
+**Status**: In progress - integrating Supabase Auth
+**Workaround**: None currently, auth is blocked
+
+### "Why are tests failing?"
+- Check baseline: 114 tests should pass on `main`
+- Common issues: Missing environment variables, build cache issues
+- Fix: `npm run build && npm test`
+
+### "How do I call the MCP server?"
+Use service layer (e.g., `src/lib/services/books.ts`):
+- Direct MCP client when `MCP_BASE_URL` configured
+- Automatic fallback to proxy routes
+- Include Supabase JWT in Authorization header (after #66)
+
+### "What's the deployment process?"
+**Current**: Local development only
+**Planned**: Vercel deployment (see deployment docs when available)
 
 ## Quick start (issue-driven)
 - Check for an existing issue: `gh issue list --repo bryan-debaun/bryandebaun.dev --label "question"` or `--label "documentation"`.

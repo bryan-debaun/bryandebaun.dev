@@ -3,7 +3,7 @@ import React from 'react';
 import ExternalMetadataCard from './ExternalMetadataCard';
 import type { OpenLibraryMetadata } from '@/lib/services/openLibrary';
 
-type ServerAuthorRef = { author?: { id?: number; name?: string } };
+type ServerAuthorRef = { id?: number; name?: string };
 
 export default function BookEnrich({ bookId, isbn, initialMetadata, serverAuthors }: { bookId: number; isbn?: string | null; initialMetadata?: OpenLibraryMetadata | null; serverAuthors?: ServerAuthorRef[] }) {
     const metadata = initialMetadata ?? null;

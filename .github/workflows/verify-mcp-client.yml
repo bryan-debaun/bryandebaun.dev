@@ -30,6 +30,8 @@ jobs:
 
       - name: Generate MCP client
         run: npm run generate:mcp-client
+        env:
+          MCP_API_KEY: ${{ secrets.MCP_API_KEY }}
 
       - name: Verify generated files are up-to-date
         run: |
@@ -39,6 +41,6 @@ jobs:
             echo
             git --no-pager status --porcelain -- packages/mcp-client/src || true
             echo
-            git --no-pager --no-color diff -- packages/mcp-client/src || true
+            git --no-pager diff -- packages/mcp-client/src || true
             exit 1
           fi

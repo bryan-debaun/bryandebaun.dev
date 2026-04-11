@@ -1,15 +1,41 @@
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import { fetchWithFallback } from '@/lib/server-fetch';
 
 export async function GET() {
+    const debug = process.env.DEBUG_AUTH === '1' || (process.env.NODE_ENV !== 'production' && process.env.DEBUG_AUTH !== '0');
+
     try {
-        const res = await fetchWithFallback('/api/mcp/auth/me');
-        const text = await res.text();
-        const headers: Record<string, string> = {};
-        res.headers.forEach((v, k) => (headers[k] = v));
-        return new NextResponse(text, { status: res.status, headers });
+        if (debug) {
+            console.info('auth.me: fetching current user');
+        }
+
+        const supabase = await createClient();
+        const { data: { user }, error } = await supabase.auth.getUser();
+
+        if (error) {
+            if (debug) {
+                console.error('auth.me: failed', { error: error.message });
+            }
+            return NextResponse.json({ error: error.message }, { status: 401 });
+        }
+
+        if (!user) {
+            if (debug) {
+                console.info('auth.me: no user session');
+            }
+            return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+        }
+
+        if (debug) {
+            console.info('auth.me: success', { userId: user.id });
+        }
+
+        return NextResponse.json({ user });
     } catch (e) {
-        console.error('Auth me proxy failed', e);
-        return NextResponse.json({ error: 'Failed to fetch user' }, { status: 502 });
+        const error = e as Error;
+        if (debug) {
+            console.error('auth.me: exception', { error: error.message });
+        }
+        return NextResponse.json({ error: 'Failed to fetch session' }, { status: 500 });
     }
 }

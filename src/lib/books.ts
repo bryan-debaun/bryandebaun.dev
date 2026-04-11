@@ -1,8 +1,7 @@
-import type { BookWithAuthors, RatingWithDetails } from '@bryandebaun/mcp-client';
-import { averageByKey } from './aggregates';
+import type { BookWithAuthors } from '@bryandebaun/mcp-client';
 import type { ItemStatus } from '@/lib/types';
 
-export type BookRow = BookWithAuthors & { averageRating?: number | null; status?: ItemStatus | string };
+export type BookRow = BookWithAuthors & { status?: ItemStatus | string };
 type ColumnDescriptor = {
     accessor?: keyof BookRow | string;
     header: string;
@@ -18,15 +17,7 @@ export const bookColumnDescriptors: ColumnDescriptor[] = [
     { id: "actions", header: "", type: "actions" },
 ];
 
-export function generateBookRows(books: BookWithAuthors[], ratings: RatingWithDetails[]): BookRow[] {
-    // Compute accurate averages using the shared helper which applies rounding to 0.1 precision.
-    const avgByKey = averageByKey(ratings, (r) => r.bookId, (r) => r.rating);
-    // averageByKey returns Map<number, number>
-
-    return books.map((b) => {
-        const br = b as BookWithAuthors & Partial<{ averageRating?: number }>;
-        const fromRatings = avgByKey.get(b.id as number);
-        const a = typeof br.averageRating === 'number' && !Number.isNaN(br.averageRating) ? br.averageRating : fromRatings;
-        return { ...b, averageRating: a };
-    });
+export function generateBookRows(books: BookWithAuthors[]): BookRow[] {
+    // Books now have embedded personal rating field - no aggregation needed
+    return books.map((b) => ({ ...b }));
 }

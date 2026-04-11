@@ -9,18 +9,17 @@ import Stars from './Stars';
 import StatusBadge from './StatusBadge';
 import { bookColumnDescriptors, type BookRow } from '@/lib/books';
 import { useBooks } from '@/lib/hooks/useBooks';
-import type { BookWithAuthors, RatingWithDetails } from '@bryandebaun/mcp-client';
+import type { BookWithAuthors } from '@bryandebaun/mcp-client';
 
 type Props = {
     books?: BookWithAuthors[];
-    ratings?: RatingWithDetails[];
     // When true, show admin-only actions (toggle status). Default false.
     isAdmin?: boolean;
 };
 
-export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
+export default function BooksTable({ books, isAdmin = false }: Props) {
     // Use the hook and seed with server-provided data when available
-    const { rows: hookRows, toggleStatus } = useBooks(books, ratings);
+    const { rows: hookRows, toggleStatus } = useBooks(books);
 
     const rows: BookRow[] = hookRows ?? [];
 
@@ -78,7 +77,7 @@ export default function BooksTable({ books, ratings, isAdmin = false }: Props) {
                         meta: { headerClassName: 'w-28 text-right', cellClassName: 'w-28 text-right' },
                         cell: (info: CellContext<BookRow, unknown>) => {
                             const book: BookRow = info.row.original;
-                            const v = book.averageRating as number | undefined;
+                            const v = book.rating as number | undefined;
                             return typeof v === 'number' ? (
                                 <div className="flex items-center justify-end gap-2">
                                     <Stars value={v} />

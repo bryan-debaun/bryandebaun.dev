@@ -6,9 +6,8 @@ describe('Books page static checks', () => {
     it('fetches from the MCP books API', () => {
         const filePath = path.resolve(process.cwd(), 'src', 'app', 'books', 'page.tsx');
         const src = readFileSync(filePath, 'utf8');
-        // Server page now uses service wrappers for fetching
+        // Server page now uses service wrappers for fetching (books only, not ratings)
         expect(src).toContain("import('@/lib/services/books')");
-        expect(src).toContain("import('@/lib/services/ratings')");
         // We now render a client-side `BooksTable` wrapper — ensure it's referenced
         expect(src).toContain('BooksTable');
 

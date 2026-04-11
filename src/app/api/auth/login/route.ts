@@ -1,17 +1,40 @@
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse, type NextRequest } from 'next/server';
-import { fetchWithFallback } from '@/lib/server-fetch';
 
 export async function POST(req: NextRequest) {
+    const debug = process.env.DEBUG_AUTH === '1' || (process.env.NODE_ENV !== 'production' && process.env.DEBUG_AUTH !== '0');
+
     try {
-        const body = await req.json();
-        const res = await fetchWithFallback('/api/mcp/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-        const text = await res.text();
-        // Mirror upstream status and body, including Set-Cookie if present
-        const headers: Record<string, string> = {};
-        res.headers.forEach((v, k) => (headers[k] = v));
-        return new NextResponse(text, { status: res.status, headers });
+        const { email, password } = await req.json();
+        const maskedEmail = email ? email.replace(/(.{2}).+(@.+)/, '$1***$2') : undefined;
+
+        if (debug) {
+            console.info('auth.login: attempting password login', { email: maskedEmail });
+        }
+
+        const supabase = await createClient();
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (error) {
+            if (debug) {
+                console.error('auth.login: failed', { email: maskedEmail, error: error.message });
+            }
+            return NextResponse.json({ error: error.message }, { status: 401 });
+        }
+
+        if (debug) {
+            console.info('auth.login: success', { email: maskedEmail, userId: data.user?.id });
+        }
+
+        return NextResponse.json({ user: data.user, session: data.session });
     } catch (e) {
-        console.error('Auth login proxy failed', e);
-        return NextResponse.json({ error: 'Failed to login' }, { status: 502 });
+        const error = e as Error;
+        if (debug) {
+            console.error('auth.login: exception', { error: error.message });
+        }
+        return NextResponse.json({ error: 'Failed to login' }, { status: 500 });
     }
 }

@@ -1,34 +1,22 @@
-import { RatingWithDetails } from '@bryandebaun/mcp-client';
 import Stars from '@/components/Stars';
 import StatusBadge from '@/components/StatusBadge';
 import BackButton from '@/components/BackButton';
 import Link from 'next/link';
 import { formatDate } from '@/lib/dates';
 import BookEnrich from '@/components/BookEnrich';
+import { getBookById } from '@/lib/services/books';
 
 export default async function BookPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
     const p = await params;
     const id = Number(p.id);
 
     try {
-        // Use the local proxy rather than calling the external MCP directly. This centralizes
-        // base URL configuration and makes behavior more predictable in dev/test.
-        // Use the server-safe fetch helper which retries with an absolute origin when needed.
-        const [, { listRatings }] = await Promise.all([
-            import('@/lib/services/books'),
-            import('@/lib/services/ratings'),
-        ]);
+        // Use the service layer function which handles direct MCP calls + fallback logic
+        const book = await getBookById(id);
 
-        // Fetch book details with diagnostic info so we can show helpful errors
-        const { fetchWithFallback } = await import('@/lib/server-fetch');
-        const bookRes = await fetchWithFallback(`/api/mcp/books/${id}`);
-        if (!bookRes.ok) {
-            const txt = await bookRes.text().catch(() => '');
-            throw new Error(`Failed to fetch book ${id}: ${bookRes.status}${txt ? ` - ${txt}` : ''}`);
+        if (!book) {
+            throw new Error(`Book ${id} not found`);
         }
-        const book = await bookRes.json();
-
-        const ratings = await listRatings({ bookId: id });
 
         // Try server-side enrichment via OpenLibrary so we can show suggestions immediately
         let initialMetadata: import('@/lib/services/openLibrary').OpenLibraryMetadata | null = null;
@@ -116,22 +104,20 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
 
                 <section>
                     <h2 className="text-lg font-medium">My Rating</h2>
-                    <div className="mt-2 space-y-2 text-center">
-                        {ratings.length ? (
-                            ratings.map((r: RatingWithDetails) => (
-                                <div key={r.id} className="p-3 rounded border border-[var(--tw-prose-td-borders)] text-center">
-                                    <div className="flex flex-col sm:flex-row items-center sm:justify-center sm:gap-3">
-                                        <div className="flex items-center gap-3">
-                                            <Stars value={r.rating} />
-                                            <div className="text-sm">{r.rating} / 10</div>
-                                        </div>
-                                        <div className="text-xs text-gray-500 mt-2 sm:mt-0">{formatDate(r.createdAt)}</div>
+                    <div className="mt-2 text-center">
+                        {typeof book.rating === 'number' ? (
+                            <div className="p-3 rounded border border-[var(--tw-prose-td-borders)] text-center">
+                                <div className="flex flex-col sm:flex-row items-center sm:justify-center sm:gap-3">
+                                    <div className="flex items-center gap-3">
+                                        <Stars value={book.rating} />
+                                        <div className="text-sm">{book.rating} / 10</div>
                                     </div>
-                                    {r.review ? <div className="mt-2 text-sm text-center">{r.review}</div> : null}
+                                    {book.ratedAt && <div className="text-xs text-gray-500 mt-2 sm:mt-0">{formatDate(book.ratedAt)}</div>}
                                 </div>
-                            ))
+                                {book.review ? <div className="mt-2 text-sm text-center">{book.review}</div> : null}
+                            </div>
                         ) : (
-                            <div className="text-sm text-gray-500">No ratings yet</div>
+                            <div className="text-sm text-gray-500">No rating yet</div>
                         )}
                     </div>
                 </section>

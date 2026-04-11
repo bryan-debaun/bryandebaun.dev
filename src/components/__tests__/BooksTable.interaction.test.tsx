@@ -10,7 +10,7 @@ vi.mock('@/lib/books', () => ({
         { accessor: 'status', header: 'Status' },
         { id: 'actions', type: 'actions', header: '' },
     ],
-    generateBookRows: (books: any[]) => books.map((b) => ({ id: b.id, title: b.title, authors: b.authors, averageRating: b.averageRating, status: b.status })),
+    generateBookRows: (books: any[]) => books.map((b) => ({ id: b.id, title: b.title, authors: b.authors, rating: b.rating, status: b.status })),
 }));
 
 const push = vi.fn();
@@ -20,14 +20,14 @@ import BooksTable from '../BooksTable';
 import Providers from '@/components/Providers';
 import { ItemStatus } from '@/lib/types';
 
-const sampleBook = (id: number, avg?: number) => ({
+const sampleBook = (id: number, rating?: number) => ({
     id,
     title: `Book ${id}`,
     status: ItemStatus.NOT_STARTED,
     createdAt: '',
     updatedAt: '',
     authors: [],
-    averageRating: avg,
+    rating,
 });
 
 describe('BooksTable interactions', () => {
@@ -47,7 +47,7 @@ describe('BooksTable interactions', () => {
     it('navigates when row clicked', () => {
         render(
             <Providers>
-                <BooksTable books={[sampleBook(1, 1.0)]} ratings={[]} />
+                <BooksTable books={[sampleBook(1, 1.0)]} />
             </Providers>
         );
 
@@ -66,12 +66,12 @@ describe('BooksTable interactions', () => {
             createdAt: '',
             updatedAt: '',
             authors: [{ id: 42, name: 'AuthOne' }],
-            averageRating: 4.0,
+            rating: 4.0,
         } as any;
 
         render(
             <Providers>
-                <BooksTable books={[bookWithAuthor]} ratings={[]} />
+                <BooksTable books={[bookWithAuthor]} />
             </Providers>
         );
 

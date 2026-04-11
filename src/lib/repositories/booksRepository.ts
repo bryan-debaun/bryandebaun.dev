@@ -1,12 +1,28 @@
 import type { BookWithAuthors } from '@bryandebaun/mcp-client';
-import * as svc from '@/lib/services/books';
+
+/**
+ * Repository layer for books - uses API routes for client-side operations
+ * For server-side operations, use the service layer directly instead
+ */
 
 export async function listBooks(): Promise<BookWithAuthors[]> {
-    return await svc.listBooks();
+    // Client-side: use the MCP proxy API route
+    const res = await fetch('/api/mcp/books');
+    if (!res.ok) {
+        throw new Error(`Failed to fetch books: ${res.status}`);
+    }
+    const data = await res.json();
+    return data?.books ?? [];
 }
 
 export async function getBookById(id: number): Promise<BookWithAuthors | null> {
-    return await svc.getBookById(id);
+    // Client-side: use the MCP proxy API route
+    const res = await fetch(`/api/mcp/books/${id}`);
+    if (!res.ok) {
+        if (res.status === 404) return null;
+        throw new Error(`Failed to fetch book ${id}: ${res.status}`);
+    }
+    return await res.json();
 }
 
 export async function updateBookStatus(id: number, status: string): Promise<BookWithAuthors> {
