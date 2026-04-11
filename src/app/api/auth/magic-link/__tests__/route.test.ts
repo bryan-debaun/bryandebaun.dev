@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { NextRequest } from 'next/server';
+import type { ProxyResult } from '@/lib/mcp-proxy';
 
-vi.mock('@/lib/server-fetch', () => ({ fetchWithFallback: vi.fn() }));
+vi.mock('@/lib/mcp-proxy', () => ({ proxyCall: vi.fn() }));
 
 describe('POST /api/auth/magic-link', () => {
     beforeEach(() => {
@@ -10,21 +11,21 @@ describe('POST /api/auth/magic-link', () => {
     });
 
     it('proxies successful magic-link request and returns upstream body/status', async () => {
-        const { fetchWithFallback } = await import('@/lib/server-fetch');
-        (fetchWithFallback as any).mockResolvedValue(new Response(JSON.stringify({ status: 'accepted' }), { status: 202, headers: { 'content-type': 'application/json' } }));
+        const { proxyCall } = await import('@/lib/mcp-proxy');
+        (proxyCall as any).mockResolvedValue({ status: 200, body: { status: 'accepted' } } satisfies ProxyResult);
 
         const route = await import('../route');
         const req = new Request('http://localhost/api/auth/magic-link', { method: 'POST', body: JSON.stringify({ email: 'test@example.com' }), headers: { 'content-type': 'application/json' } });
         const res = await route.POST(req as unknown as NextRequest);
 
-        expect(res.status).toBe(202);
+        expect(res.status).toBe(200);
         const json = await (res as Response).json();
         expect(json).toEqual({ status: 'accepted' });
     });
 
     it('forwards upstream non-2xx response and logs details when debug enabled', async () => {
-        const { fetchWithFallback } = await import('@/lib/server-fetch');
-        (fetchWithFallback as any).mockResolvedValue(new Response('Bad request', { status: 400, headers: { 'content-type': 'text/plain' } }));
+        const { proxyCall } = await import('@/lib/mcp-proxy');
+        (proxyCall as any).mockResolvedValue({ status: 400, body: { error: 'Failed to fetch from MCP' } } satisfies ProxyResult);
 
         const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
         const route = await import('../route');
@@ -32,15 +33,16 @@ describe('POST /api/auth/magic-link', () => {
         const res = await route.POST(req as unknown as NextRequest);
 
         expect(res.status).toBe(400);
-        expect(await (res as Response).text()).toBe('Bad request');
-        expect(spy).toHaveBeenCalledWith(expect.stringContaining('auth.magic-link: upstream returned non-2xx'), expect.any(Object));
+        const json = await (res as Response).json();
+        expect(json).toEqual({ error: 'Failed to fetch from MCP' });
+        expect(spy).toHaveBeenCalledWith(expect.stringContaining('auth.magic-link: non-2xx response'), expect.any(Object));
         spy.mockRestore();
     });
 
     it('sanitizes upstream error body in production (no DEBUG_AUTH)', async () => {
-        const { fetchWithFallback } = await import('@/lib/server-fetch');
+        const { proxyCall } = await import('@/lib/mcp-proxy');
         process.env.DEBUG_AUTH = '0';
-        (fetchWithFallback as any).mockResolvedValue(new Response('Internal failure', { status: 502, headers: { 'content-type': 'text/plain' } }));
+        (proxyCall as any).mockResolvedValue({ status: 502, body: { error: 'Failed to fetch from MCP' } } satisfies ProxyResult);
 
         const spy = vi.spyOn(console, 'warn').mockImplementation(() => { });
         const route = await import('../route');
@@ -49,14 +51,14 @@ describe('POST /api/auth/magic-link', () => {
 
         expect(res.status).toBe(502);
         const json = await (res as Response).json();
-        expect(json).toEqual({ error: 'Failed to send magic link' });
-        expect(spy).toHaveBeenCalledWith(expect.stringContaining('auth.magic-link: upstream returned non-2xx (sanitized response)'), expect.any(Object));
+        expect(json).toEqual({ error: 'Failed to fetch from MCP' });
+        expect(spy).toHaveBeenCalledWith(expect.stringContaining('auth.magic-link: non-2xx response (sanitized)'), expect.any(Object));
         spy.mockRestore();
     });
 
-    it('returns 502 and logs when fetchWithFallback throws', async () => {
-        const { fetchWithFallback } = await import('@/lib/server-fetch');
-        (fetchWithFallback as any).mockImplementation(() => { throw new Error('network'); });
+    it('returns 502 and logs when proxyCall throws', async () => {
+        const { proxyCall } = await import('@/lib/mcp-proxy');
+        (proxyCall as any).mockImplementation(() => { throw new Error('network'); });
 
         const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
         const route = await import('../route');

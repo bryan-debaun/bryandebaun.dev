@@ -1,17 +1,33 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { NextRequest } from 'next/server';
+import type { AxiosResponse } from 'axios';
 
-vi.mock('@/lib/server-fetch', () => ({ fetchWithFallback: vi.fn() }));
+// Create mock methods that will be shared across all Api instances
+const mockVerifyGet = vi.fn();
+const mockVerifyPost = vi.fn();
+
+vi.mock('@bryandebaun/mcp-client', () => ({
+    Api: vi.fn(function (this: any) {
+        this.api = {
+            verifyGet: mockVerifyGet,
+            verifyPost: mockVerifyPost
+        };
+        return this;
+    })
+}));
 
 describe('GET /api/auth/magic-link/verify', () => {
     beforeEach(() => {
-        vi.restoreAllMocks();
+        vi.clearAllMocks();
         process.env.DEBUG_AUTH = '1';
     });
 
     it('proxies GET verify and mirrors redirect + Set-Cookie', async () => {
-        const { fetchWithFallback } = await import('@/lib/server-fetch');
-        (fetchWithFallback as any).mockResolvedValue(new Response('', { status: 302, headers: { location: '/', 'set-cookie': 'session=abc; HttpOnly' } }));
+        mockVerifyGet.mockResolvedValue({
+            data: '',
+            status: 302,
+            headers: { location: '/', 'set-cookie': 'session=abc; HttpOnly' }
+        } as AxiosResponse);
 
         const route = await import('../verify/route');
         const req = new Request('http://localhost/api/auth/magic-link/verify?token=abc', { method: 'GET' });
@@ -22,8 +38,11 @@ describe('GET /api/auth/magic-link/verify', () => {
     });
 
     it('proxies POST verify and returns JSON body', async () => {
-        const { fetchWithFallback } = await import('@/lib/server-fetch');
-        (fetchWithFallback as any).mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'content-type': 'application/json' } }));
+        mockVerifyPost.mockResolvedValue({
+            data: { ok: true },
+            status: 200,
+            headers: { 'content-type': 'application/json' }
+        } as AxiosResponse);
 
         const route = await import('../verify/route');
         const req = new Request('http://localhost/api/auth/magic-link/verify', { method: 'POST', body: JSON.stringify({ token: 'abc' }), headers: { 'content-type': 'application/json' } });
@@ -34,8 +53,10 @@ describe('GET /api/auth/magic-link/verify', () => {
     });
 
     it('forwards upstream non-2xx response and logs details when debug enabled', async () => {
-        const { fetchWithFallback } = await import('@/lib/server-fetch');
-        (fetchWithFallback as any).mockResolvedValue(new Response('Invalid token', { status: 400 }));
+        const axiosError: any = new Error('Request failed');
+        axiosError.isAxiosError = true;
+        axiosError.response = { status: 400, data: { error: 'invalid token' } };
+        mockVerifyGet.mockRejectedValue(axiosError);
 
         const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
         const route = await import('../verify/route');
@@ -43,13 +64,13 @@ describe('GET /api/auth/magic-link/verify', () => {
         const res = await route.GET(req as unknown as NextRequest);
 
         expect(res.status).toBe(400);
-        expect(await (res as Response).text()).toBe('Invalid token');
+        const json = await (res as Response).json();
+        expect(json).toEqual({ error: 'invalid token' });
         spy.mockRestore();
     });
 
-    it('returns 502 when fetchWithFallback throws', async () => {
-        const { fetchWithFallback } = await import('@/lib/server-fetch');
-        (fetchWithFallback as any).mockImplementation(() => { throw new Error('network'); });
+    it('returns 502 when API call throws', async () => {
+        mockVerifyGet.mockRejectedValue(new Error('network'));
 
         const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
         const route = await import('../verify/route');
