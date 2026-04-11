@@ -47,8 +47,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${inter.variable} ${orbitron.variable} antialiased min-h-screen`}>
-        <Header />
         <Providers>
+          <Header />
           <main className="mx-auto max-w-5xl px-6 pt-[var(--header-height)] pb-10">{children}</main>
         </Providers>
         <footer className="site-footer mx-auto max-w-5xl px-6 py-8 text-sm">

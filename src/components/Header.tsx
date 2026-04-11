@@ -10,10 +10,38 @@ import { AuthContext } from '@/lib/auth';
 function AuthStatus() {
     const { user, logout, isAuthenticated } = useContext(AuthContext);
     const [busy, setBusy] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     const router = useRouter();
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        if (!dropdownOpen) return;
+
+        const handleClickOutside = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest('.account-dropdown')) {
+                setDropdownOpen(false);
+            }
+        };
+
+        const handleEscape = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        document.addEventListener('keydown', handleEscape);
+
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('keydown', handleEscape);
+        };
+    }, [dropdownOpen]);
 
     const onLogout = async () => {
         setBusy(true);
+        setDropdownOpen(false);
         try {
             await logout();
             router.push('/login');
@@ -33,10 +61,50 @@ function AuthStatus() {
     }
 
     return (
-        <div className="auth-status flex items-center gap-3">
-            {user?.email ? <span className="text-sm truncate max-w-[10rem]">{user.email}</span> : null}
-            {user?.isAdmin ? <Link href="/admin" className="text-sm">Admin</Link> : null}
-            <button className="text-sm" onClick={onLogout} disabled={busy}>{busy ? 'Signing out…' : 'Sign out'}</button>
+        <div className="auth-status relative account-dropdown">
+            <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="text-sm uppercase cursor-pointer font-semibold tracking-wider !text-[var(--color-norwegian-700)] hover:!text-[var(--color-fjord-600)] hover:opacity-80 transition-opacity"
+                aria-expanded={dropdownOpen}
+                aria-haspopup="true"
+            >
+                {user?.email || 'Account'}
+            </button>
+
+            {dropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 z-50 flex flex-col text-gray-900 dark:text-gray-100">
+                    <Link
+                        href="/account"
+                        className="block px-4 py-2 text-sm !normal-case cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 !no-underline !text-current"
+                        onClick={() => setDropdownOpen(false)}
+                    >
+                        Account
+                    </Link>
+                    {user?.isAdmin && (
+                        <Link
+                            href="/admin"
+                            className="block px-4 py-2 text-sm !normal-case cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 !no-underline !text-current"
+                            onClick={() => setDropdownOpen(false)}
+                        >
+                            Admin
+                        </Link>
+                    )}
+                    <Link
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            if (!busy) {
+                                setDropdownOpen(false);
+                                onLogout();
+                            }
+                        }}
+                        className="block px-4 py-2 text-sm !normal-case cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 !no-underline !text-current"
+                        style={{ opacity: busy ? 0.5 : 1, pointerEvents: busy ? 'none' : 'auto' }}
+                    >
+                        {busy ? 'Signing out…' : 'Sign out'}
+                    </Link>
+                </div>
+            )}
         </div>
     );
 }
@@ -82,9 +150,7 @@ export default function Header() {
                 <nav className="hidden md:flex site-nav items-center gap-6 prose prose-norwegian dark:prose-invert">
                     <Link href="/about" className="text-sm">About</Link>
                     <Link href="/projects" className="text-sm">Projects</Link>
-                    <Link href="/account" className="text-sm">Account</Link>
                     <DarkModeToggle />
-                    {/* Auth state will be injected client-side; show login/register when unauthenticated */}
                     <AuthStatus />
                 </nav>
 
@@ -115,10 +181,11 @@ export default function Header() {
             <div id={menuId} className={`md:hidden border-t ${open ? "block" : "hidden"}`} role="menu" aria-labelledby={toggleId} aria-hidden={!open}>
                 <div className="px-6 py-3 space-y-2 flex flex-col items-center site-nav prose prose-norwegian dark:prose-invert">
                     <Link href="/about" id="mobile-nav-about" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">About</Link>
-                    <Link href="/projects" id="mobile-nav-projects" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">Projects</Link>                    <Link href="/account" id="mobile-nav-account" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">Account</Link>
+                    <Link href="/projects" id="mobile-nav-projects" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">Projects</Link>
                     <div className="px-3 py-2">
                         <AuthStatus />
-                    </div>                </div>
+                    </div>
+                </div>
             </div>
         </header>
     );

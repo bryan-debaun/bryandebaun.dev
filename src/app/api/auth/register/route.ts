@@ -1,40 +1,43 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { proxyCall } from '@/lib/mcp-proxy';
-import { Api } from '@bryandebaun/mcp-client';
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest) {
-    const debug = process.env.DEBUG_AUTH === '1' || (process.env.NODE_ENV !== 'production' && process.env.DEBUG_AUTH !== '0');
+    const debug = process.env.DEBUG_AUTH === '1' || (process.env.NODE_ENV !== 'production' && process.env.DEBUG_AUTH !== '0')
 
     try {
-        const body = await req.json();
-        const maskedEmail = typeof body?.email === 'string' ? body.email.replace(/(.{2}).+(@.+)/, '$1***$2') : undefined;
-        if (debug) console.info('auth.register: sending registration', { email: maskedEmail });
+        const { email, password } = await req.json()
+        const maskedEmail = email ? email.replace(/(.{2}).+(@.+)/, '$1***$2') : undefined
 
-        // Registration endpoint is public, doesn't need API key
-        const baseURL = (process.env.MCP_BASE_URL || 'https://bad-mcp.onrender.com').replace(/\/+$/u, '');
-        const api = new Api({
-            baseURL,
-            headers: {
-                'Accept': 'application/json',
-                'User-Agent': process.env.MCP_USER_AGENT || 'bryandebaun.dev'
-            }
-        });
-
-        const result = await proxyCall<unknown>((a) => a.api.register(body), api);
-
-        if (result.status !== 200) {
-            if (debug) {
-                console.error('auth.register: non-2xx response', { status: result.status, body: result.body });
-            } else {
-                console.warn('auth.register: non-2xx response (sanitized)', { status: result.status });
-            }
-        } else if (debug) {
-            console.info('auth.register: success', { status: result.status });
+        if (debug) {
+            console.info('auth.register: attempting registration', { email: maskedEmail })
         }
 
-        return NextResponse.json(result.body, { status: result.status });
+        const supabase = await createClient()
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+            },
+        })
+
+        if (error) {
+            if (debug) {
+                console.error('auth.register: failed', { email: maskedEmail, error: error.message })
+            }
+            return NextResponse.json({ error: error.message }, { status: 400 })
+        }
+
+        if (debug) {
+            console.info('auth.register: success', { email: maskedEmail, userId: data.user?.id })
+        }
+
+        return NextResponse.json({ user: data.user, session: data.session })
     } catch (e) {
-        console.error('Auth register proxy failed', e);
-        return NextResponse.json({ error: 'Failed to register' }, { status: 502 });
+        const error = e as Error
+        if (debug) {
+            console.error('auth.register: exception', { error: error.message })
+        }
+        return NextResponse.json({ error: 'Failed to register' }, { status: 500 })
     }
 }

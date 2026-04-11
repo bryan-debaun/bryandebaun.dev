@@ -1,27 +1,41 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { proxyCall } from '@/lib/mcp-proxy';
-import { Api } from '@bryandebaun/mcp-client';
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
 
-export async function GET(req: NextRequest) {
+export async function GET() {
+    const debug = process.env.DEBUG_AUTH === '1' || (process.env.NODE_ENV !== 'production' && process.env.DEBUG_AUTH !== '0')
+
     try {
-        // For user session endpoints, forward the session cookie instead of using API key
-        const cookie = req.headers.get('cookie');
-        const baseURL = (process.env.MCP_BASE_URL || 'https://bad-mcp.onrender.com').replace(/\/+$/u, '');
-
-        const headers: Record<string, string> = {
-            'Accept': 'application/json',
-            'User-Agent': process.env.MCP_USER_AGENT || 'bryandebaun.dev'
-        };
-
-        if (cookie) {
-            headers['Cookie'] = cookie;
+        if (debug) {
+            console.info('auth.me: fetching current user')
         }
 
-        const api = new Api({ baseURL, headers });
-        const result = await proxyCall<unknown>((a) => a.api.get(), api);
-        return NextResponse.json(result.body, { status: result.status });
+        const supabase = await createClient()
+        const { data: { user }, error } = await supabase.auth.getUser()
+
+        if (error) {
+            if (debug) {
+                console.error('auth.me: failed', { error: error.message })
+            }
+            return NextResponse.json({ error: error.message }, { status: 401 })
+        }
+
+        if (!user) {
+            if (debug) {
+                console.info('auth.me: no user session')
+            }
+            return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+        }
+
+        if (debug) {
+            console.info('auth.me: success', { userId: user.id })
+        }
+
+        return NextResponse.json({ user })
     } catch (e) {
-        console.error('Auth session proxy failed', e);
-        return NextResponse.json({ error: 'Failed to fetch session' }, { status: 502 });
+        const error = e as Error
+        if (debug) {
+            console.error('auth.me: exception', { error: error.message })
+        }
+        return NextResponse.json({ error: 'Failed to fetch session' }, { status: 500 })
     }
 }

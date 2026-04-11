@@ -26,7 +26,9 @@ describe('GET /api/auth/magic-link/verify', () => {
         mockVerifyGet.mockResolvedValue({
             data: '',
             status: 302,
-            headers: { location: '/', 'set-cookie': 'session=abc; HttpOnly' }
+            statusText: 'Found',
+            headers: { location: '/', 'set-cookie': ['session=abc; HttpOnly'] },
+            config: {} as any
         } as AxiosResponse);
 
         const route = await import('../verify/route');
@@ -41,7 +43,9 @@ describe('GET /api/auth/magic-link/verify', () => {
         mockVerifyPost.mockResolvedValue({
             data: { ok: true },
             status: 200,
-            headers: { 'content-type': 'application/json' }
+            statusText: 'OK',
+            headers: { 'content-type': 'application/json' },
+            config: {} as any
         } as AxiosResponse);
 
         const route = await import('../verify/route');

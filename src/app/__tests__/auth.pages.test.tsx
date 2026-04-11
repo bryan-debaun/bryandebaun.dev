@@ -28,18 +28,18 @@ describe('Auth pages', () => {
 
     it('renders forgot-password form', () => {
         render(<ForgotPasswordPage />);
-        expect(screen.getByTestId('magiclink-email')).toBeInTheDocument();
-        expect(screen.getByTestId('magiclink-submit')).toBeInTheDocument();
+        expect(screen.getByTestId('reset-email')).toBeInTheDocument();
+        expect(screen.getByTestId('reset-submit')).toBeInTheDocument();
     });
 
-    it('magic link POSTs to /api/auth/magic-link', async () => {
+    it('password reset POSTs to /api/auth/reset-password', async () => {
         const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce({ ok: true, json: async () => ({}) } as any);
         render(<ForgotPasswordPage />);
-        fireEvent.change(screen.getByTestId('magiclink-email'), { target: { value: 'me@example.com' } });
-        fireEvent.click(screen.getByTestId('magiclink-submit'));
+        fireEvent.change(screen.getByTestId('reset-email'), { target: { value: 'me@example.com' } });
+        fireEvent.click(screen.getByTestId('reset-submit'));
         await waitFor(() => expect(fetchSpy).toHaveBeenCalled());
         const [url, init] = (fetchSpy as any).mock.calls[0];
-        expect(url).toBe('/api/auth/magic-link');
+        expect(url).toBe('/api/auth/reset-password');
         expect(init?.headers?.['content-type']).toMatch(/application\/json/);
         fetchSpy.mockRestore();
     });

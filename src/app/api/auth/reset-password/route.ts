@@ -9,26 +9,23 @@ export async function POST(req: NextRequest) {
         const maskedEmail = email ? email.replace(/(.{2}).+(@.+)/, '$1***$2') : undefined
 
         if (debug) {
-            console.info('auth.magic-link: sending magic link', { email: maskedEmail })
+            console.info('auth.reset-password: sending reset link', { email: maskedEmail })
         }
 
         const supabase = await createClient()
-        const { error } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-            },
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`,
         })
 
         if (error) {
             if (debug) {
-                console.error('auth.magic-link: failed', { email: maskedEmail, error: error.message })
+                console.error('auth.reset-password: failed', { email: maskedEmail, error: error.message })
             }
             return NextResponse.json({ error: error.message }, { status: 400 })
         }
 
         if (debug) {
-            console.info('auth.magic-link: success', { email: maskedEmail })
+            console.info('auth.reset-password: success', { email: maskedEmail })
         }
 
         // Return 202 Accepted to match security best practice (don't leak email existence)
@@ -36,8 +33,8 @@ export async function POST(req: NextRequest) {
     } catch (e) {
         const error = e as Error
         if (debug) {
-            console.error('auth.magic-link: exception', { error: error.message })
+            console.error('auth.reset-password: exception', { error: error.message })
         }
-        return NextResponse.json({ error: 'Failed to send magic link' }, { status: 500 })
+        return NextResponse.json({ error: 'Failed to send password reset email' }, { status: 500 })
     }
 }

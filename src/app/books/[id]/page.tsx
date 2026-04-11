@@ -13,7 +13,7 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
     try {
         // Use the service layer function which handles direct MCP calls + fallback logic
         const book = await getBookById(id);
-        
+
         if (!book) {
             throw new Error(`Book ${id} not found`);
         }
