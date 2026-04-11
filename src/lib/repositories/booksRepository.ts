@@ -1,4 +1,4 @@
-import type { BookWithAuthors } from '@bryandebaun/mcp-client'
+import type { BookWithAuthors } from '@bryandebaun/mcp-client';
 
 /**
  * Repository layer for books - uses API routes for client-side operations
@@ -7,22 +7,22 @@ import type { BookWithAuthors } from '@bryandebaun/mcp-client'
 
 export async function listBooks(): Promise<BookWithAuthors[]> {
     // Client-side: use the MCP proxy API route
-    const res = await fetch('/api/mcp/books')
+    const res = await fetch('/api/mcp/books');
     if (!res.ok) {
-        throw new Error(`Failed to fetch books: ${res.status}`)
+        throw new Error(`Failed to fetch books: ${res.status}`);
     }
-    const data = await res.json()
-    return data?.books ?? []
+    const data = await res.json();
+    return data?.books ?? [];
 }
 
 export async function getBookById(id: number): Promise<BookWithAuthors | null> {
     // Client-side: use the MCP proxy API route
-    const res = await fetch(`/api/mcp/books/${id}`)
+    const res = await fetch(`/api/mcp/books/${id}`);
     if (!res.ok) {
-        if (res.status === 404) return null
-        throw new Error(`Failed to fetch book ${id}: ${res.status}`)
+        if (res.status === 404) return null;
+        throw new Error(`Failed to fetch book ${id}: ${res.status}`);
     }
-    return await res.json()
+    return await res.json();
 }
 
 export async function updateBookStatus(id: number, status: string): Promise<BookWithAuthors> {
@@ -30,7 +30,7 @@ export async function updateBookStatus(id: number, status: string): Promise<Book
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ status }),
-    })
-    if (!res.ok) throw new Error('Failed to update book')
-    return await res.json()
+    });
+    if (!res.ok) throw new Error('Failed to update book');
+    return await res.json();
 }

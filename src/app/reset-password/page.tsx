@@ -1,58 +1,58 @@
-'use client'
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+'use client';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function ResetPasswordPage() {
-    const router = useRouter()
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
-    const [message, setMessage] = useState<string | null>(null)
-    const [error, setError] = useState<string | null>(null)
-    const [loading, setLoading] = useState(false)
+    const router = useRouter();
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [message, setMessage] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     async function submit(e: React.FormEvent) {
-        e.preventDefault()
-        setError(null)
-        setMessage(null)
+        e.preventDefault();
+        setError(null);
+        setMessage(null);
 
         if (!password) {
-            setError('Password is required')
-            return
+            setError('Password is required');
+            return;
         }
 
         if (password.length < 8) {
-            setError('Password must be at least 8 characters')
-            return
+            setError('Password must be at least 8 characters');
+            return;
         }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match')
-            return
+            setError('Passwords do not match');
+            return;
         }
 
-        setLoading(true)
+        setLoading(true);
         try {
             const res = await fetch('/api/auth/update-password', {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify({ password }),
-            })
+            });
 
-            const payload = await res.json().catch(() => ({}))
+            const payload = await res.json().catch(() => ({}));
 
             if (!res.ok) {
-                setError(payload?.error || 'Failed to reset password')
-                setLoading(false)
-                return
+                setError(payload?.error || 'Failed to reset password');
+                setLoading(false);
+                return;
             }
 
-            setMessage('Password updated successfully! Redirecting...')
+            setMessage('Password updated successfully! Redirecting...');
             setTimeout(() => {
-                router.push('/account')
-            }, 2000)
+                router.push('/account');
+            }, 2000);
         } catch {
-            setError('Failed to reset password')
-            setLoading(false)
+            setError('Failed to reset password');
+            setLoading(false);
         }
     }
 
@@ -106,5 +106,5 @@ export default function ResetPasswordPage() {
                 </div>
             </form>
         </div>
-    )
+    );
 }

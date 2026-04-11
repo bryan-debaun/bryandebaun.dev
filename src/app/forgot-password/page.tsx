@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
     return (
         <div className="max-w-md mx-auto mt-12">
             <h1 className="text-2xl font-semibold mb-4">Reset Your Password</h1>
-            <p className="text-sm text-gray-600 mb-6">Enter your email address and we'll send you a link to reset your password.</p>
+            <p className="text-sm text-gray-600 mb-6">Enter your email address and we&apos;ll send you a link to reset your password.</p>
             <form onSubmit={submit} className="space-y-4">
                 <div>
                     <label htmlFor="reset-email" className="block text-sm">Email</label>
