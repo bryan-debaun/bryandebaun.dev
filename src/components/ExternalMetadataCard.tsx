@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 import type { OpenLibraryMetadata } from '@/lib/services/openLibrary';
 
-type ServerAuthorRef = { author?: { id?: number; name?: string } };
+type ServerAuthorRef = { id?: number; name?: string };
 
 export default function ExternalMetadataCard({ bookId, metadata, serverAuthors }: { bookId: number; metadata: OpenLibraryMetadata; serverAuthors?: ServerAuthorRef[] }) {
     // Try to find a server-side author that matches any of the metadata author names.
@@ -23,12 +23,11 @@ export default function ExternalMetadataCard({ bookId, metadata, serverAuthors }
         for (const name of metadata.authors) {
             const norm = normalizeName(String(name));
             const found = server.find((s) => {
-                const sname = (s?.author?.name ?? '') as string;
+                const sname = (s?.name ?? '') as string;
                 return sname && normalizeName(sname) === norm;
             });
             if (found) {
-                const sname = found?.author?.name;
-                matchedAuthor = { id: found?.author?.id, name: sname };
+                matchedAuthor = { id: found?.id, name: found?.name };
                 break;
             }
         }

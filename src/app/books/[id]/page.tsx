@@ -4,22 +4,19 @@ import BackButton from '@/components/BackButton';
 import Link from 'next/link';
 import { formatDate } from '@/lib/dates';
 import BookEnrich from '@/components/BookEnrich';
+import { getBookById } from '@/lib/services/books';
 
 export default async function BookPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
     const p = await params;
     const id = Number(p.id);
 
     try {
-        // Use the local proxy rather than calling the external MCP directly. This centralizes
-        // base URL configuration and makes behavior more predictable in dev/test.
-        // Use the server-safe fetch helper which retries with an absolute origin when needed.
-        const { fetchWithFallback } = await import('@/lib/server-fetch');
-        const bookRes = await fetchWithFallback(`/api/mcp/books/${id}`);
-        if (!bookRes.ok) {
-            const txt = await bookRes.text().catch(() => '');
-            throw new Error(`Failed to fetch book ${id}: ${bookRes.status}${txt ? ` - ${txt}` : ''}`);
+        // Use the service layer function which handles direct MCP calls + fallback logic
+        const book = await getBookById(id);
+        
+        if (!book) {
+            throw new Error(`Book ${id} not found`);
         }
-        const book = await bookRes.json();
 
         // Try server-side enrichment via OpenLibrary so we can show suggestions immediately
         let initialMetadata: import('@/lib/services/openLibrary').OpenLibraryMetadata | null = null;
