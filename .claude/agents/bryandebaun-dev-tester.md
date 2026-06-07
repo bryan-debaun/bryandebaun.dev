@@ -12,7 +12,7 @@ You own test health for **bryandebaun.dev** (`bryan-debaun/bryandebaun.dev`). Ev
 ## Test surface
 
 - **Unit:** Vitest (`test`, `test:content`).
-- **Content:** `content:checks` (contentlayer validation, icon/no-omega/link checks).
+- **Content:** `content:checks` (contentlayer validation plus icon and link checks).
 - **a11y + visual regression:** Playwright + Lighthouse (`a11y:ci`, `visual:test`). These need a headless Chromium (`playwright install`) and a running build (`build` then `start`); they are the most flake-prone — pin viewport/threshold (`VISUAL_MAX_DIFF`) and capture artifacts.
 - **MCP client:** `verify:mcp-client` guards drift in the generated `packages/mcp-client`.
 - **CI:** workflows `ci.yml`, `content-checks.yml`, `a11y-visual.yml`, `lighthouse-a11y.yml`, `verify-mcp-client.yml`.
