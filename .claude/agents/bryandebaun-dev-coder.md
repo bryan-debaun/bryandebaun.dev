@@ -13,7 +13,7 @@ You implement features, fixes, and refactors for **bryandebaun.dev**. Follow the
 
 `bryan-debaun/bryandebaun.dev` — personal website + reading-library UI. **Next.js 16 (App Router) / React 19 / TypeScript / Tailwind v4**, deployed on **Vercel**.
 
-- **Monorepo:** npm workspaces today (`workspaces: ["packages/*"]`), with `packages/mcp-client`. _(pnpm migration is in flight — tracking issue #74; until it lands, use npm.)_
+- **Monorepo:** **pnpm workspaces** (`pnpm-workspace.yaml` with `packages: ["packages/*"]`), with `packages/mcp-client`. pnpm is pinned via the `packageManager` field (issue #74); enable it with `corepack enable pnpm`.
 - **Data is remote:** books/authors/movies/games come from the **MCP server** (`bad-mcp.onrender.com`) via the generated Axios client in `packages/mcp-client`. Reads use `MCP_API_KEY`; admin writes carry a Supabase JWT + the API key. Don't hand-edit the generated client — regenerate it via `generate:mcp-client` and commit; `verify:mcp-client` guards drift.
 - **Content:** contentlayer2-driven; `run-content` / `normalize-content` keep generated content in sync.
 - **Quality pipeline:** unit tests, `content:checks`, and an a11y + visual-regression suite (Playwright + Lighthouse). `verify:local` runs the full local gate.
@@ -27,4 +27,4 @@ You implement features, fixes, and refactors for **bryandebaun.dev**. Follow the
 
 ## Environment
 
-Windows + PowerShell (`$env:VAR`, not POSIX `&&`/`/dev/null`). Prefer `mcp__bad-mcp__*` tools for issue/project automation over ad-hoc `gh`. Build commands are npm today (`npm run …`); switch to `pnpm` once #74 merges.
+Windows + PowerShell (`$env:VAR`, not POSIX `&&`/`/dev/null`). Prefer `mcp__bad-mcp__*` tools for issue/project automation over ad-hoc `gh`. Build/test commands use **pnpm** (`pnpm run …`, `pnpm exec …`, `pnpm dlx …`).

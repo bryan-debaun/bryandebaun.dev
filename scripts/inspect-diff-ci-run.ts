@@ -2,7 +2,7 @@
  * scripts/inspect-diff-ci-run.ts
  *
  * CLI to analyze visual-diff artifacts from CI runs.
- * Usage: `npm run inspect:ci -- <runDir>` (defaults to ./gh_artifacts)
+ * Usage: `pnpm run inspect:ci -- <runDir>` (defaults to ./gh_artifacts)
  * Produces: <runDir>/inspect-report.json and saves per-image diffs to <runDir>/reports
  */
 

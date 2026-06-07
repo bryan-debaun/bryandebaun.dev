@@ -14,27 +14,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build site
-        run: npm run build
+        run: pnpm run build
 
       - name: Start site (background)
         run: |
-          npm run start &
-          npx wait-on http://localhost:3000 -t 120000
+          pnpm run start &
+          pnpm dlx wait-on http://localhost:3000 -t 120000
 
       - name: Run Lighthouse CI (autorun)
         run: |
           mkdir -p ./lhci-report
           # Run LHCI and tee output to a file so we can extract the temporary-public-storage URL
-          npx -y @lhci/cli autorun --upload.target=temporary-public-storage 2>&1 | tee ./lhci-report/lhci-output.txt
+          pnpm dlx @lhci/cli autorun --upload.target=temporary-public-storage 2>&1 | tee ./lhci-report/lhci-output.txt
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

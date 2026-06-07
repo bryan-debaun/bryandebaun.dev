@@ -11,13 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run playwright:install
-      - run: npm run build
-      - run: npm test
-      - run: npm run run-content
-      - run: npm run test:content
-      - run: npm run lint
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run playwright:install
+      - run: pnpm run build
+      - run: pnpm test
+      - run: pnpm run run-content
+      - run: pnpm run test:content
+      - run: pnpm run lint

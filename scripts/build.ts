@@ -17,14 +17,14 @@ export async function main(): Promise<void> {
 
     try {
         // Verify that required devDependencies are present (contentlayer2, tsx, etc.) so the content build won't fail if devDependencies were skipped.
-        let code = await spawnCmd('npx', ['tsx', 'scripts/check-dev-deps.ts']);
+        let code = await spawnCmd('pnpm', ['exec', 'tsx', 'scripts/check-dev-deps.ts']);
         if (code !== 0) process.exit(code);
 
-        code = await spawnCmd('npm', ['run', 'run-content']);
+        code = await spawnCmd('pnpm', ['run', 'run-content']);
         if (code !== 0) process.exit(code);
 
-        // Use npx to prefer the local next binary
-        code = await spawnCmd('npx', ['next', 'build']);
+        // Use pnpm exec to prefer the local next binary
+        code = await spawnCmd('pnpm', ['exec', 'next', 'build']);
         process.exit(code);
     } catch (e) {
         console.error('Build wrapper failed', e);

@@ -14,13 +14,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 24
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Download OpenAPI spec (optional)
         run: |
@@ -29,7 +33,7 @@ jobs:
           curl --fail --silent --show-error --retry 5 --retry-delay 5 --max-time 60 -sS "$MCP_OPENAPI_URL" -o artifacts/openapi/bad-mcp.swagger.json || echo "Couldn't download spec; generator will try remote directly or fallback to committed spec."
 
       - name: Generate MCP client
-        run: npm run generate:mcp-client
+        run: pnpm run generate:mcp-client
         env:
           MCP_API_KEY: ${{ secrets.MCP_API_KEY }}
 
@@ -37,7 +41,7 @@ jobs:
         run: |
           # Check for uncommitted changes to generated client
           if [ -n "$(git status --porcelain packages/mcp-client/src)" ]; then
-            echo "Generated MCP client is out of date. Run 'npm run generate:mcp-client' and commit the changes."
+            echo "Generated MCP client is out of date. Run 'pnpm run generate:mcp-client' and commit the changes."
             echo
             git --no-pager status --porcelain -- packages/mcp-client/src || true
             echo

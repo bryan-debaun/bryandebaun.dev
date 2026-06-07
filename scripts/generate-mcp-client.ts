@@ -27,8 +27,8 @@ function spawnCmdCapture(cmd: string, args: string[]) {
 }
 
 async function tryGenerate(spec: string) {
-    const args = ['swagger-typescript-api', 'generate', '-p', spec, '-o', OUT_DIR, '-n', 'api-client.ts', '--axios'];
-    return await spawnCmdCapture('npx', args);
+    const args = ['exec', 'swagger-typescript-api', 'generate', '-p', spec, '-o', OUT_DIR, '-n', 'api-client.ts', '--axios'];
+    return await spawnCmdCapture('pnpm', args);
 }
 
 async function downloadSpecWithAuth(url: string, outPath: string) {
