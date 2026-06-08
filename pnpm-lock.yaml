@@ -147,6 +147,9 @@ importers:
       remark-cli:
         specifier: ^12.0.1
         version: 12.0.1
+      remark-frontmatter:
+        specifier: ^4.0.1
+        version: 4.0.1
       remark-lint:
         specifier: ^10.0.1
         version: 10.0.1
