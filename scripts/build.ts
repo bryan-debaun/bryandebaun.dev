@@ -24,7 +24,9 @@ export async function main(): Promise<void> {
         if (code !== 0) process.exit(code);
 
         // Use pnpm exec to prefer the local next binary
-        code = await spawnCmd('pnpm', ['exec', 'next', 'build']);
+        // SPIKE #82: adopt Turbopack for the production build (compatible with the
+        // standalone Contentlayer2 content step; no custom webpack config to translate).
+        code = await spawnCmd('pnpm', ['exec', 'next', 'build', '--turbopack']);
         process.exit(code);
     } catch (e) {
         console.error('Build wrapper failed', e);

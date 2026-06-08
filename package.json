@@ -16,7 +16,7 @@
     ]
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "content:dev": "contentlayer2 dev",
     "run-content": "tsx scripts/run-content.ts",
     "normalize-content": "tsx scripts/run-content.ts --apply-normalize",
