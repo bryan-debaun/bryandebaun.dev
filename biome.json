@@ -1,0 +1,78 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
+	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+	"files": {
+		"ignoreUnknown": false,
+		"includes": [
+			"src/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
+			"!src/content/**",
+			"!.next/**",
+			"!.contentlayer/**",
+			"!out/**",
+			"!build/**",
+			"!next-env.d.ts",
+			"!packages/*/dist/**"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "space",
+		"indentWidth": 4,
+		"lineEnding": "lf"
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"semicolons": "always"
+		}
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"correctness": {
+				"noChildrenProp": "off",
+				"noNextAsyncClientComponent": "off",
+				"noUnusedVariables": "error",
+				"useExhaustiveDependencies": "off",
+				"useHookAtTopLevel": "off",
+				"useJsxKeyInIterable": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "error",
+				"noCommentText": "off",
+				"noDocumentImportInPage": "off",
+				"noDuplicateJsxProps": "off",
+				"noHeadImportInDocument": "off"
+			},
+			"a11y": "off",
+			"performance": {
+				"noImgElement": "off",
+				"noUnwantedPolyfillio": "off",
+				"useGoogleFontPreconnect": "off"
+			},
+			"style": {
+				"noHeadElement": "off",
+				"noCommonJs": "error",
+				"noNamespace": "error",
+				"useArrayLiterals": "error",
+				"useAsConstAssertion": "error",
+				"useConst": "error"
+			}
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["scripts/**/*.{ts,js,cjs,mjs}"],
+			"linter": { "rules": { "style": { "noCommonJs": "off" }, "suspicious": { "noExplicitAny": "off" } } }
+		},
+		{
+			"includes": ["**/__tests__/**", "tests/**/*.{ts,tsx}"],
+			"linter": { "rules": { "suspicious": { "noExplicitAny": "off" } } }
+		}
+	],
+	"assist": {
+		"enabled": true,
+		"actions": { "source": { "organizeImports": "off" } }
+	}
+}
