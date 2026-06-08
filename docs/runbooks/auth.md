@@ -63,13 +63,13 @@ await supabase.auth.admin.updateUserById(userId, {
 });
 ```
 
-**Note:** The `npm run associate:admin` script is deprecated and no longer functional.
+**Note:** The `pnpm run associate:admin` script is deprecated and no longer functional.
 
 ## Regenerate MCP client
 
-- Command: `npm run generate:mcp-client`
+- Command: `pnpm run generate:mcp-client`
 - Purpose: pick up new MCP admin endpoints (e.g. Spotify tools) and include them in the website packages.
-- Verify: `git status` should show updated files under `packages/mcp-client/src` — run `npm test` and `npm run build:packages` after generation.
+- Verify: `git status` should show updated files under `packages/mcp-client/src` — run `pnpm test` and `pnpm run build:packages` after generation.
 
 ## Debug flags
 

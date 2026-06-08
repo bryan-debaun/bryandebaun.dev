@@ -220,9 +220,9 @@ async function run() {
             if (msg.includes("Executable doesn't exist") || msg.includes('Please run the following command to download new browsers') || msg.includes('playwright')) {
                 console.error('\nPlaywright appears to be missing the required browser binaries for', browserName + '.');
                 console.error('Install them locally with:');
-                console.error('\n  npx playwright install\n');
+                console.error('\n  pnpm exec playwright install\n');
                 if (ciMode) {
-                    console.error('In CI, ensure the workflow runs: `npx playwright install --with-deps` before executing this script.');
+                    console.error('In CI, ensure the workflow runs: `pnpm exec playwright install --with-deps` before executing this script.');
                 }
             }
             console.error(msg);

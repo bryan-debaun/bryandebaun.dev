@@ -28,4 +28,4 @@ You own test health for **bryandebaun.dev** (`bryan-debaun/bryandebaun.dev`). Ev
 
 ## Environment
 
-Windows + PowerShell (not POSIX). Build/test commands are npm today; switch to `pnpm` once tracking issue #74 merges. Prefer `mcp__bad-mcp__*` tools for issue actions.
+Windows + PowerShell (not POSIX). Build/test commands use **pnpm** (`pnpm test`, `pnpm run …`); enable it with `corepack enable pnpm`. Prefer `mcp__bad-mcp__*` tools for issue actions.

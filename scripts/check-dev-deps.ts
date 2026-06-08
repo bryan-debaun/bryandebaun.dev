@@ -12,12 +12,12 @@ for (const pkg of required) {
 if (missing.length > 0) {
     console.error('Missing required devDependencies:', missing.join(', '));
     console.error('\nCommon causes:');
-    console.error(" - You have NODE_ENV=production set globally which prevents devDependencies from being installed by npm");
-    console.error(" - You haven't run 'npm ci' or 'npm install' yet");
+    console.error(" - You have NODE_ENV=production set globally which prevents devDependencies from being installed by pnpm");
+    console.error(" - You haven't run 'pnpm install --frozen-lockfile' or 'pnpm install' yet");
 
     console.error('\nFixes:');
-    console.error(" - Run: npm ci --include=dev");
-    console.error(" - Or install missing packages: npm install --save-dev " + missing.join(' '));
+    console.error(" - Run: pnpm install --prod=false");
+    console.error(" - Or install missing packages: pnpm add -D " + missing.join(' '));
     process.exit(1);
 }
 

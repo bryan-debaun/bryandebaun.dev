@@ -83,7 +83,7 @@ export function runContentWithSpawn(spawnFn: SpawnFn, opts?: { normalizeFn?: (ro
             const res = normalizeFn(undefined, { apply: applyFlag, backup: true });
             if (res.files.length > 0 && !applyFlag) {
                 console.error('Content normalization required: some content files need normalization (LF endings / trimmed whitespace).');
-                console.error('Please run `npm run normalize-content` and commit the changes before retrying the build.');
+                console.error('Please run `pnpm run normalize-content` and commit the changes before retrying the build.');
                 reject({ code: 3, message: 'content normalization required' });
                 return;
             }
@@ -95,7 +95,7 @@ export function runContentWithSpawn(spawnFn: SpawnFn, opts?: { normalizeFn?: (ro
 
         // Ensure contentlayer2 is installed locally. If NODE_ENV is set to 'production' globally, devDependencies may be skipped and
         // contentlayer2 will be missing from node_modules. Provide a clear error message if that's the case.
-        const cp = spawnFn('npx', ['contentlayer2', 'build', '--clearCache'], { shell: true });
+        const cp = spawnFn('pnpm', ['exec', 'contentlayer2', 'build', '--clearCache'], { shell: true });
 
         let out = '';
         let err = '';
@@ -155,7 +155,7 @@ export function runContent(): Promise<number> {
         // Some package versions may not expose an "exports" field that `require.resolve` can resolve.
         // Rather than failing hard, emit a warning and proceed to spawn the CLI; if the spawned process fails
         // we'll catch that below and surface a meaningful error.
-        console.warn("Warning: require.resolve('contentlayer2') failed — attempting to spawn the contentlayer CLI. If this fails, run `npm ci --include=dev` to install devDependencies.");
+        console.warn("Warning: require.resolve('contentlayer2') failed — attempting to spawn the contentlayer CLI. If this fails, run `pnpm install --prod=false` to install devDependencies.");
     }
 
     return runContentWithSpawn(spawn);
