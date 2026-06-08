@@ -30,13 +30,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Install only Chromium (the sole project in playwright.config.ts). Run the
-      # OS-dependency step non-interactively so the `sudo apt-get` invoked by
-      # --with-deps can never block on a prompt (it otherwise hangs indefinitely).
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+      # Install only Chromium (the sole project in playwright.config.ts). Split the
+      # sudo apt-get deps step from the (non-sudo) browser download/extract: running
+      # both in one `--with-deps` invocation hangs after the download completes under
+      # pnpm. Per-step timeouts ensure any future stall fails in minutes, not 30.
+      - name: Install Playwright system deps
+        run: pnpm exec playwright install-deps chromium
+        timeout-minutes: 8
         env:
           DEBIAN_FRONTEND: noninteractive
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium
+        timeout-minutes: 8
 
       - name: Install Inter system font for deterministic rendering (download+install+verify)
         run: |
