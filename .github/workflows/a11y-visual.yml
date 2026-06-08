@@ -30,17 +30,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Install only Chromium (the sole project in playwright.config.ts). Split the
-      # sudo apt-get deps step from the (non-sudo) browser download/extract: running
-      # both in one `--with-deps` invocation hangs after the download completes under
-      # pnpm. Per-step timeouts ensure any future stall fails in minutes, not 30.
+      # Install chromium + firefox: the visual suite (playwright.config.ts) uses
+      # chromium, and the a11y script (scripts/a11y/verify-a11y.ts) runs both.
+      # Split the sudo apt-get deps step from the (non-sudo) browser download so
+      # per-step timeouts bound each independently.
       - name: Install Playwright system deps
-        run: pnpm exec playwright install-deps chromium
+        run: pnpm exec playwright install-deps chromium firefox
         timeout-minutes: 8
         env:
           DEBIAN_FRONTEND: noninteractive
       - name: Install Playwright browsers
-        run: pnpm exec playwright install chromium
+        run: pnpm exec playwright install chromium firefox
         timeout-minutes: 8
 
       - name: Install Inter system font for deterministic rendering (download+install+verify)
