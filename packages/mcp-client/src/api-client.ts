@@ -191,16 +191,6 @@ export interface UpdateMovieRequest {
   status?: string;
 }
 
-export interface SendMagicLinkRequest {
-  email: string;
-}
-
-export interface RegisterRequest {
-  email: string;
-  name?: string;
-  password?: string;
-}
-
 export interface ContentCreator {
   /** @format double */
   id: number;
@@ -630,7 +620,7 @@ export class Api<
         {
           success: boolean;
         },
-        any
+        void
       >({
         path: `/api/videogames/${id}`,
         method: "DELETE",
@@ -712,76 +702,6 @@ export class Api<
     seedRefreshToken: (data: SeedRequest, params: RequestParams = {}) =>
       this.request<SeedResponse, void>({
         path: `/api/admin/spotify/oauth-callback`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Returns current user session (based on `session` cookie).
-     *
-     * @tags Auth
-     * @name Get
-     * @request GET:/api/auth/session
-     */
-    get: (params: RequestParams = {}) =>
-      this.request<any, void>({
-        path: `/api/auth/session`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Request a password reset (Supabase-backed)
-     *
-     * @tags Auth
-     * @name PasswordResetRequest
-     * @request POST:/api/auth/password/reset-request
-     */
-    passwordResetRequest: (
-      data: {
-        email?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<
-        {
-          status: "ok";
-        },
-        void
-      >({
-        path: `/api/auth/password/reset-request`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Server-side credential login (email + password, Supabase-backed)
-     *
-     * @tags Auth
-     * @name PasswordLogin
-     * @request POST:/api/auth/password/login
-     */
-    passwordLogin: (
-      data: {
-        password?: string;
-        email?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<
-        {
-          status: "ok";
-        },
-        void
-      >({
-        path: `/api/auth/password/login`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -885,97 +805,11 @@ export class Api<
         {
           success: boolean;
         },
-        any
+        void
       >({
         path: `/api/movies/${id}`,
         method: "DELETE",
         secure: true,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Send a magic link email (returns 202 accepted)
-     *
-     * @tags Auth
-     * @name Send
-     * @request POST:/api/auth/magic-link
-     */
-    send: (data: SendMagicLinkRequest, params: RequestParams = {}) =>
-      this.request<
-        {
-          status: "accepted";
-        },
-        void
-      >({
-        path: `/api/auth/magic-link`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Public registration endpoint
-     *
-     * @tags Auth
-     * @name Register
-     * @request POST:/api/auth/magic-link/register
-     */
-    register: (data: RegisterRequest, params: RequestParams = {}) =>
-      this.request<any, void>({
-        path: `/api/auth/magic-link/register`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description Verify a magic link token (GET redirect style)
-     *
-     * @tags Auth
-     * @name VerifyGet
-     * @request GET:/api/auth/magic-link/verify
-     */
-    verifyGet: (
-      query: {
-        token: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, void>({
-        path: `/api/auth/magic-link/verify`,
-        method: "GET",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * @description Verify a magic link token (POST JSON style)
-     *
-     * @tags Auth
-     * @name VerifyPost
-     * @request POST:/api/auth/magic-link/verify
-     */
-    verifyPost: (
-      data: {
-        token?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<
-        {
-          status: "ok";
-        },
-        void
-      >({
-        path: `/api/auth/magic-link/verify`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -1078,7 +912,7 @@ export class Api<
         {
           success: boolean;
         },
-        any
+        void
       >({
         path: `/api/content-creators/${id}`,
         method: "DELETE",
