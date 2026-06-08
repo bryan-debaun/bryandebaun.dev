@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@bryandebaun/mcp-client':
+        specifier: workspace:*
+        version: link:packages/mcp-client
       '@supabase/ssr':
         specifier: ^0.10.2
         version: 0.10.2(@supabase/supabase-js@2.103.0)
@@ -96,6 +99,9 @@ importers:
       axe-core:
         specifier: ^4.11.1
         version: 4.11.1
+      chrome-launcher:
+        specifier: ^1.2.1
+        version: 1.2.1
       contentlayer2:
         specifier: ^0.4.5
         version: 0.4.5(esbuild@0.27.3)
