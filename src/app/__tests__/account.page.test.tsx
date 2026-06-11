@@ -9,9 +9,16 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ push: pushMock }) }));
 describe('Account page', () => {
     it('shows sign-in prompt when unauthenticated', () => {
         render(
-            <AuthContext.Provider value={{ user: null, refresh: async () => { }, logout: async () => { }, isAuthenticated: false }}>
+            <AuthContext.Provider
+                value={{
+                    user: null,
+                    refresh: async () => {},
+                    logout: async () => {},
+                    isAuthenticated: false,
+                }}
+            >
                 <AccountPage />
-            </AuthContext.Provider>
+            </AuthContext.Provider>,
         );
 
         expect(screen.getByText(/You are not signed in/i)).toBeInTheDocument();
@@ -19,12 +26,19 @@ describe('Account page', () => {
     });
 
     it('shows user info and signs out', async () => {
-        const mockLogout = vi.fn(async () => { });
+        const mockLogout = vi.fn(async () => {});
         const user = { id: 1, email: 'me@example.com', isAdmin: false } as any;
         render(
-            <AuthContext.Provider value={{ user, refresh: async () => { }, logout: mockLogout, isAuthenticated: true }}>
+            <AuthContext.Provider
+                value={{
+                    user,
+                    refresh: async () => {},
+                    logout: mockLogout,
+                    isAuthenticated: true,
+                }}
+            >
                 <AccountPage />
-            </AuthContext.Provider>
+            </AuthContext.Provider>,
         );
 
         expect(screen.getByText(/me@example.com/i)).toBeInTheDocument();

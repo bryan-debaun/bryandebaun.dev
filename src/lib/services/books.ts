@@ -1,4 +1,7 @@
-import type { BookWithAuthors, ListBooksResponse } from '@bryandebaun/mcp-client';
+import type {
+    BookWithAuthors,
+    ListBooksResponse,
+} from '@bryandebaun/mcp-client';
 import { fetchWithFallback } from '@/lib/server-fetch';
 import { createApi } from '@/lib/mcp';
 import { unwrapApiResponse } from '@/lib/api-response';
@@ -35,13 +38,18 @@ export async function listBooks(): Promise<BookWithAuthors[]> {
             const payload = unwrapApiResponse<ListBooksResponse>(res);
 
             if (await looksLikeHtmlPayload(payload)) {
-                console.error('listBooks: detected HTML payload from MCP; falling back to proxy');
+                console.error(
+                    'listBooks: detected HTML payload from MCP; falling back to proxy',
+                );
                 throw new Error('Upstream returned HTML');
             }
 
             return payload?.books ?? [];
         } catch (e) {
-            console.error('listBooks direct MCP call failed; falling back to proxy', e);
+            console.error(
+                'listBooks direct MCP call failed; falling back to proxy',
+                e,
+            );
             // Fall back to calling our local proxy route which normalizes HTML responses
             const resProxy = await fetchWithFallback('/api/mcp/books');
             if (!resProxy.ok) return [];
@@ -67,15 +75,20 @@ export async function getBookById(id: number): Promise<BookWithAuthors | null> {
             const payload = unwrapApiResponse<BookWithAuthors>(res);
 
             if (await looksLikeHtmlPayload(payload)) {
-                console.error(`getBookById(${id}): detected HTML payload from MCP; falling back to proxy`);
+                console.error(
+                    `getBookById(${id}): detected HTML payload from MCP; falling back to proxy`,
+                );
                 throw new Error('Upstream returned HTML');
             }
 
             return payload ?? null;
         } catch (e) {
-            console.error('getBookById direct MCP call failed; falling back to proxy', e);
+            console.error(
+                'getBookById direct MCP call failed; falling back to proxy',
+                e,
+            );
             const resProxy = await fetchWithFallback(`/api/mcp/books/${id}`);
-            if (!resProxy || !resProxy.ok) return null;
+            if (!resProxy?.ok) return null;
             const book = await resProxy.json();
             return book ?? null;
         }

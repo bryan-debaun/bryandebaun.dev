@@ -15,10 +15,10 @@ describe('POST /api/auth/magic-link', () => {
 
     it('calls Supabase signInWithOtp and returns 202 on success', async () => {
         const { createClient } = await import('@/lib/supabase/server');
-        const mockSignInWithOtp = vi.fn().mockResolvedValue({ error: null })
-            ; (createClient as any).mockResolvedValue({
-                auth: { signInWithOtp: mockSignInWithOtp },
-            });
+        const mockSignInWithOtp = vi.fn().mockResolvedValue({ error: null });
+        (createClient as any).mockResolvedValue({
+            auth: { signInWithOtp: mockSignInWithOtp },
+        });
 
         const route = await import('../route');
         const req = new Request('http://localhost/api/auth/magic-link', {
@@ -41,12 +41,14 @@ describe('POST /api/auth/magic-link', () => {
 
     it('returns 400 when Supabase returns an error', async () => {
         const { createClient } = await import('@/lib/supabase/server');
-        const mockSignInWithOtp = vi.fn().mockResolvedValue({ error: { message: 'Invalid email' } })
-            ; (createClient as any).mockResolvedValue({
-                auth: { signInWithOtp: mockSignInWithOtp },
-            });
+        const mockSignInWithOtp = vi
+            .fn()
+            .mockResolvedValue({ error: { message: 'Invalid email' } });
+        (createClient as any).mockResolvedValue({
+            auth: { signInWithOtp: mockSignInWithOtp },
+        });
 
-        const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
+        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const route = await import('../route');
         const req = new Request('http://localhost/api/auth/magic-link', {
             method: 'POST',
@@ -60,7 +62,7 @@ describe('POST /api/auth/magic-link', () => {
         expect(json).toEqual({ error: 'Invalid email' });
         expect(spy).toHaveBeenCalledWith(
             expect.stringContaining('auth.magic-link: failed'),
-            expect.any(Object)
+            expect.any(Object),
         );
         spy.mockRestore();
     });
@@ -70,12 +72,12 @@ describe('POST /api/auth/magic-link', () => {
         process.env.DEBUG_AUTH = '0';
         const mockSignInWithOtp = vi.fn().mockResolvedValue({
             error: { message: 'Service error' },
-        })
-            ; (createClient as any).mockResolvedValue({
-                auth: { signInWithOtp: mockSignInWithOtp },
-            });
+        });
+        (createClient as any).mockResolvedValue({
+            auth: { signInWithOtp: mockSignInWithOtp },
+        });
 
-        const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
+        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const route = await import('../route');
         const req = new Request('http://localhost/api/auth/magic-link', {
             method: 'POST',
@@ -93,10 +95,10 @@ describe('POST /api/auth/magic-link', () => {
     });
 
     it('returns 500 and logs when signInWithOtp throws', async () => {
-        const { createClient } = await import('@/lib/supabase/server')
-            ; (createClient as any).mockRejectedValue(new Error('network'));
+        const { createClient } = await import('@/lib/supabase/server');
+        (createClient as any).mockRejectedValue(new Error('network'));
 
-        const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
+        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const route = await import('../route');
         const req = new Request('http://localhost/api/auth/magic-link', {
             method: 'POST',
@@ -110,7 +112,7 @@ describe('POST /api/auth/magic-link', () => {
         expect(json).toEqual({ error: 'Failed to send magic link' });
         expect(spy).toHaveBeenCalledWith(
             expect.stringContaining('auth.magic-link: exception'),
-            expect.any(Object)
+            expect.any(Object),
         );
         spy.mockRestore();
     });

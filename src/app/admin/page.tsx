@@ -1,5 +1,5 @@
-"use client";
-import React, { useContext, useEffect } from 'react';
+'use client';
+import { useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/lib/auth';
 
@@ -25,8 +25,12 @@ export default function AdminPage() {
     return (
         <div className="prose">
             <h1 className="text-2xl font-semibold mb-4">Admin</h1>
-            <p className="mb-4">Admin dashboard placeholder. Protected by client-side guard.</p>
-            <p className="text-sm text-muted-foreground">Use the MCP admin endpoints from the server/API routes.</p>
+            <p className="mb-4">
+                Admin dashboard placeholder. Protected by client-side guard.
+            </p>
+            <p className="text-sm text-muted-foreground">
+                Use the MCP admin endpoints from the server/API routes.
+            </p>
         </div>
     );
 }

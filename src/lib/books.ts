@@ -6,15 +6,15 @@ type ColumnDescriptor = {
     accessor?: keyof BookRow | string;
     header: string;
     id?: string;
-    type?: "text" | "rating" | "actions";
+    type?: 'text' | 'rating' | 'actions';
 };
 
 export const bookColumnDescriptors: ColumnDescriptor[] = [
-    { accessor: "title", header: "Title", type: "text" },
-    { id: "authors", header: "Author(s)", type: "text" },
-    { id: "rating", header: "Rating", type: "rating" },
-    { accessor: "status", header: "Status", type: "text" },
-    { id: "actions", header: "", type: "actions" },
+    { accessor: 'title', header: 'Title', type: 'text' },
+    { id: 'authors', header: 'Author(s)', type: 'text' },
+    { id: 'rating', header: 'Rating', type: 'rating' },
+    { accessor: 'status', header: 'Status', type: 'text' },
+    { id: 'actions', header: '', type: 'actions' },
 ];
 
 export function generateBookRows(books: BookWithAuthors[]): BookRow[] {

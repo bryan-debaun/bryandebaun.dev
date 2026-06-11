@@ -1,19 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import type { BookWithAuthors } from '@bryandebaun/mcp-client';
-import { ItemStatus } from '@/lib/types';
+import type { ItemStatus } from '@/lib/types';
 import * as repo from '@/lib/repositories/booksRepository';
 import { generateBookRows, type BookRow } from '@/lib/books';
 import { mergeBook, toggledStatus } from '@/lib/managers/booksManager';
 
-type BookWithAuthorsExt = BookWithAuthors & { _loading?: boolean; _error?: string; status?: ItemStatus | string };
+type BookWithAuthorsExt = BookWithAuthors & {
+    _loading?: boolean;
+    _error?: string;
+    status?: ItemStatus | string;
+};
 
 const BOOKS_KEY = ['books'];
 
 export function useBooks(initialBooks?: BookWithAuthors[]) {
     const qc = useQueryClient();
     // Local override map to track optimistic overlays and server-merged updates
-    const [overrides, setOverrides] = useState<Map<number, Partial<BookRow & { _loading?: boolean; _error?: string }>>>(() => new Map());
+    const [overrides, setOverrides] = useState<
+        Map<number, Partial<BookRow & { _loading?: boolean; _error?: string }>>
+    >(() => new Map());
 
     const booksQuery = useQuery({
         queryKey: BOOKS_KEY,
@@ -26,13 +32,20 @@ export function useBooks(initialBooks?: BookWithAuthors[]) {
 
     // Derive rows from server books with embedded ratings
     const sourceBooks = initialBooks ?? booksQuery.data;
-    const baseRows: BookRow[] = (sourceBooks && generateBookRows(sourceBooks)) ?? [];
+    const baseRows: BookRow[] =
+        (sourceBooks && generateBookRows(sourceBooks)) ?? [];
 
     // Attach any per-row loading/error flags from cache entries so view gets them even when mocked generateBookRows drops them
     const rows: (BookRow & { _loading?: boolean; _error?: string })[] = (() => {
         const cache = booksQuery.data as BookWithAuthorsExt[] | undefined;
-        if (!cache) return baseRows as (BookRow & { _loading?: boolean; _error?: string })[];
-        const cacheMap = new Map<number, BookWithAuthorsExt>(cache.map((b) => [b.id as number, b]));
+        if (!cache)
+            return baseRows as (BookRow & {
+                _loading?: boolean;
+                _error?: string;
+            })[];
+        const cacheMap = new Map<number, BookWithAuthorsExt>(
+            cache.map((b) => [b.id as number, b]),
+        );
         const usingInitial = sourceBooks === initialBooks;
         // debug removed — keep deriving but without noisy logs
         return baseRows.map((r) => {
@@ -44,7 +57,10 @@ export function useBooks(initialBooks?: BookWithAuthors[]) {
             if (usingInitial) {
                 merged = { ...r, _loading: ext?._loading, _error: ext?._error };
             } else {
-                merged = { ...(r as BookRow), ...(ext ?? {}) } as BookRow & { _loading?: boolean; _error?: string };
+                merged = { ...(r as BookRow), ...(ext ?? {}) } as BookRow & {
+                    _loading?: boolean;
+                    _error?: string;
+                };
             }
             // Apply any local overrides (optimistic/server merges) which may be tracked separately
             const ov = overrides.get(r.id as number);
@@ -81,42 +97,90 @@ export function useBooks(initialBooks?: BookWithAuthors[]) {
             await qc.cancelQueries({ queryKey: BOOKS_KEY });
             const previous = qc.getQueryData<BookWithAuthors[]>(BOOKS_KEY);
             if (!book) return { previous };
-            qc.setQueryData<BookWithAuthorsExt[]>(BOOKS_KEY, (old = previous ?? initialBooks ?? []) => {
-                const base = ((old as BookWithAuthorsExt[])?.length ? (old as BookWithAuthorsExt[]) : (initialBooks ?? []).map((b) => ({ ...(b as BookWithAuthorsExt) })));
-                // also track override state locally so UI renders even when derive step prefers initialBooks
-                setOverrides((prev) => {
-                    const n = new Map(prev);
-                    n.set(book.id as number, { ...(n.get(book.id as number) ?? {}), status: toggledStatus(book.status as ItemStatus), _loading: true, _error: undefined });
-                    return n;
-                });
-                return base.map((b) =>
-                    b.id === book.id
-                        ? ({ ...mergeBook(b, { ...b, status: toggledStatus(b.status as ItemStatus) }), _loading: true } as BookWithAuthorsExt)
-                        : b,
-                );
-            });
+            qc.setQueryData<BookWithAuthorsExt[]>(
+                BOOKS_KEY,
+                (old = previous ?? initialBooks ?? []) => {
+                    const base = (old as BookWithAuthorsExt[])?.length
+                        ? (old as BookWithAuthorsExt[])
+                        : (initialBooks ?? []).map((b) => ({
+                              ...(b as BookWithAuthorsExt),
+                          }));
+                    // also track override state locally so UI renders even when derive step prefers initialBooks
+                    setOverrides((prev) => {
+                        const n = new Map(prev);
+                        n.set(book.id as number, {
+                            ...(n.get(book.id as number) ?? {}),
+                            status: toggledStatus(book.status as ItemStatus),
+                            _loading: true,
+                            _error: undefined,
+                        });
+                        return n;
+                    });
+                    return base.map((b) =>
+                        b.id === book.id
+                            ? ({
+                                  ...mergeBook(b, {
+                                      ...b,
+                                      status: toggledStatus(
+                                          b.status as ItemStatus,
+                                      ),
+                                  }),
+                                  _loading: true,
+                              } as BookWithAuthorsExt)
+                            : b,
+                    );
+                },
+            );
             return { previous };
         },
-        onError: (err, variables: BookRow | undefined, context: { previous?: BookWithAuthors[] } | undefined) => {
+        onError: (
+            _err,
+            variables: BookRow | undefined,
+            context: { previous?: BookWithAuthors[] } | undefined,
+        ) => {
             // Restore previous snapshot if available, otherwise fallback to initialBooks
-            if (context?.previous) qc.setQueryData<BookWithAuthors[]>(BOOKS_KEY, context.previous);
-            else if (initialBooks) qc.setQueryData<BookWithAuthors[]>(BOOKS_KEY, initialBooks);
+            if (context?.previous)
+                qc.setQueryData<BookWithAuthors[]>(BOOKS_KEY, context.previous);
+            else if (initialBooks)
+                qc.setQueryData<BookWithAuthors[]>(BOOKS_KEY, initialBooks);
 
             // Also set a per-row error message so the UI can show inline errors
             if (variables?.id) {
-                qc.setQueryData<BookWithAuthorsExt[]>(BOOKS_KEY, (old = initialBooks ?? []) => {
-                    const base = ((old as BookWithAuthorsExt[])?.length ? (old as BookWithAuthorsExt[]) : (initialBooks ?? []).map((b) => ({ ...(b as BookWithAuthorsExt) })));
-                    const next = base.map((b) => (b.id === variables.id ? ({ ...b, _loading: false, _error: 'Failed to update' } as BookWithAuthorsExt) : b));
-                    // set local override so UI shows error immediately
-                    setOverrides((prev) => {
-                        const n = new Map(prev);
-                        n.set(variables.id as number, { ...(n.get(variables.id as number) ?? {}), _loading: false, _error: 'Failed to update' });
-                        return n;
-                    });
-                    // touch cache to notify
-                    qc.setQueryData<BookWithAuthorsExt[]>(BOOKS_KEY, (o = []) => o);
-                    return next;
-                });
+                qc.setQueryData<BookWithAuthorsExt[]>(
+                    BOOKS_KEY,
+                    (old = initialBooks ?? []) => {
+                        const base = (old as BookWithAuthorsExt[])?.length
+                            ? (old as BookWithAuthorsExt[])
+                            : (initialBooks ?? []).map((b) => ({
+                                  ...(b as BookWithAuthorsExt),
+                              }));
+                        const next = base.map((b) =>
+                            b.id === variables.id
+                                ? ({
+                                      ...b,
+                                      _loading: false,
+                                      _error: 'Failed to update',
+                                  } as BookWithAuthorsExt)
+                                : b,
+                        );
+                        // set local override so UI shows error immediately
+                        setOverrides((prev) => {
+                            const n = new Map(prev);
+                            n.set(variables.id as number, {
+                                ...(n.get(variables.id as number) ?? {}),
+                                _loading: false,
+                                _error: 'Failed to update',
+                            });
+                            return n;
+                        });
+                        // touch cache to notify
+                        qc.setQueryData<BookWithAuthorsExt[]>(
+                            BOOKS_KEY,
+                            (o = []) => o,
+                        );
+                        return next;
+                    },
+                );
             }
         },
 
@@ -124,22 +188,45 @@ export function useBooks(initialBooks?: BookWithAuthors[]) {
             // Merge server response into cache immediately (handles tests that stub the updated book payload)
             if (data?.id) {
                 // update cache and apply local override so derived rows reflect server response immediately
-                qc.setQueryData<BookWithAuthorsExt[]>(BOOKS_KEY, (old = initialBooks ?? []) => {
-                    const base = ((old as BookWithAuthorsExt[])?.length ? (old as BookWithAuthorsExt[]) : (initialBooks ?? []).map((b) => ({ ...(b as BookWithAuthorsExt) })));
-                    const next = base.map((b) => (b.id === data.id ? ({ ...b, ...data, _loading: false, _error: undefined } as BookWithAuthorsExt) : b));
-                    // set a local override to ensure that derive step (which may prefer initialBooks) picks up the server avg
-                    setOverrides((prev) => {
-                        const n = new Map(prev);
-                        n.set(data.id as number, { ...(n.get(data.id as number) ?? {}), ...(data as Partial<BookWithAuthorsExt>), _loading: false, _error: undefined });
-                        return n;
-                    });
-                    return next;
-                });
+                qc.setQueryData<BookWithAuthorsExt[]>(
+                    BOOKS_KEY,
+                    (old = initialBooks ?? []) => {
+                        const base = (old as BookWithAuthorsExt[])?.length
+                            ? (old as BookWithAuthorsExt[])
+                            : (initialBooks ?? []).map((b) => ({
+                                  ...(b as BookWithAuthorsExt),
+                              }));
+                        const next = base.map((b) =>
+                            b.id === data.id
+                                ? ({
+                                      ...b,
+                                      ...data,
+                                      _loading: false,
+                                      _error: undefined,
+                                  } as BookWithAuthorsExt)
+                                : b,
+                        );
+                        // set a local override to ensure that derive step (which may prefer initialBooks) picks up the server avg
+                        setOverrides((prev) => {
+                            const n = new Map(prev);
+                            n.set(data.id as number, {
+                                ...(n.get(data.id as number) ?? {}),
+                                ...(data as Partial<BookWithAuthorsExt>),
+                                _loading: false,
+                                _error: undefined,
+                            });
+                            return n;
+                        });
+                        return next;
+                    },
+                );
                 // touch query to notify subscribers
-                qc.setQueryData<BookWithAuthorsExt[]>(BOOKS_KEY, (old = []) => old);
+                qc.setQueryData<BookWithAuthorsExt[]>(
+                    BOOKS_KEY,
+                    (old = []) => old,
+                );
             }
         },
-
 
         onSettled: () => {
             qc.invalidateQueries({ queryKey: BOOKS_KEY });

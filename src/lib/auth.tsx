@@ -1,14 +1,15 @@
 'use client';
-import React, { createContext, useCallback, useEffect, useState } from 'react';
+import type React from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 
-export type User = { id: string; email: string; isAdmin?: boolean } | null
+export type User = { id: string; email: string; isAdmin?: boolean } | null;
 
 export type AuthContextType = {
-    user: User
-    refresh: () => Promise<void>
-    logout: () => Promise<void>
-    isAuthenticated: boolean
-}
+    user: User;
+    refresh: () => Promise<void>;
+    logout: () => Promise<void>;
+    isAuthenticated: boolean;
+};
 
 export const isUser = (u: unknown): u is NonNullable<User> =>
     !!u &&
@@ -18,8 +19,8 @@ export const isUser = (u: unknown): u is NonNullable<User> =>
 
 export const AuthContext = createContext<AuthContextType>({
     user: null,
-    refresh: async () => { },
-    logout: async () => { },
+    refresh: async () => {},
+    logout: async () => {},
     isAuthenticated: false,
 });
 
@@ -38,7 +39,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (isUser(u)) {
                 // Map Supabase user to our User type
                 // Check user_metadata for admin role
-                const isAdmin = (u as Record<string, unknown> & { user_metadata?: { role?: string } }).user_metadata?.role === 'admin';
+                const isAdmin =
+                    (
+                        u as Record<string, unknown> & {
+                            user_metadata?: { role?: string };
+                        }
+                    ).user_metadata?.role === 'admin';
                 setUser({
                     id: u.id,
                     email: u.email,
@@ -69,13 +75,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         // perform an initial refresh on mount. Call async IIFE so state updates
         // occur outside the synchronous effect body and to satisfy lint rules.
-        ; (async () => {
+        (async () => {
             await refresh();
         })();
     }, [refresh]);
 
     return (
-        <AuthContext.Provider value={{ user, refresh, logout, isAuthenticated: !!user }}>
+        <AuthContext.Provider
+            value={{ user, refresh, logout, isAuthenticated: !!user }}
+        >
             {children}
         </AuthContext.Provider>
     );

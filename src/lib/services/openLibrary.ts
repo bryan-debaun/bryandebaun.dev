@@ -13,7 +13,10 @@ export type OpenLibraryMetadata = {
 };
 
 const CACHE_TTL = 1000 * 60 * 60; // 1 hour
-const cache = new Map<string, { ts: number; data: OpenLibraryMetadata | null }>();
+const cache = new Map<
+    string,
+    { ts: number; data: OpenLibraryMetadata | null }
+>();
 
 async function fetchJson(url: string) {
     const res = await fetch(url);
@@ -38,7 +41,9 @@ type WorkDoc = {
 
 type AuthorDoc = { name?: string };
 
-export async function fetchByIsbn(isbnRaw?: string | null): Promise<OpenLibraryMetadata | null> {
+export async function fetchByIsbn(
+    isbnRaw?: string | null,
+): Promise<OpenLibraryMetadata | null> {
     const isbn = normalizeIsbn(isbnRaw);
     if (!isbn) return null;
 
@@ -59,13 +64,15 @@ export async function fetchByIsbn(isbnRaw?: string | null): Promise<OpenLibraryM
                     try {
                         const authorKey = a.key; // e.g., "/authors/OL12345A"
                         if (authorKey) {
-                            const ad = (await fetchJson(`https://openlibrary.org${authorKey}.json`)) as AuthorDoc;
-                            if (ad && ad.name) authors.push(String(ad.name));
+                            const ad = (await fetchJson(
+                                `https://openlibrary.org${authorKey}.json`,
+                            )) as AuthorDoc;
+                            if (ad?.name) authors.push(String(ad.name));
                         }
                     } catch {
                         // ignore individual author failures
                     }
-                })
+                }),
             );
         }
 
@@ -75,20 +82,25 @@ export async function fetchByIsbn(isbnRaw?: string | null): Promise<OpenLibraryM
                 // Use the first work entry — usually sufficient for author lookups
                 const workKey = book.works[0]?.key;
                 if (workKey) {
-                    const work = (await fetchJson(`https://openlibrary.org${workKey}.json`)) as WorkDoc;
+                    const work = (await fetchJson(
+                        `https://openlibrary.org${workKey}.json`,
+                    )) as WorkDoc;
                     if (work && Array.isArray(work.authors)) {
                         await Promise.all(
                             work.authors.map(async (wa) => {
                                 try {
                                     const aKey = wa?.author?.key;
                                     if (aKey) {
-                                        const ad = (await fetchJson(`https://openlibrary.org${aKey}.json`)) as AuthorDoc;
-                                        if (ad && ad.name) authors.push(String(ad.name));
+                                        const ad = (await fetchJson(
+                                            `https://openlibrary.org${aKey}.json`,
+                                        )) as AuthorDoc;
+                                        if (ad?.name)
+                                            authors.push(String(ad.name));
                                     }
                                 } catch {
                                     // ignore per-author failures
                                 }
-                            })
+                            }),
                         );
                     }
                 }
@@ -98,7 +110,10 @@ export async function fetchByIsbn(isbnRaw?: string | null): Promise<OpenLibraryM
         }
 
         // description can be string or object { value }
-        const description = typeof book.description === 'string' ? book.description : (book.description?.value ?? undefined);
+        const description =
+            typeof book.description === 'string'
+                ? book.description
+                : (book.description?.value ?? undefined);
 
         const coverUrl = `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
 

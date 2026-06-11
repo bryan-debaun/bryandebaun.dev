@@ -14,7 +14,12 @@ export async function GET(request: Request) {
     // If there's an error from Supabase, redirect to login with error
     if (error_description) {
         console.error('Auth callback error from Supabase:', error_description);
-        return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error_description)}`, origin));
+        return NextResponse.redirect(
+            new URL(
+                `/login?error=${encodeURIComponent(error_description)}`,
+                origin,
+            ),
+        );
     }
 
     if (code) {

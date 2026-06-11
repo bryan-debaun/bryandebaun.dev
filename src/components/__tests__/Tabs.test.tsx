@@ -35,7 +35,8 @@ describe('Tabs component', () => {
 
     it('panel container has no border around content', () => {
         render(<Tabs tabs={tabs} defaultIndex={0} />);
-        const panelWrapper = screen.getByText('Panel A').parentElement?.parentElement as HTMLElement;
+        const panelWrapper = screen.getByText('Panel A').parentElement
+            ?.parentElement as HTMLElement;
         expect(panelWrapper.className).not.toContain('border');
     });
 });

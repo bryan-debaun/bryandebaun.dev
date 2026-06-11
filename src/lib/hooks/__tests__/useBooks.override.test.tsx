@@ -15,14 +15,20 @@ const sampleBook = (id: number, avg?: number) => ({
 });
 
 function formatRating(v: number | undefined) {
-    return typeof v === 'number' ? (Number.isInteger(v) ? String(v) : v.toFixed(1)) : '';
+    return typeof v === 'number'
+        ? Number.isInteger(v)
+            ? String(v)
+            : v.toFixed(1)
+        : '';
 }
 
 function Harness({ books, ratings }: { books: any[]; ratings: any[] }) {
     const { rows, toggleStatus } = useBooks(books, ratings);
     return (
         <div>
-            <div data-testid="rating">{formatRating(rows[0]?.averageRating)}</div>
+            <div data-testid="rating">
+                {formatRating(rows[0]?.averageRating)}
+            </div>
             <button onClick={() => toggleStatus(rows[0])}>toggle</button>
         </div>
     );
@@ -32,7 +38,13 @@ describe('useBooks override/merge behavior', () => {
     afterEach(() => vi.restoreAllMocks());
 
     it('applies server override even when using initialBooks as source', async () => {
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 1, averageRating: 9.0 }) } as any));
+        vi.stubGlobal(
+            'fetch',
+            vi.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({ id: 1, averageRating: 9.0 }),
+            } as any),
+        );
 
         render(
             <Providers>

@@ -18,7 +18,7 @@ export function createApi(userToken?: string) {
     // bot mitigation layers sometimes challenge requests missing an Accept header
     // or a User-Agent. This reduces the chance of being served an HTML challenge.
     const headers: Record<string, string> = {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         'User-Agent': process.env.MCP_USER_AGENT || 'bryandebaun.dev',
     };
 
@@ -26,9 +26,9 @@ export function createApi(userToken?: string) {
     // Otherwise fall back to MCP_API_KEY for server-to-server requests
     const hasAuth = Boolean(userToken || process.env.MCP_API_KEY);
     if (userToken) {
-        headers['Authorization'] = `Bearer ${userToken}`;
+        headers.Authorization = `Bearer ${userToken}`;
     } else if (process.env.MCP_API_KEY) {
-        headers['Authorization'] = `Bearer ${process.env.MCP_API_KEY}`;
+        headers.Authorization = `Bearer ${process.env.MCP_API_KEY}`;
     }
 
     // DEV / DEBUG: log resolved baseURL and whether we will send Authorization header.
@@ -38,13 +38,19 @@ export function createApi(userToken?: string) {
     try {
         const debug =
             process.env.DEBUG_MCP === '1' ||
-            (process.env.NODE_ENV !== 'production' && process.env.DEBUG_MCP !== '0');
+            (process.env.NODE_ENV !== 'production' &&
+                process.env.DEBUG_MCP !== '0');
         if (debug) {
             // Do NOT log the API key itself — only indicate presence of auth and the base URL.
-            console.info('createApi', { baseURL, hasAuth, authType: userToken ? 'supabase' : 'api-key' });
+            console.info('createApi', {
+                baseURL,
+                hasAuth,
+                authType: userToken ? 'supabase' : 'api-key',
+            });
             // Non-sensitive debug header to aid correlation in upstream logs when troubleshooting
             // preview or CI requests. It should never include secrets.
-            headers['X-Debug-MCP'] = process.env.DEBUG_MCP === '1' ? '1' : 'dev';
+            headers['X-Debug-MCP'] =
+                process.env.DEBUG_MCP === '1' ? '1' : 'dev';
         }
     } catch {
         // ignore logging errors

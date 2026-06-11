@@ -1,4 +1,8 @@
-export default function BookNote({ reading }: { reading?: string | { title?: string; author?: string } }) {
+export default function BookNote({
+    reading,
+}: {
+    reading?: string | { title?: string; author?: string };
+}) {
     if (!reading) return null;
     if (typeof reading === 'string') {
         return <div className="book-note">{reading}</div>;
@@ -9,4 +13,4 @@ export default function BookNote({ reading }: { reading?: string | { title?: str
             {reading.author ? <div>by {reading.author}</div> : null}
         </div>
     );
-} 
+}

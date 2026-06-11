@@ -16,8 +16,12 @@ export default function Philosophy() {
                         const shortSlug = slugParts[slugParts.length - 1];
                         return (
                             <li key={p._id}>
-                                <Link href={`/philosophy/${shortSlug}`}>{p.title}</Link>
-                                {p.summary ? <div className="text-sm">{p.summary}</div> : null}
+                                <Link href={`/philosophy/${shortSlug}`}>
+                                    {p.title}
+                                </Link>
+                                {p.summary ? (
+                                    <div className="text-sm">{p.summary}</div>
+                                ) : null}
                             </li>
                         );
                     })}

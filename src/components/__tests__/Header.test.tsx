@@ -28,7 +28,9 @@ describe('Header (mobile nav)', () => {
         await waitFor(() => expect(first).toHaveFocus());
 
         fireEvent.keyDown(document, { key: 'Escape' });
-        await waitFor(() => expect(menu).toHaveAttribute('aria-hidden', 'true'));
+        await waitFor(() =>
+            expect(menu).toHaveAttribute('aria-hidden', 'true'),
+        );
         await waitFor(() => expect(toggle).toHaveFocus());
 
         // Axe accessibility check

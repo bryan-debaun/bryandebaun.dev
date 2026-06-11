@@ -20,7 +20,7 @@ describe('createApi header behavior', () => {
         createApi();
         const { Api } = await import('@bryandebaun/mcp-client');
         const callArg = (Api as any).mock.calls[0][0];
-        expect(callArg.headers['Authorization']).toBe('Bearer super-secret');
+        expect(callArg.headers.Authorization).toBe('Bearer super-secret');
     });
 
     it('normalizes MCP_BASE_URL when it includes a trailing /api', async () => {
@@ -47,6 +47,6 @@ describe('createApi header behavior', () => {
         createApi();
         const { Api } = await import('@bryandebaun/mcp-client');
         const callArg = (Api as any).mock.calls[0][0];
-        expect(callArg.headers['Authorization']).toBeUndefined();
+        expect(callArg.headers.Authorization).toBeUndefined();
     });
 });

@@ -7,7 +7,9 @@ describe('formatDate', () => {
     });
 
     it('formats using long month when requested', () => {
-        expect(formatDate('2024-02-03T12:34:56Z', { month: 'long' })).toBe('February 3, 2024');
+        expect(formatDate('2024-02-03T12:34:56Z', { month: 'long' })).toBe(
+            'February 3, 2024',
+        );
     });
 
     it('returns dash for falsy or invalid values', () => {

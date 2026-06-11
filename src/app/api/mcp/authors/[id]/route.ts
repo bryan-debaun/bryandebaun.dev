@@ -1,18 +1,24 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { AuthorWithBooks } from '@bryandebaun/mcp-client';
+import type { AuthorWithBooks } from '@bryandebaun/mcp-client';
 import { proxyCall } from '@/lib/mcp-proxy';
 import { createApi as _createApi } from '@/lib/mcp';
 export function createApi() {
     return _createApi();
 }
 
-export async function GET(req: NextRequest, context: { params: { id: string } | Promise<{ id: string }> }) {
+export async function GET(
+    _req: NextRequest,
+    context: { params: { id: string } | Promise<{ id: string }> },
+) {
     const params = await context.params;
     const id = Number(params.id);
     // Import the module namespace dynamically so tests can spy on the exported `createApi` function.
     const mod = await import('./route');
     const api = mod.createApi();
 
-    const result = await proxyCall<AuthorWithBooks>((a) => a.api.getAuthor(id), api);
+    const result = await proxyCall<AuthorWithBooks>(
+        (a) => a.api.getAuthor(id),
+        api,
+    );
     return NextResponse.json(result.body, { status: result.status });
 }

@@ -14,13 +14,24 @@ describe('fetchWithFallback', () => {
 
     it('retries using VERCEL_URL when NEXT_PUBLIC_SITE_URL is not set', async () => {
         process.env.VERCEL_URL = 'bryandebaun-dev.vercel.app';
-        global.fetch = vi.fn()
-            .mockImplementationOnce(() => Promise.reject(new Error('Failed to parse URL')))
-            .mockImplementationOnce(() => Promise.resolve(new Response(JSON.stringify({ origin: 'vercel' }), { status: 200 })));
+        global.fetch = vi
+            .fn()
+            .mockImplementationOnce(() =>
+                Promise.reject(new Error('Failed to parse URL')),
+            )
+            .mockImplementationOnce(() =>
+                Promise.resolve(
+                    new Response(JSON.stringify({ origin: 'vercel' }), {
+                        status: 200,
+                    }),
+                ),
+            );
 
         const res = await fetchWithFallback('/api/test', undefined, 1000);
         expect(await res.json()).toEqual({ origin: 'vercel' });
-        expect((global.fetch as any).mock.calls.length).toBeGreaterThanOrEqual(2);
+        expect((global.fetch as any).mock.calls.length).toBeGreaterThanOrEqual(
+            2,
+        );
         const secondCall = (global.fetch as any).mock.calls[1][0];
         expect(secondCall).toBe('https://bryandebaun-dev.vercel.app/api/test');
     });
@@ -29,11 +40,28 @@ describe('fetchWithFallback', () => {
         process.env.MCP_BASE_URL = 'https://bad-mcp.onrender.com';
         process.env.MCP_API_KEY = 'fake-key';
 
-        global.fetch = vi.fn()
-            .mockImplementationOnce(() => Promise.reject(new Error('Failed to parse URL')))
-            .mockImplementationOnce((url, init) => Promise.resolve(new Response(JSON.stringify({ upstream: String(url), auth: (init as any)?.headers?.Authorization ?? null }), { status: 200 })));
+        global.fetch = vi
+            .fn()
+            .mockImplementationOnce(() =>
+                Promise.reject(new Error('Failed to parse URL')),
+            )
+            .mockImplementationOnce((url, init) =>
+                Promise.resolve(
+                    new Response(
+                        JSON.stringify({
+                            upstream: String(url),
+                            auth: (init as any)?.headers?.Authorization ?? null,
+                        }),
+                        { status: 200 },
+                    ),
+                ),
+            );
 
-        const res = await fetchWithFallback('/api/mcp/books/1', undefined, 1000);
+        const res = await fetchWithFallback(
+            '/api/mcp/books/1',
+            undefined,
+            1000,
+        );
         const json = await res.json();
         expect(json.upstream).toBe('https://bad-mcp.onrender.com/api/books/1');
         expect(json.auth).toBe('Bearer fake-key');
@@ -41,20 +69,36 @@ describe('fetchWithFallback', () => {
 
     it('returns the response when fetch succeeds', async () => {
         const body = { ok: true };
-        global.fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' } }));
+        global.fetch = vi.fn().mockResolvedValue(
+            new Response(JSON.stringify(body), {
+                status: 200,
+                headers: { 'content-type': 'application/json' },
+            }),
+        );
         const res = await fetchWithFallback('/test', undefined, 1000);
         expect(await res.json()).toEqual(body);
     });
 
     it('retries with origin when runtime rejects relative URLs', async () => {
         process.env.NEXT_PUBLIC_SITE_URL = 'http://localhost:3000';
-        global.fetch = vi.fn()
-            .mockImplementationOnce(() => Promise.reject(new Error('Failed to parse URL')))
-            .mockImplementationOnce(() => Promise.resolve(new Response(JSON.stringify({ origin: true }), { status: 200 })));
+        global.fetch = vi
+            .fn()
+            .mockImplementationOnce(() =>
+                Promise.reject(new Error('Failed to parse URL')),
+            )
+            .mockImplementationOnce(() =>
+                Promise.resolve(
+                    new Response(JSON.stringify({ origin: true }), {
+                        status: 200,
+                    }),
+                ),
+            );
 
         const res = await fetchWithFallback('/api/test', undefined, 1000);
         expect(await res.json()).toEqual({ origin: true });
-        expect((global.fetch as any).mock.calls.length).toBeGreaterThanOrEqual(2);
+        expect((global.fetch as any).mock.calls.length).toBeGreaterThanOrEqual(
+            2,
+        );
     });
 
     it('returns a fallback response on timeout', async () => {
@@ -66,8 +110,8 @@ describe('fetchWithFallback', () => {
                 const signal = (init as any)?.signal;
                 if (signal) {
                     signal.addEventListener('abort', () => {
-                        const e = new Error('The operation was aborted.')
-                            ; (e as any).name = 'AbortError';
+                        const e = new Error('The operation was aborted.');
+                        (e as any).name = 'AbortError';
                         reject(e);
                     });
                 }

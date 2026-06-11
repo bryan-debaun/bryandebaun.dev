@@ -6,7 +6,11 @@ import { formatDate } from '@/lib/dates';
 import BookEnrich from '@/components/BookEnrich';
 import { getBookById } from '@/lib/services/books';
 
-export default async function BookPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
+export default async function BookPage({
+    params,
+}: {
+    params: { id: string } | Promise<{ id: string }>;
+}) {
     const p = await params;
     const id = Number(p.id);
 
@@ -19,14 +23,15 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
         }
 
         // Try server-side enrichment via OpenLibrary so we can show suggestions immediately
-        let initialMetadata: import('@/lib/services/openLibrary').OpenLibraryMetadata | null = null;
+        let initialMetadata:
+            | import('@/lib/services/openLibrary').OpenLibraryMetadata
+            | null = null;
         try {
             const { fetchByIsbn } = await import('@/lib/services/openLibrary');
             initialMetadata = await fetchByIsbn(book.isbn);
         } catch {
             // ignore enrichment failures — we still render the page
         }
-
 
         return (
             <main className="p-6">
@@ -51,51 +56,101 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
                 {/* If OpenLibrary suggested metadata exists, prefer it as the canonical section. Otherwise fall back to Description + Details */}
                 {initialMetadata ? (
                     <div className="mb-6">
-                        <BookEnrich bookId={book.id} isbn={book.isbn} initialMetadata={initialMetadata} serverAuthors={book.authors} />
+                        <BookEnrich
+                            bookId={book.id}
+                            isbn={book.isbn}
+                            initialMetadata={initialMetadata}
+                            serverAuthors={book.authors}
+                        />
                     </div>
                 ) : (
                     <>
                         <section className="mb-6">
                             <h2 className="text-lg font-medium">Description</h2>
-                            <p className="mt-2 text-sm text-[var(--color-norwegian-700)] text-center">{book.description ?? 'No description'}</p>
+                            <p className="mt-2 text-sm text-[var(--color-norwegian-700)] text-center">
+                                {book.description ?? 'No description'}
+                            </p>
                         </section>
 
                         <section className="mb-6">
                             <h2 className="text-lg font-medium">Details</h2>
                             <dl className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-center">
                                 <div>
-                                    <dt className="text-xs text-gray-500">ISBN</dt>
+                                    <dt className="text-xs text-gray-500">
+                                        ISBN
+                                    </dt>
                                     <dd className="mt-1">{book.isbn ?? '—'}</dd>
                                 </div>
                                 <div>
-                                    <dt className="text-xs text-gray-500">Author</dt>
+                                    <dt className="text-xs text-gray-500">
+                                        Author
+                                    </dt>
                                     <dd className="mt-1">
-                                        {book.authors && book.authors.length ? (
-                                            book.authors.map((a: { author?: { id?: number; name?: string }; id?: number; name?: string }, i: number) => {
-                                                const authorId = a?.author?.id ?? a?.id;
-                                                const name = a?.author?.name ?? a?.name ?? 'Unknown';
-                                                return (
-                                                    <span key={`${authorId ?? name}-${i}`}>
-                                                        {authorId ? (
-                                                            <Link href={`/authors/${authorId}`} className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]">{name}</Link>
-                                                        ) : (
-                                                            <span>{name}</span>
-                                                        )}{i < (book.authors?.length ?? 0) - 1 ? ', ' : ''}
-                                                    </span>
-                                                );
-                                            })
+                                        {book.authors?.length ? (
+                                            book.authors.map(
+                                                (
+                                                    a: {
+                                                        author?: {
+                                                            id?: number;
+                                                            name?: string;
+                                                        };
+                                                        id?: number;
+                                                        name?: string;
+                                                    },
+                                                    i: number,
+                                                ) => {
+                                                    const authorId =
+                                                        a?.author?.id ?? a?.id;
+                                                    const name =
+                                                        a?.author?.name ??
+                                                        a?.name ??
+                                                        'Unknown';
+                                                    return (
+                                                        <span
+                                                            key={`${authorId ?? name}-${i}`}
+                                                        >
+                                                            {authorId ? (
+                                                                <Link
+                                                                    href={`/authors/${authorId}`}
+                                                                    className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]"
+                                                                >
+                                                                    {name}
+                                                                </Link>
+                                                            ) : (
+                                                                <span>
+                                                                    {name}
+                                                                </span>
+                                                            )}
+                                                            {i <
+                                                            (book.authors
+                                                                ?.length ?? 0) -
+                                                                1
+                                                                ? ', '
+                                                                : ''}
+                                                        </span>
+                                                    );
+                                                },
+                                            )
                                         ) : (
                                             <span>Unknown</span>
                                         )}
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt className="text-xs text-gray-500">Published</dt>
-                                    <dd className="mt-1">{formatDate(book.publishedAt)}</dd>
+                                    <dt className="text-xs text-gray-500">
+                                        Published
+                                    </dt>
+                                    <dd className="mt-1">
+                                        {formatDate(book.publishedAt)}
+                                    </dd>
                                 </div>
                                 <div>
-                                    <dt className="text-xs text-gray-500">Updated</dt>
-                                    <dd className="mt-1">{formatDate(book.updatedAt)}</dd>
+                                    <dt className="text-xs text-gray-500">
+                                        Updated
+                                    </dt>
+                                    <dd className="mt-1">
+                                        {formatDate(book.updatedAt)}
+                                    </dd>
                                 </div>
                             </dl>
                         </section>
@@ -110,14 +165,26 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
                                 <div className="flex flex-col sm:flex-row items-center sm:justify-center sm:gap-3">
                                     <div className="flex items-center gap-3">
                                         <Stars value={book.rating} />
-                                        <div className="text-sm">{book.rating} / 10</div>
+                                        <div className="text-sm">
+                                            {book.rating} / 10
+                                        </div>
                                     </div>
-                                    {book.ratedAt && <div className="text-xs text-gray-500 mt-2 sm:mt-0">{formatDate(book.ratedAt)}</div>}
+                                    {book.ratedAt && (
+                                        <div className="text-xs text-gray-500 mt-2 sm:mt-0">
+                                            {formatDate(book.ratedAt)}
+                                        </div>
+                                    )}
                                 </div>
-                                {book.review ? <div className="mt-2 text-sm text-center">{book.review}</div> : null}
+                                {book.review ? (
+                                    <div className="mt-2 text-sm text-center">
+                                        {book.review}
+                                    </div>
+                                ) : null}
                             </div>
                         ) : (
-                            <div className="text-sm text-gray-500">No rating yet</div>
+                            <div className="text-sm text-gray-500">
+                                No rating yet
+                            </div>
                         )}
                     </div>
                 </section>
@@ -130,7 +197,16 @@ export default async function BookPage({ params }: { params: { id: string } | Pr
             <main className="p-6">
                 <h2 className="text-lg font-semibold">Book not found</h2>
                 <p className="mt-2 text-sm text-red-600">{msg}</p>
-                <p className="mt-2">Go back to the <Link href="/books" className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]">books list</Link>.</p>
+                <p className="mt-2">
+                    Go back to the{' '}
+                    <Link
+                        href="/books"
+                        className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]"
+                    >
+                        books list
+                    </Link>
+                    .
+                </p>
             </main>
         );
     }

@@ -1,10 +1,11 @@
-import React from 'react';
 import type { BookWithAuthors } from '@bryandebaun/mcp-client';
 import { fetchWithFallback } from '@/lib/server-fetch';
 
 export default async function Page() {
     // Ratings are now embedded in books - fetch books and show those with ratings
-    const res = await fetchWithFallback('/api/mcp/books', { cache: 'no-store' });
+    const res = await fetchWithFallback('/api/mcp/books', {
+        cache: 'no-store',
+    });
     const data = await res.json();
 
     const books: BookWithAuthors[] = data?.books ?? [];
@@ -20,7 +21,16 @@ export default async function Page() {
                     {booksWithRatings.map((b) => (
                         <li key={b.id}>
                             {b.title} — {b.rating}
-                            {b.review && <p style={{ marginLeft: 16, fontSize: '0.9em' }}>{b.review}</p>}
+                            {b.review && (
+                                <p
+                                    style={{
+                                        marginLeft: 16,
+                                        fontSize: '0.9em',
+                                    }}
+                                >
+                                    {b.review}
+                                </p>
+                            )}
                         </li>
                     ))}
                 </ul>

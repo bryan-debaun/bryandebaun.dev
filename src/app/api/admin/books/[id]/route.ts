@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { UpdateBookRequest } from '@bryandebaun/mcp-client';
+import type { UpdateBookRequest } from '@bryandebaun/mcp-client';
 function unwrapApiResponse<T>(res: unknown): T {
     if (typeof res === 'object' && res !== null && 'data' in res) {
         return (res as { data: T }).data;
@@ -13,7 +13,10 @@ export function createApi() {
 }
 
 // NOTE: This route is intentionally minimal for the prototype. Add auth/role checks here.
-export async function PATCH(req: NextRequest, context: { params: { id: string } | Promise<{ id: string }> }) {
+export async function PATCH(
+    req: NextRequest,
+    context: { params: { id: string } | Promise<{ id: string }> },
+) {
     const params = await context.params;
     const id = Number(params.id);
     const api = createApi();
@@ -25,6 +28,9 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
         return NextResponse.json(updated);
     } catch (e) {
         console.error('Admin: failed to update book', e);
-        return NextResponse.json({ error: 'Failed to update book' }, { status: 502 });
+        return NextResponse.json(
+            { error: 'Failed to update book' },
+            { status: 502 },
+        );
     }
 }

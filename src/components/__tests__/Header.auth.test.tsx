@@ -10,9 +10,16 @@ import { describe, it, expect } from 'vitest';
 describe('Header (auth state)', () => {
     it('shows sign in / register when unauthenticated', () => {
         render(
-            <AuthContext.Provider value={{ user: null, refresh: async () => { }, logout: async () => { }, isAuthenticated: false }}>
+            <AuthContext.Provider
+                value={{
+                    user: null,
+                    refresh: async () => {},
+                    logout: async () => {},
+                    isAuthenticated: false,
+                }}
+            >
                 <Header />
-            </AuthContext.Provider>
+            </AuthContext.Provider>,
         );
 
         expect(screen.getAllByText(/Sign in/i).length).toBeGreaterThan(0);
@@ -22,9 +29,16 @@ describe('Header (auth state)', () => {
     it('shows user email and dropdown with admin/sign out when authenticated', async () => {
         const user = { id: '123', email: 'me@example.com', isAdmin: true };
         render(
-            <AuthContext.Provider value={{ user, refresh: async () => { }, logout: async () => { }, isAuthenticated: true }}>
+            <AuthContext.Provider
+                value={{
+                    user,
+                    refresh: async () => {},
+                    logout: async () => {},
+                    isAuthenticated: true,
+                }}
+            >
                 <Header />
-            </AuthContext.Provider>
+            </AuthContext.Provider>,
         );
 
         // Email button is visible (there may be multiple for mobile/desktop)

@@ -1,4 +1,7 @@
-export function formatDate(iso?: string | null, { month = 'short' }: { month?: 'short' | 'long' } = {}): string {
+export function formatDate(
+    iso?: string | null,
+    { month = 'short' }: { month?: 'short' | 'long' } = {},
+): string {
     if (!iso) return '—';
     try {
         // Handle bare YYYY-MM-DD prefixes specially to avoid timezone shifts during UTC parsing.
@@ -13,7 +16,11 @@ export function formatDate(iso?: string | null, { month = 'short' }: { month?: '
             d = new Date(iso);
         }
         if (Number.isNaN(d.getTime())) return '—';
-        return new Intl.DateTimeFormat('en-US', { year: 'numeric', month, day: 'numeric' }).format(d);
+        return new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month,
+            day: 'numeric',
+        }).format(d);
     } catch {
         return '—';
     }

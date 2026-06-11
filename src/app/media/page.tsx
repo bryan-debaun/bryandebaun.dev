@@ -4,10 +4,16 @@ import Tabs from '@/components/Tabs';
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
-    const books = await import('@/lib/services/books').then((m) => m.listBooks());
+    const books = await import('@/lib/services/books').then((m) =>
+        m.listBooks(),
+    );
 
     // Books now have embedded personal rating field
-    if (!books || books.length === 0) console.warn('Media: empty response at render', { length: books?.length ?? 0, origin: process.env.NEXT_PUBLIC_SITE_URL });
+    if (!books || books.length === 0)
+        console.warn('Media: empty response at render', {
+            length: books?.length ?? 0,
+            origin: process.env.NEXT_PUBLIC_SITE_URL,
+        });
 
     const tabs = [
         {
@@ -24,7 +30,9 @@ export default async function Page() {
             label: 'Movies',
             panel: (
                 <div className="prose">
-                    <p>Coming soon — a list of movies I like and short notes.</p>
+                    <p>
+                        Coming soon — a list of movies I like and short notes.
+                    </p>
                 </div>
             ),
         },
@@ -33,7 +41,9 @@ export default async function Page() {
             label: 'Games',
             panel: (
                 <div className="prose">
-                    <p>Coming soon — favorite video games and platform notes.</p>
+                    <p>
+                        Coming soon — favorite video games and platform notes.
+                    </p>
                 </div>
             ),
         },
@@ -51,13 +61,20 @@ export default async function Page() {
     return (
         <main className="p-6">
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-semibold w-full text-center">Media</h1>
+                <h1 className="text-2xl font-semibold w-full text-center">
+                    Media
+                </h1>
             </div>
 
-            {(!books || books.length === 0) ? (
+            {!books || books.length === 0 ? (
                 <div className="mb-4 rounded border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">
-                    <strong>No books available from server at render time.</strong>
-                    <div className="mt-1 text-xs text-gray-600">books.length: {books ? books.length : 0} — rendered at {new Date().toISOString()}</div>
+                    <strong>
+                        No books available from server at render time.
+                    </strong>
+                    <div className="mt-1 text-xs text-gray-600">
+                        books.length: {books ? books.length : 0} — rendered at{' '}
+                        {new Date().toISOString()}
+                    </div>
                 </div>
             ) : null}
 
