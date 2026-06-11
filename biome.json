@@ -40,6 +40,7 @@
 			},
 			"suspicious": {
 				"noExplicitAny": "error",
+				"noArrayIndexKey": "warn",
 				"noCommentText": "off",
 				"noDocumentImportInPage": "off",
 				"noDuplicateJsxProps": "off",
@@ -52,6 +53,7 @@
 				"useGoogleFontPreconnect": "off"
 			},
 			"style": {
+				"noNonNullAssertion": "warn",
 				"noHeadElement": "off",
 				"noCommonJs": "error",
 				"noNamespace": "error",
