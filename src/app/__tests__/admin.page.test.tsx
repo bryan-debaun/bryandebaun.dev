@@ -9,9 +9,16 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ push: pushMock }) }));
 describe('Admin page guard', () => {
     it('redirects to /login when unauthenticated', () => {
         render(
-            <AuthContext.Provider value={{ user: null, refresh: async () => { }, logout: async () => { }, isAuthenticated: false }}>
+            <AuthContext.Provider
+                value={{
+                    user: null,
+                    refresh: async () => {},
+                    logout: async () => {},
+                    isAuthenticated: false,
+                }}
+            >
                 <AdminPage />
-            </AuthContext.Provider>
+            </AuthContext.Provider>,
         );
         expect(pushMock).toHaveBeenCalledWith('/login');
     });
@@ -19,21 +26,41 @@ describe('Admin page guard', () => {
     it('redirects to / when authenticated but not admin', () => {
         const user = { id: 1, email: 'me@example.com', isAdmin: false } as any;
         render(
-            <AuthContext.Provider value={{ user, refresh: async () => { }, logout: async () => { }, isAuthenticated: true }}>
+            <AuthContext.Provider
+                value={{
+                    user,
+                    refresh: async () => {},
+                    logout: async () => {},
+                    isAuthenticated: true,
+                }}
+            >
                 <AdminPage />
-            </AuthContext.Provider>
+            </AuthContext.Provider>,
         );
         expect(pushMock).toHaveBeenCalledWith('/');
     });
 
     it('renders admin UI for admin users', () => {
-        const user = { id: 1, email: 'admin@example.com', isAdmin: true } as any;
+        const user = {
+            id: 1,
+            email: 'admin@example.com',
+            isAdmin: true,
+        } as any;
         render(
-            <AuthContext.Provider value={{ user, refresh: async () => { }, logout: async () => { }, isAuthenticated: true }}>
+            <AuthContext.Provider
+                value={{
+                    user,
+                    refresh: async () => {},
+                    logout: async () => {},
+                    isAuthenticated: true,
+                }}
+            >
                 <AdminPage />
-            </AuthContext.Provider>
+            </AuthContext.Provider>,
         );
 
-        expect(screen.getByText(/Admin dashboard placeholder/i)).toBeInTheDocument();
+        expect(
+            screen.getByText(/Admin dashboard placeholder/i),
+        ).toBeInTheDocument();
     });
 });

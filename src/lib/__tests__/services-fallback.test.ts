@@ -27,15 +27,17 @@ const proxyResponses = (url: string) => {
     }
 
     if (url === '/api/mcp/books') {
-        return new Response(JSON.stringify({ books: [{ id: 1, title: 'proxied list' }] }), {
-            status: 200,
-            headers: { 'content-type': 'application/json' },
-        });
+        return new Response(
+            JSON.stringify({ books: [{ id: 1, title: 'proxied list' }] }),
+            {
+                status: 200,
+                headers: { 'content-type': 'application/json' },
+            },
+        );
     }
 
     return new Response('{}', { status: 404 });
 };
-
 
 import { createApi } from '@/lib/mcp';
 import { listBooks, getBookById } from '@/lib/services/books';
@@ -44,7 +46,9 @@ describe('services fallback behavior (server-side)', () => {
     beforeEach(() => {
         (global as any).window = undefined;
         // set the implementation for the proxy responses each test
-        (fetchWithFallback as any).mockImplementation(async (url: string) => proxyResponses(url));
+        (fetchWithFallback as any).mockImplementation(async (url: string) =>
+            proxyResponses(url),
+        );
     });
 
     afterEach(() => {
@@ -54,14 +58,20 @@ describe('services fallback behavior (server-side)', () => {
 
     it('falls back to proxy when listBooks returns HTML-like payload', async () => {
         // Mock createApi to return an object whose api.listBooks resolves to an Axios-like object
-        (createApi as any).mockImplementation(() => ({ api: { listBooks: async () => ({ data: '<!doctype html>challenge' }) } }));
+        (createApi as any).mockImplementation(() => ({
+            api: {
+                listBooks: async () => ({ data: '<!doctype html>challenge' }),
+            },
+        }));
 
         const books = await listBooks();
         expect(books).toEqual([{ id: 1, title: 'proxied list' }]);
     });
 
     it('falls back to proxy when getBookById returns HTML-like payload', async () => {
-        (createApi as any).mockImplementation(() => ({ api: { getBook: async () => ({ data: '<html>not json</html>' }) } }));
+        (createApi as any).mockImplementation(() => ({
+            api: { getBook: async () => ({ data: '<html>not json</html>' }) },
+        }));
 
         const book = await getBookById(1);
         expect(book).toEqual({ id: 1, title: 'proxied book' });

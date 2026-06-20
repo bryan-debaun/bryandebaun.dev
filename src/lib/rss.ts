@@ -1,6 +1,9 @@
 import { publicOnly } from './content';
 
-export function generateRSS(baseUrl: string, items: Array<{ title: string; slug: string } & { private?: boolean }>) {
+export function generateRSS(
+    baseUrl: string,
+    items: Array<{ title: string; slug: string } & { private?: boolean }>,
+) {
     const publicItems = publicOnly(items);
     const itemsXml = publicItems
         .map(

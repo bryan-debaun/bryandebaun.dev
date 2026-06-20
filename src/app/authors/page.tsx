@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Author } from '@bryandebaun/mcp-client';
 
 export default async function Page() {

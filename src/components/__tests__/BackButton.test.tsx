@@ -26,14 +26,19 @@ describe('BackButton', () => {
 
     it('pushes fallback when history length <= 1', () => {
         const originalHistory = window.history;
-        Object.defineProperty(window, 'history', { value: { ...originalHistory, length: 1 }, configurable: true });
+        Object.defineProperty(window, 'history', {
+            value: { ...originalHistory, length: 1 },
+            configurable: true,
+        });
         try {
             render(<BackButton fallbackHref="/fallback">Back</BackButton>);
             fireEvent.click(screen.getByRole('button', { name: /go back/i }));
             expect(push).toHaveBeenCalledWith('/fallback');
             expect(back).not.toHaveBeenCalled();
         } finally {
-            Object.defineProperty(window, 'history', { value: originalHistory });
+            Object.defineProperty(window, 'history', {
+                value: originalHistory,
+            });
         }
     });
 });

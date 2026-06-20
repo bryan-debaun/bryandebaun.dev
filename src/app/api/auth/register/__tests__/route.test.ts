@@ -16,17 +16,23 @@ describe('POST /api/auth/register', () => {
     it('calls Supabase signUp and returns user/session on success', async () => {
         const { createClient } = await import('@/lib/supabase/server');
         const mockSignUp = vi.fn().mockResolvedValue({
-            data: { user: { id: '123', email: 'test@example.com' }, session: { access_token: 'token' } },
+            data: {
+                user: { id: '123', email: 'test@example.com' },
+                session: { access_token: 'token' },
+            },
             error: null,
-        })
-            ; (createClient as any).mockResolvedValue({
-                auth: { signUp: mockSignUp },
-            });
+        });
+        (createClient as any).mockResolvedValue({
+            auth: { signUp: mockSignUp },
+        });
 
         const route = await import('../route');
         const req = new Request('http://localhost/api/auth/register', {
             method: 'POST',
-            body: JSON.stringify({ email: 'test@example.com', password: 'securepassword' }),
+            body: JSON.stringify({
+                email: 'test@example.com',
+                password: 'securepassword',
+            }),
             headers: { 'content-type': 'application/json' },
         });
         const res = await route.POST(req as unknown as NextRequest);
@@ -46,12 +52,15 @@ describe('POST /api/auth/register', () => {
 
     it('returns 400 when Supabase returns an error', async () => {
         const { createClient } = await import('@/lib/supabase/server');
-        const mockSignUp = vi.fn().mockResolvedValue({ data: {}, error: { message: 'Email already registered' } })
-            ; (createClient as any).mockResolvedValue({
-                auth: { signUp: mockSignUp },
-            });
+        const mockSignUp = vi.fn().mockResolvedValue({
+            data: {},
+            error: { message: 'Email already registered' },
+        });
+        (createClient as any).mockResolvedValue({
+            auth: { signUp: mockSignUp },
+        });
 
-        const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
+        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const route = await import('../route');
         const req = new Request('http://localhost/api/auth/register', {
             method: 'POST',
@@ -65,7 +74,7 @@ describe('POST /api/auth/register', () => {
         expect(json).toEqual({ error: 'Email already registered' });
         expect(spy).toHaveBeenCalledWith(
             expect.stringContaining('auth.register: failed'),
-            expect.any(Object)
+            expect.any(Object),
         );
         spy.mockRestore();
     });
@@ -76,12 +85,12 @@ describe('POST /api/auth/register', () => {
         const mockSignUp = vi.fn().mockResolvedValue({
             data: {},
             error: { message: 'Service error' },
-        })
-            ; (createClient as any).mockResolvedValue({
-                auth: { signUp: mockSignUp },
-            });
+        });
+        (createClient as any).mockResolvedValue({
+            auth: { signUp: mockSignUp },
+        });
 
-        const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
+        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const route = await import('../route');
         const req = new Request('http://localhost/api/auth/register', {
             method: 'POST',
@@ -99,10 +108,10 @@ describe('POST /api/auth/register', () => {
     });
 
     it('returns 500 and logs when signUp throws', async () => {
-        const { createClient } = await import('@/lib/supabase/server')
-            ; (createClient as any).mockRejectedValue(new Error('network'));
+        const { createClient } = await import('@/lib/supabase/server');
+        (createClient as any).mockRejectedValue(new Error('network'));
 
-        const spy = vi.spyOn(console, 'error').mockImplementation(() => { });
+        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const route = await import('../route');
         const req = new Request('http://localhost/api/auth/register', {
             method: 'POST',
@@ -116,7 +125,7 @@ describe('POST /api/auth/register', () => {
         expect(json).toEqual({ error: 'Failed to register' });
         expect(spy).toHaveBeenCalledWith(
             expect.stringContaining('auth.register: exception'),
-            expect.any(Object)
+            expect.any(Object),
         );
         spy.mockRestore();
     });

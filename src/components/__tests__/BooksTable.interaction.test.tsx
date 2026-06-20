@@ -10,7 +10,14 @@ vi.mock('@/lib/books', () => ({
         { accessor: 'status', header: 'Status' },
         { id: 'actions', type: 'actions', header: '' },
     ],
-    generateBookRows: (books: any[]) => books.map((b) => ({ id: b.id, title: b.title, authors: b.authors, rating: b.rating, status: b.status })),
+    generateBookRows: (books: any[]) =>
+        books.map((b) => ({
+            id: b.id,
+            title: b.title,
+            authors: b.authors,
+            rating: b.rating,
+            status: b.status,
+        })),
 }));
 
 const push = vi.fn();
@@ -36,7 +43,11 @@ describe('BooksTable interactions', () => {
     beforeEach(() => {
         // Prevent jsdom navigation side-effects
         delete (window as any).location;
-        (window as any).location = { href: '', assign: vi.fn(), replace: vi.fn() } as any;
+        (window as any).location = {
+            href: '',
+            assign: vi.fn(),
+            replace: vi.fn(),
+        } as any;
     });
 
     afterEach(() => {
@@ -48,11 +59,13 @@ describe('BooksTable interactions', () => {
         render(
             <Providers>
                 <BooksTable books={[sampleBook(1, 1.0)]} />
-            </Providers>
+            </Providers>,
         );
 
         // tr has role=link with accessible aria-label we supplied
-        const row = screen.getByRole('link', { name: /open details for book 1/i });
+        const row = screen.getByRole('link', {
+            name: /open details for book 1/i,
+        });
         fireEvent.click(row);
         // our implementation assigns window.location.href
         expect((window as any).location.href).toBe('/books/1');
@@ -72,7 +85,7 @@ describe('BooksTable interactions', () => {
         render(
             <Providers>
                 <BooksTable books={[bookWithAuthor]} />
-            </Providers>
+            </Providers>,
         );
 
         const authorLink = screen.getByText('AuthOne');

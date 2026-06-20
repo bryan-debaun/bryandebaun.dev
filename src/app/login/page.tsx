@@ -1,5 +1,6 @@
 'use client';
-import React, { useState, useContext } from 'react';
+import type React from 'react';
+import { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/lib/auth';
 
@@ -32,7 +33,11 @@ export default function LoginPage() {
                 return;
             }
             // Refresh user context then redirect
-            try { await refresh(); } catch { /* ignore */ }
+            try {
+                await refresh();
+            } catch {
+                /* ignore */
+            }
             router.push('/');
         } catch {
             setError('Login failed');
@@ -45,19 +50,55 @@ export default function LoginPage() {
             <h1 className="text-2xl font-semibold mb-4">Sign in</h1>
             <form onSubmit={submit} className="space-y-4">
                 <div>
-                    <label htmlFor="login-email" className="block text-sm">Email</label>
-                    <input id="login-email" data-testid="login-email" placeholder="you@example.com" autoComplete="email" className="mt-1 w-full form-input" value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
+                    <label htmlFor="login-email" className="block text-sm">
+                        Email
+                    </label>
+                    <input
+                        id="login-email"
+                        data-testid="login-email"
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        className="mt-1 w-full form-input"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        type="email"
+                    />
                 </div>
                 <div>
-                    <label htmlFor="login-password" className="block text-sm">Password</label>
-                    <input id="login-password" data-testid="login-password" placeholder="••••••••" autoComplete="current-password" className="mt-1 w-full form-input" value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
+                    <label htmlFor="login-password" className="block text-sm">
+                        Password
+                    </label>
+                    <input
+                        id="login-password"
+                        data-testid="login-password"
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                        className="mt-1 w-full form-input"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        type="password"
+                    />
                 </div>
-                {error ? <div className="text-sm text-red-600">{error}</div> : null}
+                {error ? (
+                    <div className="text-sm text-red-600">{error}</div>
+                ) : null}
                 <div className="form-actions">
-                    <button data-testid="login-submit" className="btn btn--primary w-full md:w-auto" type="submit" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
+                    <button
+                        data-testid="login-submit"
+                        className="btn btn--primary w-full md:w-auto"
+                        type="submit"
+                        disabled={loading}
+                    >
+                        {loading ? 'Signing in…' : 'Sign in'}
+                    </button>
                 </div>
                 <div className="mt-2 text-sm">
-                    <a href="/forgot-password" className="text-[var(--color-norwegian-700)] hover:underline">Forgot password?</a>
+                    <a
+                        href="/forgot-password"
+                        className="text-[var(--color-norwegian-700)] hover:underline"
+                    >
+                        Forgot password?
+                    </a>
                 </div>
             </form>
         </div>

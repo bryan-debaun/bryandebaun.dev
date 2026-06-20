@@ -9,7 +9,11 @@ describe('averageByKey', () => {
             { bookId: 2, rating: 7 },
         ];
 
-        const map = averageByKey(items, x => x.bookId, x => x.rating);
+        const map = averageByKey(
+            items,
+            (x) => x.bookId,
+            (x) => x.rating,
+        );
         expect(map.get(1)).toBe(9);
         expect(map.get(2)).toBe(7);
     });
@@ -21,7 +25,11 @@ describe('averageByKey', () => {
             { id: 'b', value: 3 },
         ];
 
-        const map = averageByKey(items, x => x.id, x => x.value);
+        const map = averageByKey(
+            items,
+            (x) => x.id,
+            (x) => x.value,
+        );
         expect(map.get('a')).toBe(5);
         expect(map.get('b')).toBe(3);
     });

@@ -8,7 +8,9 @@ describe('sitemap generation', () => {
             { slug: 'philosophy/secret', private: true },
         ];
         const xml = generateSitemap('https://example.com', items);
-        expect(xml).toContain('<loc>https://example.com/philosophy/hello</loc>');
+        expect(xml).toContain(
+            '<loc>https://example.com/philosophy/hello</loc>',
+        );
         expect(xml).not.toContain('secret');
     });
 });

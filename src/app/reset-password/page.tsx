@@ -1,5 +1,6 @@
 'use client';
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function ResetPasswordPage() {
@@ -92,8 +93,12 @@ export default function ResetPasswordPage() {
                         required
                     />
                 </div>
-                {error ? <div className="text-sm text-red-600">{error}</div> : null}
-                {message ? <div className="text-sm text-green-700">{message}</div> : null}
+                {error ? (
+                    <div className="text-sm text-red-600">{error}</div>
+                ) : null}
+                {message ? (
+                    <div className="text-sm text-green-700">{message}</div>
+                ) : null}
                 <div className="form-actions">
                     <button
                         data-testid="reset-submit"

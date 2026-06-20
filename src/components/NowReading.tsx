@@ -12,7 +12,9 @@ export default function NowReading() {
                 {items.map((p) => (
                     <li key={p._id}>
                         <BookNote reading={p.reading} />
-                        {p.title ? <div className="text-sm">— {p.title}</div> : null}
+                        {p.title ? (
+                            <div className="text-sm">— {p.title}</div>
+                        ) : null}
                     </li>
                 ))}
             </ul>

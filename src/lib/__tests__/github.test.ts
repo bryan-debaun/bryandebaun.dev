@@ -2,9 +2,33 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getUserRepos, getShowcaseRepos } from '../github';
 
 const sampleRepos = [
-    { name: 'one', description: 'First', html_url: 'https://github.com/x/one', homepage: null, archived: false, fork: false, topics: [] },
-    { name: 'two', description: 'Second', html_url: 'https://github.com/x/two', homepage: null, archived: false, fork: true, topics: [] },
-    { name: 'three', description: 'Archived', html_url: 'https://github.com/x/three', homepage: null, archived: true, fork: false, topics: ['showcase'] },
+    {
+        name: 'one',
+        description: 'First',
+        html_url: 'https://github.com/x/one',
+        homepage: null,
+        archived: false,
+        fork: false,
+        topics: [],
+    },
+    {
+        name: 'two',
+        description: 'Second',
+        html_url: 'https://github.com/x/two',
+        homepage: null,
+        archived: false,
+        fork: true,
+        topics: [],
+    },
+    {
+        name: 'three',
+        description: 'Archived',
+        html_url: 'https://github.com/x/three',
+        homepage: null,
+        archived: true,
+        fork: false,
+        topics: ['showcase'],
+    },
 ];
 
 describe('github lib', () => {
@@ -21,8 +45,14 @@ describe('github lib', () => {
 
     it('getUserRepos fetches pages until empty', async () => {
         // Page 1 returns two items, page 2 returns one item, page 3 returns empty
-        fetchMock.mockResolvedValueOnce({ ok: true, json: async () => [sampleRepos[0], sampleRepos[1]] });
-        fetchMock.mockResolvedValueOnce({ ok: true, json: async () => [sampleRepos[2]] });
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            json: async () => [sampleRepos[0], sampleRepos[1]],
+        });
+        fetchMock.mockResolvedValueOnce({
+            ok: true,
+            json: async () => [sampleRepos[2]],
+        });
         fetchMock.mockResolvedValueOnce({ ok: true, json: async () => [] });
 
         const res = await getUserRepos('me', { perPage: 2 });
@@ -31,7 +61,10 @@ describe('github lib', () => {
     });
 
     it('getShowcaseRepos filters forks and archived by default', async () => {
-        fetchMock.mockResolvedValue({ ok: true, json: async () => sampleRepos });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => sampleRepos,
+        });
 
         const res = await getShowcaseRepos('me');
         expect(res.find((r) => r.name === 'one')).toBeTruthy();
@@ -40,9 +73,15 @@ describe('github lib', () => {
     });
 
     it('getShowcaseRepos can include forks and archived when requested', async () => {
-        fetchMock.mockResolvedValue({ ok: true, json: async () => sampleRepos });
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => sampleRepos,
+        });
 
-        const res = await getShowcaseRepos('me', { includeForks: true, includeArchived: true });
+        const res = await getShowcaseRepos('me', {
+            includeForks: true,
+            includeArchived: true,
+        });
         expect(res.find((r) => r.name === 'one')).toBeTruthy();
         expect(res.find((r) => r.name === 'two')).toBeTruthy();
         expect(res.find((r) => r.name === 'three')).toBeTruthy();

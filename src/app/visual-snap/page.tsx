@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import React from 'react';
 
 export const metadata: Metadata = {
     title: 'Visual Snapshot — Stable',
@@ -9,17 +8,28 @@ export default function VisualSnapPage() {
     return (
         <main className="mx-auto max-w-3xl p-8">
             <header className="mb-6">
-                <h1 className="text-4xl font-semibold">Visual snapshot — stable fixture</h1>
-                <p className="mt-2 text-gray-600">This page is intentionally static and deterministic for visual tests.</p>
+                <h1 className="text-4xl font-semibold">
+                    Visual snapshot — stable fixture
+                </h1>
+                <p className="mt-2 text-gray-600">
+                    This page is intentionally static and deterministic for
+                    visual tests.
+                </p>
             </header>
 
             <section className="space-y-6">
                 <div className="rounded-lg border p-4 shadow-sm">
                     <h2 className="text-2xl font-medium">Card title</h2>
-                    <p className="mt-2 text-gray-700">Fixed content that should not change across PRs.</p>
+                    <p className="mt-2 text-gray-700">
+                        Fixed content that should not change across PRs.
+                    </p>
                     <div className="mt-4 flex gap-3">
-                        <button className="px-4 py-2 bg-slate-900 text-white rounded">Primary</button>
-                        <button className="px-4 py-2 border rounded">Secondary</button>
+                        <button className="px-4 py-2 bg-slate-900 text-white rounded">
+                            Primary
+                        </button>
+                        <button className="px-4 py-2 border rounded">
+                            Secondary
+                        </button>
                     </div>
                 </div>
 
@@ -39,7 +49,10 @@ export default function VisualSnapPage() {
                 </div>
             </section>
 
-            <footer className="mt-12 text-sm text-gray-500">Do not put dynamic content here — this page is for visual regression baselines.</footer>
+            <footer className="mt-12 text-sm text-gray-500">
+                Do not put dynamic content here — this page is for visual
+                regression baselines.
+            </footer>
         </main>
     );
 }

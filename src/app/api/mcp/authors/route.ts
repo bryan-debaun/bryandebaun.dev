@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ListAuthorsResponse } from '@bryandebaun/mcp-client';
+import type { ListAuthorsResponse } from '@bryandebaun/mcp-client';
 import { proxyCall } from '@/lib/mcp-proxy';
 
 import { createApi as _createApi } from '@/lib/mcp';
@@ -13,10 +13,16 @@ export async function GET() {
     const api = mod.createApi();
 
     try {
-        const result = await proxyCall<ListAuthorsResponse>((a) => a.api.listAuthors(), api);
+        const result = await proxyCall<ListAuthorsResponse>(
+            (a) => a.api.listAuthors(),
+            api,
+        );
         return NextResponse.json(result.body, { status: result.status });
     } catch (e) {
         console.error('MCP: failed to fetch authors', e);
-        return NextResponse.json({ error: 'Failed to fetch authors' }, { status: 502 });
+        return NextResponse.json(
+            { error: 'Failed to fetch authors' },
+            { status: 502 },
+        );
     }
 }

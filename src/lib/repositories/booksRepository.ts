@@ -25,7 +25,10 @@ export async function getBookById(id: number): Promise<BookWithAuthors | null> {
     return await res.json();
 }
 
-export async function updateBookStatus(id: number, status: string): Promise<BookWithAuthors> {
+export async function updateBookStatus(
+    id: number,
+    status: string,
+): Promise<BookWithAuthors> {
     const res = await fetch(`/api/admin/books/${id}`, {
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },

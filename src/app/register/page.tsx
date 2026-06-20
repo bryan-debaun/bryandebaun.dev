@@ -1,5 +1,6 @@
 'use client';
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
@@ -47,20 +48,65 @@ export default function RegisterPage() {
             <h1 className="text-2xl font-semibold mb-4">Create an account</h1>
             <form onSubmit={submit} className="space-y-4">
                 <div>
-                    <label htmlFor="register-email" className="block text-sm">Email</label>
-                    <input id="register-email" data-testid="register-email" placeholder="you@example.com" autoComplete="email" className="mt-1 w-full form-input" value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
+                    <label htmlFor="register-email" className="block text-sm">
+                        Email
+                    </label>
+                    <input
+                        id="register-email"
+                        data-testid="register-email"
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        className="mt-1 w-full form-input"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        type="email"
+                    />
                 </div>
                 <div>
-                    <label htmlFor="register-password" className="block text-sm">Password</label>
-                    <input id="register-password" data-testid="register-password" placeholder="••••••••" autoComplete="new-password" className="mt-1 w-full form-input" value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
+                    <label
+                        htmlFor="register-password"
+                        className="block text-sm"
+                    >
+                        Password
+                    </label>
+                    <input
+                        id="register-password"
+                        data-testid="register-password"
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        className="mt-1 w-full form-input"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        type="password"
+                    />
                 </div>
                 <div>
-                    <label htmlFor="register-confirm" className="block text-sm">Confirm password</label>
-                    <input id="register-confirm" data-testid="register-confirm" placeholder="••••••••" autoComplete="new-password" className="mt-1 w-full form-input" value={confirm} onChange={(e) => setConfirm(e.target.value)} type="password" />
+                    <label htmlFor="register-confirm" className="block text-sm">
+                        Confirm password
+                    </label>
+                    <input
+                        id="register-confirm"
+                        data-testid="register-confirm"
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        className="mt-1 w-full form-input"
+                        value={confirm}
+                        onChange={(e) => setConfirm(e.target.value)}
+                        type="password"
+                    />
                 </div>
-                {error ? <div className="text-sm text-red-600">{error}</div> : null}
+                {error ? (
+                    <div className="text-sm text-red-600">{error}</div>
+                ) : null}
                 <div className="form-actions">
-                    <button data-testid="register-submit" className="btn btn--primary w-full md:w-auto" type="submit" disabled={loading}>{loading ? 'Registering…' : 'Register'}</button>
+                    <button
+                        data-testid="register-submit"
+                        className="btn btn--primary w-full md:w-auto"
+                        type="submit"
+                        disabled={loading}
+                    >
+                        {loading ? 'Registering…' : 'Register'}
+                    </button>
                 </div>
             </form>
         </div>

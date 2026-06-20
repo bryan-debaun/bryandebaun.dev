@@ -1,12 +1,20 @@
 import type { BookWithAuthors } from '@bryandebaun/mcp-client';
 import { ItemStatus } from '@/lib/types';
 
-export function mergeBook(existing: BookWithAuthors, updated: Partial<BookWithAuthors> | Record<string, unknown>): BookWithAuthors {
+export function mergeBook(
+    existing: BookWithAuthors,
+    updated: Partial<BookWithAuthors> | Record<string, unknown>,
+): BookWithAuthors {
     // Preserve derived fields like averageRating if not supplied by server
-    return { ...existing, ...(updated as Record<string, unknown>) } as BookWithAuthors;
+    return {
+        ...existing,
+        ...(updated as Record<string, unknown>),
+    } as BookWithAuthors;
 }
 
 export function toggledStatus(current?: ItemStatus | string): ItemStatus {
     const s = current as ItemStatus | undefined;
-    return s === ItemStatus.COMPLETED ? ItemStatus.NOT_STARTED : ItemStatus.COMPLETED;
+    return s === ItemStatus.COMPLETED
+        ? ItemStatus.NOT_STARTED
+        : ItemStatus.COMPLETED;
 }

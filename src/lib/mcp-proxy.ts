@@ -11,14 +11,20 @@ export async function looksLikeHtmlPayload(payload: unknown): Promise<boolean> {
     try {
         if (typeof payload === 'string') {
             const trimmed = payload.trim().toLowerCase();
-            return trimmed.startsWith('<!doctype') || trimmed.startsWith('<html');
+            return (
+                trimmed.startsWith('<!doctype') || trimmed.startsWith('<html')
+            );
         }
 
         if (typeof payload === 'object' && payload !== null) {
             const maybeData = (payload as { data?: unknown }).data;
             if (typeof maybeData === 'string') {
                 const trimmed = maybeData.trim().toLowerCase();
-                if (trimmed.startsWith('<!doctype') || trimmed.startsWith('<html')) return true;
+                if (
+                    trimmed.startsWith('<!doctype') ||
+                    trimmed.startsWith('<html')
+                )
+                    return true;
             }
 
             const textFn = (payload as { text?: unknown }).text;
@@ -28,7 +34,10 @@ export async function looksLikeHtmlPayload(payload: unknown): Promise<boolean> {
                     const txt = await (textFn as () => Promise<unknown>)();
                     if (typeof txt === 'string') {
                         const trimmed = txt.trim().toLowerCase();
-                        return trimmed.startsWith('<!doctype') || trimmed.startsWith('<html');
+                        return (
+                            trimmed.startsWith('<!doctype') ||
+                            trimmed.startsWith('<html')
+                        );
                     }
                 } catch {
                     // ignore text() read errors; treat as not HTML
@@ -59,13 +68,18 @@ export async function proxyCall<T = unknown>(
 
     // When debugging is enabled, capture which generated client method is being invoked
     // and whether the resolved Api instance will send Authorization or debug headers.
-    const debug = process.env.DEBUG_MCP === '1' || (process.env.NODE_ENV !== 'production' && process.env.DEBUG_MCP !== '0');
+    const debug =
+        process.env.DEBUG_MCP === '1' ||
+        (process.env.NODE_ENV !== 'production' &&
+            process.env.DEBUG_MCP !== '0');
     let callInfo: { method?: string; args?: unknown[] } | undefined;
 
     // If debug is enabled, wrap the `api.api` object so we can record method invocations and args.
     type ApiLike = {
         api?: Record<string, (...args: unknown[]) => unknown>;
-        instance?: { defaults?: { headers?: Record<string, unknown>; baseURL?: string } };
+        instance?: {
+            defaults?: { headers?: Record<string, unknown>; baseURL?: string };
+        };
     };
     const apiAny = api as ApiLike;
 
@@ -74,11 +88,15 @@ export async function proxyCall<T = unknown>(
               ...api,
               api: new Proxy((apiAny.api ?? {}) as object, {
                   get(target, prop) {
-                      const orig = (target as Record<string, unknown>)[String(prop)];
+                      const orig = (target as Record<string, unknown>)[
+                          String(prop)
+                      ];
                       if (typeof orig === 'function') {
                           return (...args: unknown[]) => {
                               callInfo = { method: String(prop), args };
-                              return (orig as (...args: unknown[]) => unknown).apply(target, args);
+                              return (
+                                  orig as (...args: unknown[]) => unknown
+                              ).apply(target, args);
                           };
                       }
                       return orig;
@@ -91,16 +109,26 @@ export async function proxyCall<T = unknown>(
         if (debug && callInfo === undefined) {
             // Pre-notify that we're about to call the client (method will be recorded by the proxy wrapper)
             const defaults = apiAny.instance?.defaults;
-            const hasAuthHeader = Boolean(defaults?.headers?.Authorization || defaults?.headers?.authorization);
+            const hasAuthHeader = Boolean(
+                defaults?.headers?.Authorization ||
+                    defaults?.headers?.authorization,
+            );
             const debugHeader = defaults?.headers?.['X-Debug-MCP'];
-            console.info('MCP Proxy debug: prepared to call generated client', { baseURL: defaults?.baseURL, hasAuth: hasAuthHeader, debugHeader });
+            console.info('MCP Proxy debug: prepared to call generated client', {
+                baseURL: defaults?.baseURL,
+                hasAuth: hasAuthHeader,
+                debugHeader,
+            });
         }
 
         const res = await fn(apiToCall);
         const payload = unwrapApiResponse<T>(res);
 
         if (debug && callInfo) {
-            console.info('MCP Proxy debug: client call', { method: callInfo.method, args: callInfo.args });
+            console.info('MCP Proxy debug: client call', {
+                method: callInfo.method,
+                args: callInfo.args,
+            });
         }
 
         // Use a shared helper to detect HTML-like payloads (Cloudflare challenge pages, etc.)
@@ -108,11 +136,21 @@ export async function proxyCall<T = unknown>(
             // Log a small sample of the upstream payload to aid diagnosis (do not log full HTML)
             try {
                 // Try to capture any status that may have been returned by the upstream client
-                const status = typeof (res as { status?: unknown })?.status === 'number' ? (res as { status?: number }).status : undefined;
-                const sample = String(payload ?? '').slice(0, 512).replace(/\s+/g, ' ');
-                console.error('MCP Proxy error: upstream returned HTML (possible Cloudflare challenge)', { status, sample });
+                const status =
+                    typeof (res as { status?: unknown })?.status === 'number'
+                        ? (res as { status?: number }).status
+                        : undefined;
+                const sample = String(payload ?? '')
+                    .slice(0, 512)
+                    .replace(/\s+/g, ' ');
+                console.error(
+                    'MCP Proxy error: upstream returned HTML (possible Cloudflare challenge)',
+                    { status, sample },
+                );
             } catch {
-                console.error('MCP Proxy error: upstream returned HTML (possible Cloudflare challenge)');
+                console.error(
+                    'MCP Proxy error: upstream returned HTML (possible Cloudflare challenge)',
+                );
             }
 
             return { status: 502, body: { error: 'Failed to fetch from MCP' } };
@@ -127,12 +165,17 @@ export async function proxyCall<T = unknown>(
             let sample: string | undefined;
 
             if (maybeResponse && typeof maybeResponse === 'object') {
-                if (typeof (maybeResponse as { status?: unknown }).status === 'number') {
+                if (
+                    typeof (maybeResponse as { status?: unknown }).status ===
+                    'number'
+                ) {
                     status = (maybeResponse as { status?: number }).status;
                 }
                 try {
                     const data = (maybeResponse as { data?: unknown }).data;
-                    sample = String(data ?? '').slice(0, 512).replace(/\s+/g, ' ');
+                    sample = String(data ?? '')
+                        .slice(0, 512)
+                        .replace(/\s+/g, ' ');
                 } catch {
                     // ignore serialization errors
                 }
@@ -145,7 +188,10 @@ export async function proxyCall<T = unknown>(
             }
 
             const resolvedStatus = status ?? 502;
-            return { status: resolvedStatus, body: { error: 'Failed to fetch from MCP' } };
+            return {
+                status: resolvedStatus,
+                body: { error: 'Failed to fetch from MCP' },
+            };
         } catch {
             // If our diagnostic logging fails for any reason, fall back to a minimal log and 502
             console.error('MCP Proxy error', e);

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useContext, useEffect, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { useContext, useEffect, useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import DarkModeToggle from "./DarkModeToggle";
+import DarkModeToggle from './DarkModeToggle';
 import { AuthContext } from '@/lib/auth';
 
 function AuthStatus() {
@@ -53,9 +53,18 @@ function AuthStatus() {
     if (!isAuthenticated) {
         return (
             <div className="auth-status flex items-center gap-3">
-                <Link href="/login" className="text-sm">Sign in</Link>
-                <span aria-hidden="true" className="inline-flex h-6 items-center text-sm text-[var(--color-norwegian-400)] px-1 select-none md:hidden">|</span>
-                <Link href="/register" className="text-sm">Register</Link>
+                <Link href="/login" className="text-sm">
+                    Sign in
+                </Link>
+                <span
+                    aria-hidden="true"
+                    className="inline-flex h-6 items-center text-sm text-[var(--color-norwegian-400)] px-1 select-none md:hidden"
+                >
+                    |
+                </span>
+                <Link href="/register" className="text-sm">
+                    Register
+                </Link>
             </div>
         );
     }
@@ -99,7 +108,10 @@ function AuthStatus() {
                             }
                         }}
                         className="block px-4 py-2 text-sm !normal-case cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 !no-underline !text-current"
-                        style={{ opacity: busy ? 0.5 : 1, pointerEvents: busy ? 'none' : 'auto' }}
+                        style={{
+                            opacity: busy ? 0.5 : 1,
+                            pointerEvents: busy ? 'none' : 'auto',
+                        }}
                     >
                         {busy ? 'Signing out…' : 'Sign out'}
                     </Link>
@@ -111,15 +123,15 @@ function AuthStatus() {
 
 export default function Header() {
     const [open, setOpen] = useState(false);
-    const menuId = "mobile-nav";
-    const toggleId = "mobile-nav-toggle";
+    const menuId = 'mobile-nav';
+    const toggleId = 'mobile-nav-toggle';
 
     useEffect(() => {
         function onKey(e: KeyboardEvent) {
-            if (e.key === "Escape") setOpen(false);
+            if (e.key === 'Escape') setOpen(false);
         }
-        if (open) document.addEventListener("keydown", onKey);
-        return () => document.removeEventListener("keydown", onKey);
+        if (open) document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
     }, [open]);
 
     useEffect(() => {
@@ -127,12 +139,16 @@ export default function Header() {
         // When closing, return focus to the toggle button.
         if (open) {
             requestAnimationFrame(() => {
-                const first = document.getElementById('mobile-nav-about') as HTMLElement | null;
+                const first = document.getElementById(
+                    'mobile-nav-about',
+                ) as HTMLElement | null;
                 first?.focus();
             });
         } else {
             requestAnimationFrame(() => {
-                const toggle = document.getElementById(toggleId) as HTMLElement | null;
+                const toggle = document.getElementById(
+                    toggleId,
+                ) as HTMLElement | null;
                 toggle?.focus();
             });
         }
@@ -141,15 +157,32 @@ export default function Header() {
     return (
         <header className="site-header border-b sticky top-0 z-10">
             <div className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
-                <Link href="/" className="inline-flex items-center gap-2" aria-label="Home — Bryan DeBaun">
-                    <Image src="/icons/wolf.svg" alt="" className="site-logo w-12 h-12 md:w-16 md:h-16 object-contain" width={64} height={64} priority />
-                    <span className="site-brand text-lg font-semibold tracking-wide">BAD</span>
+                <Link
+                    href="/"
+                    className="inline-flex items-center gap-2"
+                    aria-label="Home — Bryan DeBaun"
+                >
+                    <Image
+                        src="/icons/wolf.svg"
+                        alt=""
+                        className="site-logo w-12 h-12 md:w-16 md:h-16 object-contain"
+                        width={64}
+                        height={64}
+                        priority
+                    />
+                    <span className="site-brand text-lg font-semibold tracking-wide">
+                        BAD
+                    </span>
                 </Link>
 
                 {/* Desktop nav */}
                 <nav className="hidden md:flex site-nav items-center gap-6 prose prose-norwegian dark:prose-invert">
-                    <Link href="/about" className="text-sm">About</Link>
-                    <Link href="/projects" className="text-sm">Projects</Link>
+                    <Link href="/about" className="text-sm">
+                        About
+                    </Link>
+                    <Link href="/projects" className="text-sm">
+                        Projects
+                    </Link>
                     <DarkModeToggle />
                     <AuthStatus />
                 </nav>
@@ -163,14 +196,35 @@ export default function Header() {
                         aria-expanded={open}
                         onClick={() => setOpen((s) => !s)}
                         className="p-3 h-11 w-11 rounded cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-fjord-600)]"
-                        aria-label={open ? "Close navigation" : "Open navigation"}
+                        aria-label={
+                            open ? 'Close navigation' : 'Open navigation'
+                        }
                     >
-                        <span className="sr-only">{open ? 'Close navigation' : 'Open navigation'}</span>
-                        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <span className="sr-only">
+                            {open ? 'Close navigation' : 'Open navigation'}
+                        </span>
+                        <svg
+                            className="w-6 h-6"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            aria-hidden="true"
+                        >
                             {open ? (
-                                <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                                <path
+                                    d="M6 18L18 6M6 6l12 12"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
                             ) : (
-                                <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                                <path
+                                    d="M4 6h16M4 12h16M4 18h16"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
                             )}
                         </svg>
                     </button>
@@ -178,10 +232,30 @@ export default function Header() {
             </div>
 
             {/* Mobile menu (collapsible) */}
-            <div id={menuId} className={`md:hidden border-t ${open ? "block" : "hidden"}`} role="menu" aria-labelledby={toggleId} aria-hidden={!open}>
+            <div
+                id={menuId}
+                className={`md:hidden border-t ${open ? 'block' : 'hidden'}`}
+                role="menu"
+                aria-labelledby={toggleId}
+                aria-hidden={!open}
+            >
                 <div className="px-6 py-3 space-y-2 flex flex-col items-center site-nav prose prose-norwegian dark:prose-invert">
-                    <Link href="/about" id="mobile-nav-about" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">About</Link>
-                    <Link href="/projects" id="mobile-nav-projects" className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide" role="menuitem">Projects</Link>
+                    <Link
+                        href="/about"
+                        id="mobile-nav-about"
+                        className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide"
+                        role="menuitem"
+                    >
+                        About
+                    </Link>
+                    <Link
+                        href="/projects"
+                        id="mobile-nav-projects"
+                        className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide"
+                        role="menuitem"
+                    >
+                        Projects
+                    </Link>
                     <div className="px-3 py-2">
                         <AuthStatus />
                     </div>

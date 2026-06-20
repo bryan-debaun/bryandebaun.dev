@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -7,7 +6,15 @@ import type { OpenLibraryMetadata } from '@/lib/services/openLibrary';
 
 type ServerAuthorRef = { id?: number; name?: string };
 
-export default function ExternalMetadataCard({ bookId, metadata, serverAuthors }: { bookId: number; metadata: OpenLibraryMetadata; serverAuthors?: ServerAuthorRef[] }) {
+export default function ExternalMetadataCard({
+    bookId,
+    metadata,
+    serverAuthors,
+}: {
+    bookId: number;
+    metadata: OpenLibraryMetadata;
+    serverAuthors?: ServerAuthorRef[];
+}) {
     // Try to find a server-side author that matches any of the metadata author names.
     let matchedAuthor: { id?: number; name?: string } | null = null;
     if (serverAuthors && metadata?.authors?.length) {
@@ -34,27 +41,57 @@ export default function ExternalMetadataCard({ bookId, metadata, serverAuthors }
     }
 
     return (
-        <div className="mt-4 p-4 rounded bg-transparent dark:bg-transparent" data-book-id={bookId}>
+        <div
+            className="mt-4 p-4 rounded bg-transparent dark:bg-transparent"
+            data-book-id={bookId}
+        >
             <div className="flex gap-4">
                 {metadata.coverUrl ? (
-                    <Image src={metadata.coverUrl} alt={`${metadata.title ?? 'Cover'} cover`} width={128} height={192} className="w-32 h-auto object-cover rounded" />
+                    <Image
+                        src={metadata.coverUrl}
+                        alt={`${metadata.title ?? 'Cover'} cover`}
+                        width={128}
+                        height={192}
+                        className="w-32 h-auto object-cover rounded"
+                    />
                 ) : (
                     <div className="w-32 h-40 bg-gray-100 rounded" />
                 )}
 
                 <div className="flex-1">
                     <h3 className="text-lg font-medium">{metadata.title}</h3>
-                    {metadata.subtitle ? <div className="text-sm text-gray-600">{metadata.subtitle}</div> : null}
-                    {metadata.authors?.length ? (
-                        <div className="text-sm mt-1">By {metadata.authors.join(', ')}</div>
+                    {metadata.subtitle ? (
+                        <div className="text-sm text-gray-600">
+                            {metadata.subtitle}
+                        </div>
                     ) : null}
-                    {metadata.publishDate ? <div className="text-sm text-gray-500 mt-2">Published {metadata.publishDate}</div> : null}
-                    {metadata.pages ? <div className="text-sm text-gray-500">{metadata.pages} pages</div> : null}
-                    {metadata.description ? <p className="mt-2 text-sm">{metadata.description}</p> : null}
+                    {metadata.authors?.length ? (
+                        <div className="text-sm mt-1">
+                            By {metadata.authors.join(', ')}
+                        </div>
+                    ) : null}
+                    {metadata.publishDate ? (
+                        <div className="text-sm text-gray-500 mt-2">
+                            Published {metadata.publishDate}
+                        </div>
+                    ) : null}
+                    {metadata.pages ? (
+                        <div className="text-sm text-gray-500">
+                            {metadata.pages} pages
+                        </div>
+                    ) : null}
+                    {metadata.description ? (
+                        <p className="mt-2 text-sm">{metadata.description}</p>
+                    ) : null}
 
                     {matchedAuthor ? (
                         <div className="mt-3">
-                            <Link href={`/authors/${matchedAuthor.id}`} className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]">View author: {matchedAuthor.name}</Link>
+                            <Link
+                                href={`/authors/${matchedAuthor.id}`}
+                                className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]"
+                            >
+                                View author: {matchedAuthor.name}
+                            </Link>
                         </div>
                     ) : null}
                 </div>

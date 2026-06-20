@@ -15,11 +15,13 @@ if (typeof globalThis.window === 'undefined') {
     globalThis.navigator = dom.window.navigator;
 
     // Shim canvas getContext to avoid jsdom "Not implemented" warnings when axe or libraries access canvas
-    if (typeof globalThis.HTMLCanvasElement !== 'undefined' && !globalThis.HTMLCanvasElement.prototype.getContext) {
+    if (
+        typeof globalThis.HTMLCanvasElement !== 'undefined' &&
+        !globalThis.HTMLCanvasElement.prototype.getContext
+    ) {
         // @ts-expect-error adding getContext shim in test environment
-        globalThis.HTMLCanvasElement.prototype.getContext = function () {
-            return {} as CanvasRenderingContext2D;
-        };
+        globalThis.HTMLCanvasElement.prototype.getContext = () =>
+            ({}) as CanvasRenderingContext2D;
     }
 }
 
@@ -31,15 +33,23 @@ vi.mock('next/image', () => ({
         // Coerce priority to a string to avoid React "non-boolean attribute" warnings in tests
         if (priority !== undefined) props.priority = String(priority);
         return React.createElement('img', props as Record<string, unknown>);
-    }
+    },
 }));
 
 // Mock next/link to a plain anchor element
 vi.mock('next/link', () => ({
-    default: (input: { children?: unknown; href?: string;[key: string]: unknown }) => {
+    default: (input: {
+        children?: unknown;
+        href?: string;
+        [key: string]: unknown;
+    }) => {
         const { children, href, ...rest } = input;
-        return React.createElement('a', { href, ...rest } as Record<string, unknown>, children as React.ReactNode);
-    }
+        return React.createElement(
+            'a',
+            { href, ...rest } as Record<string, unknown>,
+            children as React.ReactNode,
+        );
+    },
 }));
 
 // Suppress a noisy Vite deprecation warning emitted when Vitest uses Vite's CJS Node API.
@@ -47,7 +57,10 @@ vi.mock('next/link', () => ({
 if (typeof process !== 'undefined' && typeof process.on === 'function') {
     process.on('warning', (warning: unknown) => {
         const rawMessage = (warning as { message?: unknown })?.message;
-        const msg = typeof rawMessage === 'string' ? rawMessage : String(rawMessage ?? warning);
+        const msg =
+            typeof rawMessage === 'string'
+                ? rawMessage
+                : String(rawMessage ?? warning);
         if (msg.includes("CJS build of Vite's Node API is deprecated")) return;
         // otherwise let Node print the warning as usual
         console.warn(warning);

@@ -2,7 +2,10 @@ import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function POST() {
-    const debug = process.env.DEBUG_AUTH === '1' || (process.env.NODE_ENV !== 'production' && process.env.DEBUG_AUTH !== '0');
+    const debug =
+        process.env.DEBUG_AUTH === '1' ||
+        (process.env.NODE_ENV !== 'production' &&
+            process.env.DEBUG_AUTH !== '0');
 
     try {
         if (debug) {
@@ -29,6 +32,9 @@ export async function POST() {
         if (debug) {
             console.error('auth.logout: exception', { error: error.message });
         }
-        return NextResponse.json({ error: 'Failed to logout' }, { status: 500 });
+        return NextResponse.json(
+            { error: 'Failed to logout' },
+            { status: 500 },
+        );
     }
 }

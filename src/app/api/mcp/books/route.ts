@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ListBooksResponse } from '@bryandebaun/mcp-client';
+import type { ListBooksResponse } from '@bryandebaun/mcp-client';
 import { proxyCall } from '@/lib/mcp-proxy';
 
 import { createApi as _createApi } from '@/lib/mcp';
@@ -13,6 +13,9 @@ export async function GET() {
     const api = mod.createApi();
 
     // Delegate to the proxy helper which normalizes response + errors.
-    const result = await proxyCall<ListBooksResponse>((a) => a.api.listBooks(), api);
+    const result = await proxyCall<ListBooksResponse>(
+        (a) => a.api.listBooks(),
+        api,
+    );
     return NextResponse.json(result.body, { status: result.status });
 }
