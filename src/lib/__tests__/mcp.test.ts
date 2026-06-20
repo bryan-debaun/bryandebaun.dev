@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@bryandebaun/mcp-client', () => ({ Api: vi.fn() }));
+vi.mock('@bryandebaun/mcp-client', () => {
+    // Use a regular function (not an arrow) so `this` refers to the new instance.
+    // Returning `this` (or omitting the return) lets `new Api(...)` build the instance
+    // properly while still tracking calls on the vi.fn() spy.
+    const Api = vi.fn().mockImplementation(function (this: any) {
+        this.setSecurityData = vi.fn();
+    });
+    return { Api };
+});
 
 describe('createApi header behavior', () => {
     afterEach(async () => {

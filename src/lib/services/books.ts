@@ -7,33 +7,15 @@ import { createApi } from '@/lib/mcp';
 import { unwrapApiResponse } from '@/lib/api-response';
 import { looksLikeHtmlPayload } from '@/lib/mcp-proxy';
 
-/**
- * Get Supabase access token for authenticated requests
- * Only call this from server-side code
- */
-async function getSupabaseToken(): Promise<string | undefined> {
-    try {
-        // Dynamic import to avoid bundling server-only code in client
-        const { createClient } = await import('@/lib/supabase/server');
-        const supabase = await createClient();
-        const {
-            data: { session },
-        } = await supabase.auth.getSession();
-        return session?.access_token;
-    } catch (error) {
-        console.error('Failed to get Supabase session:', error);
-        return undefined;
-    }
-}
-
 export async function listBooks(): Promise<BookWithAuthors[]> {
     // When running server-side, prefer a *direct* MCP client call only if an explicit
     // MCP_BASE_URL is configured. This prevents accidental calls to a production origin
     // (which can return Cloudflare HTML challenges) when running locally without env.
     if (typeof window === 'undefined' && process.env.MCP_BASE_URL) {
         try {
-            const token = await getSupabaseToken();
-            const api = createApi(token);
+            // Use server-to-server API key — the user's Supabase JWT is for our own
+            // backend auth and is not accepted by the MCP server.
+            const api = createApi();
             const res = await api.api.listBooks();
             const payload = unwrapApiResponse<ListBooksResponse>(res);
 
@@ -50,11 +32,14 @@ export async function listBooks(): Promise<BookWithAuthors[]> {
                 'listBooks direct MCP call failed; falling back to proxy',
                 e,
             );
-            // Fall back to calling our local proxy route which normalizes HTML responses
-            const resProxy = await fetchWithFallback('/api/mcp/books');
-            if (!resProxy.ok) return [];
-            const payload = await resProxy.json();
-            return payload?.books ?? [];
+            try {
+                const resProxy = await fetchWithFallback('/api/mcp/books');
+                if (!resProxy.ok) return [];
+                const payload = await resProxy.json();
+                return payload?.books ?? [];
+            } catch {
+                return [];
+            }
         }
     }
 
@@ -69,8 +54,7 @@ export async function getBookById(id: number): Promise<BookWithAuthors | null> {
     // Prefer direct MCP calls only when MCP_BASE_URL is explicitly configured.
     if (typeof window === 'undefined' && process.env.MCP_BASE_URL) {
         try {
-            const token = await getSupabaseToken();
-            const api = createApi(token);
+            const api = createApi();
             const res = await api.api.getBook(id);
             const payload = unwrapApiResponse<BookWithAuthors>(res);
 
@@ -87,10 +71,15 @@ export async function getBookById(id: number): Promise<BookWithAuthors | null> {
                 'getBookById direct MCP call failed; falling back to proxy',
                 e,
             );
-            const resProxy = await fetchWithFallback(`/api/mcp/books/${id}`);
-            if (!resProxy?.ok) return null;
-            const book = await resProxy.json();
-            return book ?? null;
+            try {
+                const resProxy = await fetchWithFallback(
+                    `/api/mcp/books/${id}`,
+                );
+                if (!resProxy || !resProxy.ok) return null;
+                return await resProxy.json();
+            } catch {
+                return null;
+            }
         }
     }
 
