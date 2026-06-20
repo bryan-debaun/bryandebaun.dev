@@ -413,6 +413,26 @@ html.dark .site-footer {
   /* soft mint tint on dark background */
 }
 
+/* Global interactive cursor — any element the user can click should show a pointer */
+button,
+[role="button"],
+a,
+select,
+label[for],
+input[type="checkbox"],
+input[type="radio"],
+input[type="date"],
+input[type="file"],
+input[type="color"],
+[tabindex]:not([tabindex="-1"]) {
+  cursor: pointer;
+}
+
+/* Ensure date input calendar icon also shows pointer (Tailwind base can override) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
 /* Smooth transitions for typographic links and interactive text */
 .prose a,
 main a,

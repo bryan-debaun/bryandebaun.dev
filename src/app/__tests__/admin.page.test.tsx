@@ -1,66 +1,46 @@
-import { render, screen } from '@testing-library/react';
-import AdminPage from '@/app/admin/page';
-import { AuthContext } from '@/lib/auth';
-import { describe, it, expect, vi } from 'vitest';
+import { readFileSync } from 'fs';
+import path from 'path';
+import { describe, it, expect } from 'vitest';
 
-const pushMock = vi.fn();
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push: pushMock }) }));
-
-describe('Admin page guard', () => {
-    it('redirects to /login when unauthenticated', () => {
-        render(
-            <AuthContext.Provider
-                value={{
-                    user: null,
-                    refresh: async () => {},
-                    logout: async () => {},
-                    isAuthenticated: false,
-                }}
-            >
-                <AdminPage />
-            </AuthContext.Provider>,
+describe('Admin page', () => {
+    it('is a server component with server-side auth via Supabase (no "use client")', () => {
+        const filePath = path.resolve(
+            process.cwd(),
+            'src',
+            'app',
+            'admin',
+            'page.tsx',
         );
-        expect(pushMock).toHaveBeenCalledWith('/login');
+        const src = readFileSync(filePath, 'utf8');
+        expect(src).not.toContain("'use client'");
+        expect(src).toContain('@/lib/supabase/server');
+        expect(src).toContain('redirect');
     });
 
-    it('redirects to / when authenticated but not admin', () => {
-        const user = { id: 1, email: 'me@example.com', isAdmin: false } as any;
-        render(
-            <AuthContext.Provider
-                value={{
-                    user,
-                    refresh: async () => {},
-                    logout: async () => {},
-                    isAuthenticated: true,
-                }}
-            >
-                <AdminPage />
-            </AuthContext.Provider>,
+    it('renders BooksTable with isAdmin prop and server-fetched books', () => {
+        const filePath = path.resolve(
+            process.cwd(),
+            'src',
+            'app',
+            'admin',
+            'page.tsx',
         );
-        expect(pushMock).toHaveBeenCalledWith('/');
+        const src = readFileSync(filePath, 'utf8');
+        expect(src).toContain('BooksTable');
+        expect(src).toContain('isAdmin');
+        expect(src).toContain('listBooks');
     });
 
-    it('renders admin UI for admin users', () => {
-        const user = {
-            id: 1,
-            email: 'admin@example.com',
-            isAdmin: true,
-        } as any;
-        render(
-            <AuthContext.Provider
-                value={{
-                    user,
-                    refresh: async () => {},
-                    logout: async () => {},
-                    isAuthenticated: true,
-                }}
-            >
-                <AdminPage />
-            </AuthContext.Provider>,
+    it('redirects to /login when no user and to / when user is not admin', () => {
+        const filePath = path.resolve(
+            process.cwd(),
+            'src',
+            'app',
+            'admin',
+            'page.tsx',
         );
-
-        expect(
-            screen.getByText(/Admin dashboard placeholder/i),
-        ).toBeInTheDocument();
+        const src = readFileSync(filePath, 'utf8');
+        expect(src).toContain("redirect('/login')");
+        expect(src).toContain("redirect('/')");
     });
 });

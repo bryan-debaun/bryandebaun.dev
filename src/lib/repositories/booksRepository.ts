@@ -1,4 +1,8 @@
-import type { BookWithAuthors } from '@bryandebaun/mcp-client';
+import type {
+    BookWithAuthors,
+    CreateBookRequest,
+    UpdateBookRequest,
+} from '@bryandebaun/mcp-client';
 
 /**
  * Repository layer for books - uses API routes for client-side operations
@@ -36,4 +40,36 @@ export async function updateBookStatus(
     });
     if (!res.ok) throw new Error('Failed to update book');
     return await res.json();
+}
+
+export async function createBook(
+    data: CreateBookRequest,
+): Promise<BookWithAuthors> {
+    const res = await fetch('/api/admin/books', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error('Failed to create book');
+    return await res.json();
+}
+
+export async function updateBook(
+    id: number,
+    data: UpdateBookRequest & { rating?: number | null },
+): Promise<BookWithAuthors> {
+    const res = await fetch(`/api/admin/books/${id}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error('Failed to update book');
+    return await res.json();
+}
+
+export async function deleteBook(id: number): Promise<void> {
+    const res = await fetch(`/api/admin/books/${id}`, {
+        method: 'DELETE',
+    });
+    if (!res.ok && res.status !== 204) throw new Error('Failed to delete book');
 }

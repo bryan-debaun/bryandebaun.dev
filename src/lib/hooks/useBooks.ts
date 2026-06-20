@@ -1,7 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import type { BookWithAuthors } from '@bryandebaun/mcp-client';
-import type { ItemStatus } from '@/lib/types';
+import type {
+    BookWithAuthors,
+    CreateBookRequest,
+    UpdateBookRequest,
+} from '@bryandebaun/mcp-client';
+import { ItemStatus } from '@/lib/types';
 import * as repo from '@/lib/repositories/booksRepository';
 import { generateBookRows, type BookRow } from '@/lib/books';
 import { mergeBook, toggledStatus } from '@/lib/managers/booksManager';
@@ -134,7 +138,7 @@ export function useBooks(initialBooks?: BookWithAuthors[]) {
             return { previous };
         },
         onError: (
-            _err,
+            err,
             variables: BookRow | undefined,
             context: { previous?: BookWithAuthors[] } | undefined,
         ) => {
@@ -233,6 +237,156 @@ export function useBooks(initialBooks?: BookWithAuthors[]) {
         },
     });
 
+    const createMutation = useMutation({
+        mutationFn: async (data: CreateBookRequest) => {
+            return await repo.createBook(data);
+        },
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: BOOKS_KEY });
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: async (id: number) => {
+            await repo.deleteBook(id);
+        },
+        onMutate: async (id: number) => {
+            await qc.cancelQueries({ queryKey: BOOKS_KEY });
+            const previous = qc.getQueryData<BookWithAuthors[]>(BOOKS_KEY);
+            qc.setQueryData<BookWithAuthorsExt[]>(
+                BOOKS_KEY,
+                (old = previous ?? initialBooks ?? []) =>
+                    (old as BookWithAuthorsExt[]).filter((b) => b.id !== id),
+            );
+            setOverrides((prev) => {
+                const n = new Map(prev);
+                n.delete(id);
+                return n;
+            });
+            return { previous };
+        },
+        onError: (
+            _err: unknown,
+            _id: number,
+            context: { previous?: BookWithAuthors[] } | undefined,
+        ) => {
+            if (context?.previous)
+                qc.setQueryData<BookWithAuthors[]>(BOOKS_KEY, context.previous);
+        },
+        onSettled: () => {
+            qc.invalidateQueries({ queryKey: BOOKS_KEY });
+        },
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: async ({
+            id,
+            data,
+        }: {
+            id: number;
+            data: UpdateBookRequest & { rating?: number | null };
+        }) => {
+            return await repo.updateBook(id, data);
+        },
+        onMutate: async ({
+            id,
+            data,
+        }: {
+            id: number;
+            data: UpdateBookRequest & { rating?: number | null };
+        }) => {
+            await qc.cancelQueries({ queryKey: BOOKS_KEY });
+            const previous = qc.getQueryData<BookWithAuthors[]>(BOOKS_KEY);
+            qc.setQueryData<BookWithAuthorsExt[]>(
+                BOOKS_KEY,
+                (old = previous ?? initialBooks ?? []) => {
+                    const base = (old as BookWithAuthorsExt[]).length
+                        ? (old as BookWithAuthorsExt[])
+                        : (initialBooks ?? []).map(
+                              (b) => ({ ...b }) as BookWithAuthorsExt,
+                          );
+                    return base.map((b) =>
+                        b.id === id
+                            ? ({
+                                  ...b,
+                                  ...(data as Partial<BookWithAuthorsExt>),
+                                  _loading: true,
+                              } as BookWithAuthorsExt)
+                            : b,
+                    );
+                },
+            );
+            setOverrides((prev) => {
+                const n = new Map(prev);
+                n.set(id, {
+                    ...(n.get(id) ?? {}),
+                    ...(data as Partial<BookRow>),
+                    _loading: true,
+                    _error: undefined,
+                });
+                return n;
+            });
+            return { previous };
+        },
+        onError: (
+            _err: unknown,
+            vars: {
+                id: number;
+                data: UpdateBookRequest & { rating?: number | null };
+            },
+            context: { previous?: BookWithAuthors[] } | undefined,
+        ) => {
+            if (context?.previous)
+                qc.setQueryData<BookWithAuthors[]>(BOOKS_KEY, context.previous);
+            setOverrides((prev) => {
+                const n = new Map(prev);
+                n.set(vars.id, {
+                    ...(n.get(vars.id) ?? {}),
+                    _loading: false,
+                    _error: 'Failed to update',
+                });
+                return n;
+            });
+        },
+        onSuccess: (data: BookWithAuthors | undefined) => {
+            if (data?.id) {
+                qc.setQueryData<BookWithAuthorsExt[]>(
+                    BOOKS_KEY,
+                    (old = initialBooks ?? []) => {
+                        const base = (old as BookWithAuthorsExt[]).length
+                            ? (old as BookWithAuthorsExt[])
+                            : (initialBooks ?? []).map(
+                                  (b) => ({ ...b }) as BookWithAuthorsExt,
+                              );
+                        return base.map((b) =>
+                            b.id === data.id
+                                ? ({
+                                      ...b,
+                                      ...data,
+                                      _loading: false,
+                                      _error: undefined,
+                                  } as BookWithAuthorsExt)
+                                : b,
+                        );
+                    },
+                );
+                setOverrides((prev) => {
+                    const n = new Map(prev);
+                    n.set(data.id as number, {
+                        ...(n.get(data.id as number) ?? {}),
+                        ...(data as Partial<BookWithAuthorsExt>),
+                        _loading: false,
+                        _error: undefined,
+                    });
+                    return n;
+                });
+            }
+        },
+        onSettled: () => {
+            qc.invalidateQueries({ queryKey: BOOKS_KEY });
+        },
+    });
+
     return {
         books: booksQuery.data ?? [],
         rows,
@@ -241,5 +395,20 @@ export function useBooks(initialBooks?: BookWithAuthors[]) {
         toggleStatus: (book: BookRow) => mutation.mutate(book),
         toggleStatusAsync: (book: BookRow) => mutation.mutateAsync(book),
         mutation,
+        createBook: (data: CreateBookRequest) => createMutation.mutate(data),
+        createBookAsync: (data: CreateBookRequest) =>
+            createMutation.mutateAsync(data),
+        createMutation,
+        deleteBook: (id: number) => deleteMutation.mutate(id),
+        deleteMutation,
+        updateBook: (
+            id: number,
+            data: UpdateBookRequest & { rating?: number | null },
+        ) => updateMutation.mutate({ id, data }),
+        updateBookAsync: (
+            id: number,
+            data: UpdateBookRequest & { rating?: number | null },
+        ) => updateMutation.mutateAsync({ id, data }),
+        updateMutation,
     };
 }

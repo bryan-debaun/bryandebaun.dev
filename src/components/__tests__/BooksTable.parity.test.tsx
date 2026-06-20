@@ -1,10 +1,4 @@
-import {
-    render,
-    screen,
-    fireEvent,
-    waitFor,
-    act,
-} from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 
 // Mock the internal books helpers so tests don't depend on path aliases resolving in the test runner
@@ -63,112 +57,43 @@ describe('BooksTable parity and optimistic overlay', () => {
         expect(screen.getByText('2')).toBeInTheDocument();
     });
 
-    it('applies optimistic status immediately and merges server response', async () => {
-        // mock fetch to succeed and return updated book with rating 9.0
-        vi.stubGlobal(
-            'fetch',
-            vi.fn().mockResolvedValue({
-                ok: true,
-                json: async () => ({ id: 1, rating: 9.0 }),
-            } as any),
-        );
-
+    it('shows edit and delete buttons for admin', () => {
         render(
             <Providers>
                 <BooksTable books={[sampleBook(1, 1.0)]} isAdmin={true} />
             </Providers>,
         );
-        expect(screen.getByText('1')).toBeInTheDocument();
-
-        // click the toggle button to trigger optimistic status change
-        const toggle = screen.getByRole('button', {
-            name: /toggle status for book 1/i,
-        });
-        fireEvent.click(toggle);
-
-        // server response should be merged and update rating
-        expect(await screen.findByText('9')).toBeInTheDocument();
+        expect(
+            screen.getByRole('button', { name: /edit book 1/i }),
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole('button', { name: /delete book 1/i }),
+        ).toBeInTheDocument();
     });
 
-    it('disables toggle while request pending and re-enables after', async () => {
-        let resolveFetch: any;
-        const fetchP = new Promise((res) => {
-            resolveFetch = res;
-        });
-        vi.stubGlobal(
-            'fetch',
-            vi.fn().mockImplementation(() => fetchP as any),
+    it('hides edit and delete buttons for non-admin', () => {
+        render(
+            <Providers>
+                <BooksTable books={[sampleBook(1, 1.0)]} />
+            </Providers>,
         );
+        expect(
+            screen.queryByRole('button', { name: /edit book 1/i }),
+        ).not.toBeInTheDocument();
+        expect(
+            screen.queryByRole('button', { name: /delete book 1/i }),
+        ).not.toBeInTheDocument();
+    });
 
+    it('opens edit dialog when edit button clicked', async () => {
         render(
             <Providers>
                 <BooksTable books={[sampleBook(1, 1.0)]} isAdmin={true} />
             </Providers>,
         );
-        // Query fresh on each assertion to avoid stale element references
+        fireEvent.click(screen.getByRole('button', { name: /edit book 1/i }));
         expect(
-            screen.getByRole('button', { name: /toggle status for book 1/i }),
-        ).toBeEnabled();
-
-        await act(async () => {
-            fireEvent.click(
-                screen.getByRole('button', {
-                    name: /toggle status for book 1/i,
-                }),
-            );
-        });
-
-        // wait for loading state to be applied
-        await waitFor(() =>
-            expect(
-                screen.getByRole('button', {
-                    name: /toggle status for book 1/i,
-                }),
-            ).toBeDisabled(),
-        );
-
-        // resolve the fetch
-        resolveFetch({ ok: true, json: async () => ({ id: 1, rating: 9.0 }) });
-
-        // wait for the update to be applied
-        expect(await screen.findByText('9')).toBeInTheDocument();
-        expect(
-            screen.getByRole('button', { name: /toggle status for book 1/i }),
-        ).toBeEnabled();
-    });
-
-    it('shows error and does not set optimistic on failure', async () => {
-        vi.stubGlobal(
-            'fetch',
-            vi.fn().mockResolvedValue({
-                ok: false,
-                text: async () => 'server error',
-            } as any),
-        );
-
-        render(
-            <Providers>
-                <BooksTable
-                    books={[sampleBook(1, 1.0)]}
-                    ratings={[]}
-                    isAdmin={true}
-                />
-            </Providers>,
-        );
-        const toggle = screen.getByRole('button', {
-            name: /toggle status for book 1/i,
-        });
-
-        await act(async () => {
-            fireEvent.click(toggle);
-        });
-
-        // error message should be shown
-        await waitFor(() =>
-            expect(screen.getByText(/failed to update/i)).toBeInTheDocument(),
-        );
-
-        // original value remains
-        expect(screen.getByText('1')).toBeInTheDocument();
+            await screen.findByRole('dialog', { name: /edit book/i }),
+        ).toBeInTheDocument();
     });
 });

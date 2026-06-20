@@ -49,6 +49,21 @@ const eslintConfig = defineConfig([
       semi: ["error", "always"]
     }
   },
+  // Honor the `_`-prefix convention for intentionally-unused bindings, and ignore
+  // properties destructured solely to omit them from a rest spread (e.g. stripping
+  // `rating` before forwarding a payload to the MCP client).
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          ignoreRestSiblings: true
+        }
+      ]
+    }
+  },
   // Disallow casting to `unknown` — prefer explicit types and narrower assertions
   {
     rules: {

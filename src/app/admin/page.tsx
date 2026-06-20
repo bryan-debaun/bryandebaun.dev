@@ -1,36 +1,35 @@
-'use client';
-import { useContext, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { AuthContext } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import BooksTable from '@/components/BooksTable';
+import { listBooks } from '@/lib/services/books';
 
-export default function AdminPage() {
-    const { user, isAuthenticated } = useContext(AuthContext);
-    const router = useRouter();
+export const dynamic = 'force-dynamic';
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            router.push('/login');
-            return;
-        }
-        if (!user?.isAdmin) {
-            // Non-admin users should not access the admin UI
-            router.push('/');
-        }
-    }, [isAuthenticated, user, router]);
+export default async function AdminPage() {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!isAuthenticated || !user?.isAdmin) {
-        return <div className="prose">Checking authentication…</div>;
+    if (!user) {
+        redirect('/login');
     }
 
+    const role = (user.user_metadata as Record<string, unknown> | undefined)
+        ?.role;
+    if (role !== 'admin') {
+        redirect('/');
+    }
+
+    const books = await listBooks();
+
     return (
-        <div className="prose">
-            <h1 className="text-2xl font-semibold mb-4">Admin</h1>
-            <p className="mb-4">
-                Admin dashboard placeholder. Protected by client-side guard.
-            </p>
-            <p className="text-sm text-muted-foreground">
-                Use the MCP admin endpoints from the server/API routes.
-            </p>
-        </div>
+        <main className="p-6">
+            <h1 className="text-2xl font-semibold mb-6">Admin</h1>
+            <section>
+                <h2 className="text-xl font-semibold mb-4">Books</h2>
+                <BooksTable books={books} isAdmin={true} />
+            </section>
+        </main>
     );
 }
