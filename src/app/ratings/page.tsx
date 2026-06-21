@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import type { BookWithAuthors } from '@bryandebaun/mcp-client';
 import { fetchWithFallback } from '@/lib/server-fetch';
+
+export const metadata: Metadata = {
+    title: 'My Ratings — Bryan DeBaun',
+    description:
+        'Bryan DeBaun’s personal book ratings and short reviews from his reading library.',
+};
 
 export default async function Page() {
     // Ratings are now embedded in books - fetch books and show those with ratings

@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import BooksTable from '@/components/BooksTable';
 import Tabs from '@/components/Tabs';
+
+export const metadata: Metadata = {
+    title: 'Media — Bryan DeBaun',
+    description:
+        'A curated list of books, movies, games, and creators Bryan DeBaun enjoys.',
+};
 
 export const dynamic = 'force-dynamic';
 

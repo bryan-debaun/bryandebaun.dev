@@ -1,6 +1,30 @@
+import type { Metadata } from 'next';
 import React from 'react';
 import * as jsxRuntime from 'react/jsx-runtime';
 import { formatDate } from '@/lib/dates';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bryandebaun.dev';
+
+type PhilosophyDoc = {
+    slug: string;
+    title: string;
+    summary?: string;
+    ogImage?: string;
+    date?: string;
+    private?: boolean;
+};
+
+async function findPostBySlug(
+    slug: string,
+): Promise<PhilosophyDoc | undefined> {
+    const { allPhilosophies } = await import(
+        '../../../../.contentlayer/generated'
+    );
+    return allPhilosophies.find(
+        (p: PhilosophyDoc) =>
+            p.slug.endsWith(slug) || p.slug === `philosophy/${slug}`,
+    );
+}
 
 const componentCache = new Map<string, React.ComponentType<unknown>>();
 const compiledBySlug = new Map<string, React.ComponentType<unknown>>();
@@ -40,6 +64,37 @@ export async function generateStaticParams() {
         const parts = p.slug.split('/');
         return { slug: parts[parts.length - 1] };
     });
+}
+
+export async function generateMetadata({
+    params,
+}: {
+    params?: { slug: string } | Promise<{ slug: string }>;
+}): Promise<Metadata> {
+    const { slug } = (await params) as { slug: string };
+    const post = await findPostBySlug(slug);
+
+    if (!post) {
+        return { title: 'Note not found — Bryan DeBaun' };
+    }
+
+    const title = `${post.title} — Bryan DeBaun`;
+    const description =
+        post.summary ?? `${post.title} — a note by Bryan DeBaun.`;
+    const url = `${SITE_URL}/${post.slug}`;
+
+    return {
+        title,
+        description,
+        openGraph: {
+            type: 'article',
+            title,
+            description,
+            url,
+            ...(post.ogImage ? { images: [{ url: post.ogImage }] } : {}),
+            ...(post.date ? { publishedTime: post.date } : {}),
+        },
+    };
 }
 
 export default async function PhilosophyPage({
@@ -87,8 +142,26 @@ export default async function PhilosophyPage({
         }
     }
 
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: post.title,
+        ...(post.summary ? { description: post.summary } : {}),
+        ...(post.date
+            ? { datePublished: post.date, dateModified: post.date }
+            : {}),
+        ...(post.ogImage ? { image: post.ogImage } : {}),
+        url: `${SITE_URL}/${post.slug}`,
+        author: { '@type': 'Person', name: 'Bryan DeBaun' },
+    };
+
     return (
         <article className="prose prose-norwegian dark:prose-invert max-w-none">
+            <script
+                type="application/ld+json"
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD must be emitted as a raw script body; content is a serialized object, not user HTML
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <h1 className="text-center scroll-mt-[var(--header-height)]">
                 {post.title}
             </h1>

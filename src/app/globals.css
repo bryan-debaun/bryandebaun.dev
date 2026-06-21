@@ -225,7 +225,7 @@ html {
 
 .site-header .inline-flex:focus-visible {
   /* keep accessibility focus visible but without underline */
-  outline: 3px solid rgba(23, 111, 196, 0.12);
+  outline: 3px solid var(--color-fjord-600);
   outline-offset: 3px;
 }
 
@@ -301,7 +301,7 @@ a:focus-visible {
 }
 
 .site-nav a:focus-visible {
-  outline: 3px solid rgba(23, 111, 196, 0.12);
+  outline: 3px solid var(--color-fjord-600);
   outline-offset: 3px;
 }
 
@@ -533,7 +533,7 @@ main a,
 }
 
 .btn--neon:focus-visible {
-  outline: 3px solid rgba(23, 111, 196, 0.12);
+  outline: 3px solid var(--color-fjord-600);
   outline-offset: 3px;
 }
 
@@ -757,7 +757,16 @@ html.dark .btn--primary:hover {
 }
 
 /* Target the visible label and icon so defaults we set are applied even if child elements receive styles */
+/* Light mode: use a dark, readable teal (>= 4.5:1 on the pale button). The
+   pale norwegian-200 tone is only legible on the dark-mode button, so scope it
+   to .dark below. */
 .projects-list .btn--primary .truncate {
+  color: var(--color-norwegian-700) !important;
+}
+
+.dark .projects-list .btn--primary .truncate,
+.projects-list .dark .btn--primary .truncate,
+html.dark .projects-list .btn--primary .truncate {
   color: var(--color-norwegian-200) !important;
 }
 
@@ -777,7 +786,7 @@ html.dark .btn--primary:hover {
   /* Prefer a rounded, subtle box-shadow ring instead of a hard outline */
   outline: none;
   border-radius: 0.5rem;
-  box-shadow: 0 0 0 2px rgba(23, 111, 196, 0.09), 0 6px 18px rgba(64, 215, 208, 0.04);
+  box-shadow: 0 0 0 3px var(--color-fjord-600), 0 6px 18px rgba(64, 215, 208, 0.04);
   transition: box-shadow .12s ease;
   /* ensure Tailwind ring variables (if present) point to Fjord */
   --tw-ring-color: var(--color-fjord-600) !important;
@@ -811,12 +820,14 @@ html.dark .btn--primary:hover {
 
 @media (prefers-reduced-motion: reduce) {
 
-  /* Provide a conservative global fallback that disables non-essential transitions/animations */
+  /* Provide a conservative global fallback that disables non-essential
+     transitions/animations. NOTE: do NOT blanket-disable `transform` here — the
+     dark-mode toggle knob and several centered elements rely on static
+     transforms; only the animated transition/animation should be suppressed. */
   * {
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
     animation-delay: 0ms !important;
-    transform: none !important;
   }
 }
 
@@ -982,7 +993,7 @@ html.dark .form-textarea::placeholder {
 main p.lead,
 main .prose p.lead,
 .prose .lead {
-  color: var(--color-norwegian-600);
+  color: var(--color-norwegian-700);
   font-weight: 500;
   font-size: 1.125rem;
 }

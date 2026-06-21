@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { resolveIsDark } from '@/lib/theme';
 
 export default function DarkModeToggle() {
     // Defer real theme detection to the client to avoid SSR/client hydration mismatch.
@@ -40,12 +41,17 @@ export default function DarkModeToggle() {
 
             // Determine the authoritative initial theme in this order:
             // 1. localStorage (explicit user choice)
-            // 2. document class if already set by another instance
+            // 2. document class if already set by another instance / the
+            //    pre-paint inline theme script (src/lib/theme.ts)
             // 3. prefers-color-scheme media query
+            //
+            // Steps 1 and 3 share their precedence with the blocking inline
+            // script via `resolveIsDark` so the two never drift; step 2 is the
+            // cross-instance sync fallback unique to this client component.
             let initial: boolean;
-            if (stored === 'dark') initial = true;
-            else if (stored === 'light') initial = false;
-            else if (
+            if (stored === 'dark' || stored === 'light') {
+                initial = resolveIsDark(stored, !!prefersDark);
+            } else if (
                 typeof document !== 'undefined' &&
                 document.documentElement.classList.contains('dark')
             )
@@ -55,7 +61,7 @@ export default function DarkModeToggle() {
                 document.documentElement.classList.contains('light')
             )
                 initial = false;
-            else initial = !!prefersDark;
+            else initial = resolveIsDark(stored, !!prefersDark);
 
             // Apply and set state together to avoid races between instances
             requestAnimationFrame(() => {

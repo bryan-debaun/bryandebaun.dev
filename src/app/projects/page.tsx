@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import type { Repo } from '../../lib/github';
 import { getShowcaseRepos } from '../../lib/github';
+
+export const metadata: Metadata = {
+    title: 'Projects — Bryan DeBaun',
+    description:
+        'Open-source projects and technical demos by Bryan DeBaun, including the MCP server, Copilot agent tooling, and this site.',
+};
 
 const curatedFallback: Repo[] = [
     {
