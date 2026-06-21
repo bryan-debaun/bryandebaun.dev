@@ -16,10 +16,6 @@ const eslintConfig = defineConfig([
     ".contentlayer/**",
     // Ignore generated package output (dist)
     "packages/*/dist/**",
-    // Temporary: ignore specific MDX files that trigger the MDX parser bug. See issue: TODO
-    "src/content/posts/hello-world.mdx",
-    "src/content/philosophy/private-example.mdx",
-    "src/content/philosophy/cptsd.mdx",
   ]),
   // MDX files: lint with eslint-plugin-mdx (only content folder)
   {
