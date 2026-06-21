@@ -1,0 +1,91 @@
+name: Integration / E2E
+
+# Integration suite (issue #84): admin auth + Books CRUD against the LIVE prod
+# MCP server, plus negative auth cases. WRITES to production data (namespaced
+# `[e2e-<runId>]` + guaranteed teardown) — so it is gated on repo secrets and
+# SKIPS GRACEFULLY when they're absent (e.g. PRs from forks).
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: Run integration specs
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # Map repo secrets into the env the suite reads. On forks these resolve to
+      # empty strings and the preflight gate skips the job (secrets are not
+      # exposed to fork PRs by GitHub).
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      MCP_BASE_URL: ${{ secrets.MCP_BASE_URL }}
+      MCP_API_KEY: ${{ secrets.MCP_API_KEY }}
+      E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+      E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+      E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+    steps:
+      - name: Preflight — are the integration secrets present?
+        id: preflight
+        run: |
+          if [ -z "$MCP_API_KEY" ] || [ -z "$E2E_ADMIN_EMAIL" ] || [ -z "$E2E_USER_EMAIL" ] || [ -z "$NEXT_PUBLIC_SUPABASE_URL" ]; then
+            echo "Integration secrets unavailable (likely a fork). Skipping."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.preflight.outputs.run == 'true'
+
+      - name: Install pnpm
+        if: steps.preflight.outputs.run == 'true'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        if: steps.preflight.outputs.run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.preflight.outputs.run == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright (chromium)
+        if: steps.preflight.outputs.run == 'true'
+        run: pnpm exec playwright install --with-deps chromium
+        timeout-minutes: 8
+
+      - name: Build
+        if: steps.preflight.outputs.run == 'true'
+        run: pnpm run build
+
+      - name: Start server
+        if: steps.preflight.outputs.run == 'true'
+        run: |
+          pnpm run start &
+          echo "Waiting for localhost:3000..."
+          pnpm dlx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run integration specs
+        if: steps.preflight.outputs.run == 'true'
+        run: pnpm run test:integration
+
+      - name: Upload Playwright report/traces
+        if: ${{ always() && steps.preflight.outputs.run == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-report
+          path: |
+            playwright-report/**
+            test-results/**
+          retention-days: 14
