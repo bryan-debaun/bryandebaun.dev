@@ -183,6 +183,9 @@ export default function Header() {
                     <Link href="/projects" className="text-sm">
                         Projects
                     </Link>
+                    <Link href="/contact" className="text-sm">
+                        Contact
+                    </Link>
                     <DarkModeToggle />
                     <AuthStatus />
                 </nav>
@@ -255,6 +258,14 @@ export default function Header() {
                         role="menuitem"
                     >
                         Projects
+                    </Link>
+                    <Link
+                        href="/contact"
+                        id="mobile-nav-contact"
+                        className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide"
+                        role="menuitem"
+                    >
+                        Contact
                     </Link>
                     <div className="px-3 py-2">
                         <AuthStatus />
