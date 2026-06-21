@@ -6,8 +6,8 @@ export default function Home() {
             <h1 className="font-bold">Hi, I&apos;m Bryan DeBaun.</h1>
             <p className="text-lg">
                 A Software Engineer focused on building reliable, scalable web
-                apps and developer tools. This site showcases projects, writing,
-                and technical demos.
+                apps and developer tools. This site is where I share my
+                projects, writing, and what I&apos;m reading.
             </p>
             <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:gap-4">
                 <Link

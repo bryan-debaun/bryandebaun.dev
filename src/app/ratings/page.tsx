@@ -19,8 +19,8 @@ export default async function Page() {
     const booksWithRatings = books.filter((b) => typeof b.rating === 'number');
 
     return (
-        <main style={{ padding: 24 }}>
-            <h1>My Ratings</h1>
+        <div className="prose prose-norwegian dark:prose-invert max-w-none">
+            <h2>My Ratings</h2>
             {booksWithRatings.length === 0 ? (
                 <p>No ratings found.</p>
             ) : (
@@ -28,20 +28,13 @@ export default async function Page() {
                     {booksWithRatings.map((b) => (
                         <li key={b.id}>
                             {b.title} — {b.rating}
-                            {b.review && (
-                                <p
-                                    style={{
-                                        marginLeft: 16,
-                                        fontSize: '0.9em',
-                                    }}
-                                >
-                                    {b.review}
-                                </p>
-                            )}
+                            {b.review ? (
+                                <p className="ml-4 text-sm">{b.review}</p>
+                            ) : null}
                         </li>
                     ))}
                 </ul>
             )}
-        </main>
+        </div>
     );
 }

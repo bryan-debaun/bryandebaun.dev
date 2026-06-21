@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import NowReading from '@/components/NowReading';
 import PhilosophyList from '@/components/PhilosophyList';
 import WorkPassions from '@/components/WorkPassions';
@@ -33,16 +34,16 @@ export default function About() {
 
             <PhilosophyList />
 
-            <h3>Media</h3>
+            <h3>Reading</h3>
             <p>
-                I keep a small, curated list of books, movies, games, and
-                creators I enjoy. You can view them on the{' '}
-                <a
+                I keep a small, curated list of the books I&apos;m reading, with
+                personal ratings and short notes. You can browse them on the{' '}
+                <Link
                     href="/media"
                     className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]"
                 >
                     Media
-                </a>{' '}
+                </Link>{' '}
                 page.
             </p>
         </div>

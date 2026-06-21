@@ -13,8 +13,8 @@ export default async function Page() {
     const authors = await listAuthors();
 
     return (
-        <main style={{ padding: 24 }}>
-            <h1>Authors</h1>
+        <div className="prose prose-norwegian dark:prose-invert max-w-none">
+            <h2>Authors</h2>
             {authors.length === 0 ? (
                 <p>No authors found.</p>
             ) : (
@@ -24,6 +24,6 @@ export default async function Page() {
                     ))}
                 </ul>
             )}
-        </main>
+        </div>
     );
 }
