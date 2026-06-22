@@ -1,6 +1,13 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { allPhilosophies } from 'contentlayer/generated';
 import { publicOnly } from '@/lib/content';
+
+export const metadata: Metadata = {
+    title: 'Philosophy & Thoughts — Bryan DeBaun',
+    description:
+        'Notes and reflections by Bryan DeBaun on philosophy, engineering, and the ideas that shape his thinking.',
+};
 
 export default function Philosophy() {
     const posts = publicOnly(allPhilosophies);

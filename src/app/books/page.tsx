@@ -1,4 +1,11 @@
+import type { Metadata } from 'next';
 import BooksTable from '@/components/BooksTable';
+
+export const metadata: Metadata = {
+    title: 'Books — Bryan DeBaun',
+    description:
+        'Books Bryan DeBaun has read, with personal ratings and reviews.',
+};
 
 // Force dynamic rendering so preview builds always render live data instead of stale SSG
 export const dynamic = 'force-dynamic';

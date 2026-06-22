@@ -1,4 +1,11 @@
+import type { Metadata } from 'next';
 import type { Author } from '@bryandebaun/mcp-client';
+
+export const metadata: Metadata = {
+    title: 'Authors — Bryan DeBaun',
+    description:
+        'Authors featured in Bryan DeBaun’s reading library and book collection.',
+};
 
 export default async function Page() {
     // Use service wrapper to fetch authors

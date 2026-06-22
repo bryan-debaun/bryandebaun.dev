@@ -1,6 +1,13 @@
+import type { Metadata } from 'next';
 import NowReading from '@/components/NowReading';
 import PhilosophyList from '@/components/PhilosophyList';
 import WorkPassions from '@/components/WorkPassions';
+
+export const metadata: Metadata = {
+    title: 'About — Bryan DeBaun',
+    description:
+        'Bryan DeBaun — a Senior Software Engineer focused on web platforms, cloud-native systems, and developer tools.',
+};
 
 export default function About() {
     return (
