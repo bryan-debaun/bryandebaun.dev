@@ -186,6 +186,9 @@ export default function Header() {
                     <Link href="/contact" className="text-sm">
                         Contact
                     </Link>
+                    <Link href="/resume" className="text-sm">
+                        Resume
+                    </Link>
                     <DarkModeToggle />
                     <AuthStatus />
                 </nav>
@@ -266,6 +269,14 @@ export default function Header() {
                         role="menuitem"
                     >
                         Contact
+                    </Link>
+                    <Link
+                        href="/resume"
+                        id="mobile-nav-resume"
+                        className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide"
+                        role="menuitem"
+                    >
+                        Resume
                     </Link>
                     <div className="px-3 py-2">
                         <AuthStatus />

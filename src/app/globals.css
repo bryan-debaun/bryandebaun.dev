@@ -824,3 +824,68 @@ body {
   /* Use the typography token so next/font/our tokens control the font-family */
   font-family: var(--font-body);
 }
+
+/* Resume entry spacing — keep grouped work/education/project blocks visually
+   distinct without relying on prose default margins between sibling headings. */
+.resume-entry {
+  margin-bottom: 1.25rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Print styles — primarily for the /resume page so it prints cleanly as a
+   fallback when the static public/resume.pdf is stale or missing. Chrome's
+   page.pdf() in scripts/generate-resume-pdf.ts also honours these rules.
+   --------------------------------------------------------------------------- */
+@media print {
+
+  /* Chrome (and page.pdf with printBackground) — force a light, ink-friendly
+     palette regardless of the user's dark-mode preference. */
+  html,
+  html.dark,
+  body {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+  }
+
+  /* Hide site chrome that doesn't belong in a printed/PDF résumé. */
+  .site-header,
+  .site-footer,
+  .resume-actions,
+  .resume-placeholder-note {
+    display: none !important;
+  }
+
+  /* Remove the sticky-header offset/gutters so content starts at the top
+     with readable print margins. */
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+
+  /* Single, full-width column with comfortable, readable type. */
+  .resume-page {
+    max-width: none !important;
+    margin: 0 !important;
+    color: #1a1a1a !important;
+  }
+
+  .resume-page :where(h1, h2, h3, h4, p, li, a, strong, code) {
+    color: #1a1a1a !important;
+    text-shadow: none !important;
+  }
+
+  .resume-page a {
+    text-decoration: none !important;
+  }
+
+  /* Avoid awkward breaks inside a single role / education / project block. */
+  .resume-page .resume-entry {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .resume-page h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}

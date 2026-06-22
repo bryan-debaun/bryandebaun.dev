@@ -1,0 +1,87 @@
+{
+    "_note": "SCAFFOLD — placeholder resume. This file is the single source of truth for /resume and public/resume.pdf (JSON Resume schema: https://jsonresume.org/schema/). Replace every value containing the word PLACEHOLDER with real content. While any PLACEHOLDER marker remains, the /resume page is served noindex (see src/lib/resume.ts → resumeHasPlaceholders). Regenerate the PDF afterward with `pnpm resume:pdf` (dev/prod server must be running).",
+    "basics": {
+        "name": "Bryan DeBaun",
+        "label": "Senior Software Engineer",
+        "email": "hello@bryandebaun.dev",
+        "url": "https://bryandebaun.dev",
+        "summary": "PLACEHOLDER — replace in src/content/resume.json. A short professional summary (2–3 sentences) describing Bryan's focus on web platforms, cloud-native systems, and developer tooling.",
+        "location": {
+            "city": "PLACEHOLDER City",
+            "region": "PLACEHOLDER Region",
+            "countryCode": "US"
+        },
+        "profiles": [
+            {
+                "network": "GitHub",
+                "username": "bryan-debaun",
+                "url": "https://github.com/bryan-debaun"
+            },
+            {
+                "network": "LinkedIn",
+                "username": "PLACEHOLDER",
+                "url": "https://www.linkedin.com/in/PLACEHOLDER"
+            }
+        ]
+    },
+    "work": [
+        {
+            "name": "PLACEHOLDER Company",
+            "position": "Senior Software Engineer",
+            "url": "https://example.com",
+            "startDate": "2020-01-01",
+            "endDate": "",
+            "summary": "PLACEHOLDER — replace in src/content/resume.json. One-line description of the role and scope.",
+            "highlights": [
+                "PLACEHOLDER — a measurable accomplishment with impact.",
+                "PLACEHOLDER — a second accomplishment or responsibility."
+            ]
+        },
+        {
+            "name": "PLACEHOLDER Prior Company",
+            "position": "Software Engineer",
+            "url": "https://example.com",
+            "startDate": "2016-06-01",
+            "endDate": "2019-12-31",
+            "summary": "PLACEHOLDER — replace in src/content/resume.json.",
+            "highlights": [
+                "PLACEHOLDER — a measurable accomplishment with impact."
+            ]
+        }
+    ],
+    "education": [
+        {
+            "institution": "PLACEHOLDER University",
+            "url": "https://example.edu",
+            "area": "PLACEHOLDER Field of Study",
+            "studyType": "Bachelor of Science",
+            "startDate": "2012-09-01",
+            "endDate": "2016-05-31"
+        }
+    ],
+    "skills": [
+        {
+            "name": "Languages",
+            "level": "Advanced",
+            "keywords": ["C#", "TypeScript", "JavaScript", "SQL"]
+        },
+        {
+            "name": "Frameworks & Platforms",
+            "level": "Advanced",
+            "keywords": ["ASP.NET Core", "Next.js", "React", "Node.js"]
+        },
+        {
+            "name": "Cloud & Infrastructure",
+            "level": "Intermediate",
+            "keywords": ["AWS", "Azure", "Docker", "CI/CD"]
+        }
+    ],
+    "projects": [
+        {
+            "name": "PLACEHOLDER Project",
+            "description": "PLACEHOLDER — replace in src/content/resume.json. A short description of a notable project and its outcome.",
+            "url": "https://example.com",
+            "keywords": ["PLACEHOLDER", "PLACEHOLDER"]
+        }
+    ]
+}
