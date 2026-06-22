@@ -1,40 +1,48 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import BooksTable from '@/components/BooksTable';
 import Tabs from '@/components/Tabs';
 
 export const metadata: Metadata = {
     title: 'Media — Bryan DeBaun',
     description:
-        'A curated list of books, movies, games, and creators Bryan DeBaun enjoys.',
+        'Books Bryan DeBaun is reading, with personal ratings and short notes.',
 };
 
 export const dynamic = 'force-dynamic';
+
+type MediaTab = {
+    id: string;
+    label: string;
+    panel: ReactNode;
+    // Tabs flagged `comingSoon` are kept in the data path but not rendered until
+    // they have real content. Flip to `false` (or remove the flag) to re-enable.
+    comingSoon?: boolean;
+};
 
 export default async function Page() {
     const books = await import('@/lib/services/books').then((m) =>
         m.listBooks(),
     );
 
-    // Books now have embedded personal rating field
-    if (!books || books.length === 0)
-        console.warn('Media: empty response at render', {
-            length: books?.length ?? 0,
-            origin: process.env.NEXT_PUBLIC_SITE_URL,
-        });
+    const hasBooks = Boolean(books && books.length > 0);
 
-    const tabs = [
+    const allTabs: MediaTab[] = [
         {
             id: 'books',
             label: 'Books',
-            panel: (
-                <div>
-                    <BooksTable books={books} />
-                </div>
+            panel: hasBooks ? (
+                <BooksTable books={books} />
+            ) : (
+                <p className="text-sm text-[var(--color-norwegian-700)] dark:text-[var(--color-white)]">
+                    No books to show just yet — check back soon.
+                </p>
             ),
         },
         {
             id: 'movies',
             label: 'Movies',
+            comingSoon: true,
             panel: (
                 <div className="prose">
                     <p>
@@ -46,6 +54,7 @@ export default async function Page() {
         {
             id: 'games',
             label: 'Games',
+            comingSoon: true,
             panel: (
                 <div className="prose">
                     <p>
@@ -57,6 +66,7 @@ export default async function Page() {
         {
             id: 'creators',
             label: 'Creators',
+            comingSoon: true,
             panel: (
                 <div className="prose">
                     <p>Coming soon — content creators I follow and why.</p>
@@ -65,6 +75,11 @@ export default async function Page() {
         },
     ];
 
+    // Only render tabs that have content; empty "Coming soon" tabs stay hidden.
+    const tabs = allTabs
+        .filter((t) => !t.comingSoon)
+        .map(({ comingSoon: _comingSoon, ...t }) => t);
+
     return (
         <main className="p-6">
             <div className="flex items-center justify-between mb-6">
@@ -72,18 +87,6 @@ export default async function Page() {
                     Media
                 </h1>
             </div>
-
-            {!books || books.length === 0 ? (
-                <div className="mb-4 rounded border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">
-                    <strong>
-                        No books available from server at render time.
-                    </strong>
-                    <div className="mt-1 text-xs text-gray-600">
-                        books.length: {books ? books.length : 0} — rendered at{' '}
-                        {new Date().toISOString()}
-                    </div>
-                </div>
-            ) : null}
 
             <Tabs tabs={tabs} />
         </main>

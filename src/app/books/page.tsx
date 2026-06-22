@@ -11,18 +11,13 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function Page() {
-    // Server-side fetch to our API routes via services
-    // Note: Books now include embedded personal ratings (rating, review, ratedAt)
+    // Server-side fetch to our API routes via services.
+    // Books now include embedded personal ratings (rating, review, ratedAt).
     const books = await import('@/lib/services/books').then((m) =>
         m.listBooks(),
     );
 
-    // Helpful server-side debug log for preview builds — removed when not needed
-    if (!books || books.length === 0)
-        console.warn('Books: empty response at render', {
-            length: books?.length ?? 0,
-            origin: process.env.NEXT_PUBLIC_SITE_URL,
-        });
+    const hasBooks = Boolean(books && books.length > 0);
 
     return (
         <main className="p-6">
@@ -30,20 +25,13 @@ export default async function Page() {
                 <h1 className="text-2xl font-semibold">Books</h1>
             </div>
 
-            {/* Show a visible debug banner in preview environments when no books were returned at render time */}
-            {!books || books.length === 0 ? (
-                <div className="mb-4 rounded border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">
-                    <strong>
-                        No books available from server at render time.
-                    </strong>
-                    <div className="mt-1 text-xs text-gray-600">
-                        books.length: {books ? books.length : 0} — rendered at{' '}
-                        {new Date().toISOString()}
-                    </div>
-                </div>
-            ) : null}
-
-            <BooksTable books={books} />
+            {hasBooks ? (
+                <BooksTable books={books} />
+            ) : (
+                <p className="text-sm text-[var(--color-norwegian-700)] dark:text-[var(--color-white)]">
+                    No books to show just yet — check back soon.
+                </p>
+            )}
         </main>
     );
 }
