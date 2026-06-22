@@ -1,12 +1,5 @@
 {
     "plugins": [
-        "remark-mdx",
-        [
-            "remark-mdx-frontmatter",
-            {
-                "name": "yaml"
-            }
-        ],
         "remark-frontmatter",
         "remark-preset-lint-recommended"
     ]
