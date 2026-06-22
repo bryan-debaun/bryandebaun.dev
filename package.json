@@ -42,6 +42,7 @@
     "a11y:ci": "tsx scripts/a11y/verify-a11y.ts --url http://localhost:3000 --outDir artifacts/a11y --ci",
     "playwright:install": "pnpm exec playwright install --with-deps",
     "visual:test": "pnpm exec playwright test --config=playwright.config.ts",
+    "test:integration": "playwright test --config=playwright.integration.config.ts",
     "visual:baseline": "tsx scripts/generate-visual-baseline.ts",
     "inspect:ci": "tsx scripts/inspect-diff-ci-run.ts",
     "ci:lighthouse": "lhci autorun",

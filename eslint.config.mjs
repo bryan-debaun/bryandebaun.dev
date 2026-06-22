@@ -79,6 +79,15 @@ const eslintConfig = defineConfig([
       "no-restricted-syntax": "off",
       "@typescript-eslint/no-explicit-any": "off"
     }
+  },
+  // Playwright fixtures pass values to the runner via a `use()` callback. The
+  // react-hooks plugin mistakes `use` for the React hook and flags valid
+  // fixture definitions; it does not apply to the integration suite.
+  {
+    files: ["tests/integration/**/*.{ts,tsx}"],
+    rules: {
+      "react-hooks/rules-of-hooks": "off"
+    }
   }
 ]);
 
