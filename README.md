@@ -56,6 +56,15 @@ This repository includes content quality tooling and a CI job to run checks on P
 
 If a new word is flagged by `cspell`, add it to `cspell.json` under `words`.
 
+### MDX-aware linting (Issue #20)
+
+`.md`/`.mdx` content is linted on two complementary tracks:
+
+- **Plain Markdown docs** (`README.md`, `docs/**/*.md`) are linted by the `remark` CLI via `pnpm run lint:content`, configured in `.remarkrc.json`. This config intentionally contains **only** plain-Markdown plugins (`remark-frontmatter` + the lint preset) — do **not** add `remark-mdx` here, or remark will try to parse plain Markdown as MDX and fail on characters like `/`.
+- **MDX content** (`src/content/**/*.{md,mdx}`) is linted by **ESLint** via `eslint-plugin-mdx` (flat config in `eslint.config.mjs`), run as part of `pnpm run lint`. This catches MDX/JSX syntax and frontmatter issues in authored content.
+
+> Requires `remark-frontmatter` v5+ (it depends on `mdast-util-frontmatter` v2, compatible with the `unified@11`/`mdast` v2 stack). Pinning the older v4 reintroduces the `Cannot set properties of undefined (setting 'value')` parser crash — see Issue #22.
+
 ## Accessibility & visual regression 🧭✅
 
 The repository includes a small Playwright-based audit script used in CI to capture accessibility reports and full-page screenshots for visual review.
@@ -78,10 +87,25 @@ Content is authored as MDX under `src/content/` and parsed by Contentlayer. Fron
 
 When adding content, prefer placing posts in `src/content/posts/` and notes in `src/content/philosophy/`. The `pnpm run content:checks` script will verify Contentlayer output includes generated documents for CI.
 
+## Contributing — editing content ✍️
+
+Most content lives in version-controlled files; editing it is a normal pull-request workflow. No CMS or admin login is required for content edits.
+
+1. **Branch** off `main` (`content/<short-desc>` or `docs/<short-desc>`). Never commit content directly to `main`.
+2. **Edit the source:**
+   - **Articles / notes:** add or edit MDX under `src/content/philosophy/` (or `src/content/posts/`). Include valid frontmatter (see _Content frontmatter & private semantics_ above). Set `private: true` to keep a draft out of public listings, sitemap, and RSS.
+   - **Page copy** (home, about, projects): edit the corresponding `src/app/**/page.tsx`.
+   - **Résumé:** edit `src/data/resume.json` only, then regenerate the PDF with `pnpm resume:pdf` (a dev/prod server must be running).
+3. **Lint before pushing:**
+   - `pnpm run lint` — ESLint, including MDX content (see _MDX-aware linting_ above).
+   - `pnpm run content:checks` — remark + cspell + link-check for Markdown docs.
+   - `pnpm run run-content && pnpm run test:content` — regenerate and validate Contentlayer output.
+4. **Open a PR.** CI runs build, lint, content checks, tests, and the a11y/visual suite. If `cspell` flags an intentional word, add it to `cspell.json`.
+
 ## Notes
 
-- MDX/Contentlayer integration is planned, but currently the `next-contentlayer` package is incompatible with Next.js 16; see Issue #2 for tracking.
-- CI runs on push and PRs and performs build and lint checks.
+- MDX content is built with **`contentlayer2`** (the maintained fork) via `scripts/run-content.ts` — the legacy `next-contentlayer` plugin is not used, so there's no Next.js 16 incompatibility.
+- CI runs on push and PRs and performs build, lint, content checks, tests, and the a11y/visual suite.
 
 ### PWA icons / Troubleshooting ⚠️
 
