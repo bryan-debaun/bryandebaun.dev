@@ -38,6 +38,7 @@
     "lint:biome:fix": "biome check src --write",
     "test": "vitest --run",
     "start": "next start",
+    "resume:pdf": "tsx scripts/generate-resume-pdf.ts",
     "a11y:local": "tsx scripts/a11y/verify-a11y.ts --url http://localhost:3000 --outDir artifacts/a11y",
     "a11y:ci": "tsx scripts/a11y/verify-a11y.ts --url http://localhost:3000 --outDir artifacts/a11y --ci",
     "playwright:install": "pnpm exec playwright install --with-deps",
