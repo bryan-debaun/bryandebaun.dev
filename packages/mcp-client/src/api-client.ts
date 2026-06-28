@@ -10,6 +10,18 @@
  * ---------------------------------------------------------------
  */
 
+/** Read visibility filter. `all` returns both; `draft`/`all` require admin. */
+export enum ArticleReadStatus {
+  Draft = "draft",
+  Published = "published",
+  All = "all",
+}
+
+export enum ArticleStatus {
+  Draft = "draft",
+  Published = "published",
+}
+
 export enum ItemStatus {
   NOT_STARTED = "NOT_STARTED",
   IN_PROGRESS = "IN_PROGRESS",
@@ -333,6 +345,46 @@ export interface UpdateAuthorRequest {
   website?: string;
 }
 
+export interface Article {
+  /** @format double */
+  id: number;
+  slug: string;
+  title: string;
+  summary?: string | null;
+  body: string;
+  status: ArticleStatus;
+  tags: string[];
+  publishedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListArticlesResponse {
+  articles: Article[];
+  /** @format double */
+  total: number;
+}
+
+export interface CreateArticleRequest {
+  slug: string;
+  title: string;
+  body: string;
+  summary?: string;
+  status?: ArticleStatus;
+  tags?: string[];
+  publishedAt?: string;
+}
+
+export interface UpdateArticleRequest {
+  title?: string;
+  body?: string;
+  summary?: string;
+  status?: ArticleStatus;
+  tags?: string[];
+  publishedAt?: string;
+  newSlug?: string;
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -527,6 +579,7 @@ export class Api<
      * @tags VideoGames
      * @name ListVideoGames
      * @request GET:/api/videogames
+     * @secure
      */
     listVideoGames: (
       query?: {
@@ -543,6 +596,7 @@ export class Api<
         path: `/api/videogames`,
         method: "GET",
         query: query,
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -575,11 +629,13 @@ export class Api<
      * @tags VideoGames
      * @name GetVideoGame
      * @request GET:/api/videogames/{id}
+     * @secure
      */
     getVideoGame: (id: number, params: RequestParams = {}) =>
       this.request<VideoGame, void>({
         path: `/api/videogames/${id}`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -635,11 +691,13 @@ export class Api<
      * @tags Spotify
      * @name NowPlaying
      * @request GET:/api/spotify/now-playing
+     * @secure
      */
     nowPlaying: (params: RequestParams = {}) =>
       this.request<PlaybackState, any>({
         path: `/api/spotify/now-playing`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -650,6 +708,7 @@ export class Api<
      * @tags Spotify
      * @name Liked
      * @request GET:/api/spotify/liked
+     * @secure
      */
     liked: (
       query?: {
@@ -664,6 +723,7 @@ export class Api<
         path: `/api/spotify/liked`,
         method: "GET",
         query: query,
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -674,6 +734,7 @@ export class Api<
      * @tags Spotify
      * @name Playlists
      * @request GET:/api/spotify/playlists
+     * @secure
      */
     playlists: (
       query?: {
@@ -688,6 +749,7 @@ export class Api<
         path: `/api/spotify/playlists`,
         method: "GET",
         query: query,
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -715,6 +777,7 @@ export class Api<
      * @tags Movies
      * @name ListMovies
      * @request GET:/api/movies
+     * @secure
      */
     listMovies: (
       query?: {
@@ -731,6 +794,7 @@ export class Api<
         path: `/api/movies`,
         method: "GET",
         query: query,
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -760,11 +824,13 @@ export class Api<
      * @tags Movies
      * @name GetMovie
      * @request GET:/api/movies/{id}
+     * @secure
      */
     getMovie: (id: number, params: RequestParams = {}) =>
       this.request<Movie, void>({
         path: `/api/movies/${id}`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -820,6 +886,7 @@ export class Api<
      * @tags ContentCreators
      * @name ListContentCreators
      * @request GET:/api/content-creators
+     * @secure
      */
     listContentCreators: (
       query?: {
@@ -835,6 +902,7 @@ export class Api<
         path: `/api/content-creators`,
         method: "GET",
         query: query,
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -867,11 +935,13 @@ export class Api<
      * @tags ContentCreators
      * @name GetContentCreator
      * @request GET:/api/content-creators/{id}
+     * @secure
      */
     getContentCreator: (id: number, params: RequestParams = {}) =>
       this.request<ContentCreator, void>({
         path: `/api/content-creators/${id}`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -928,6 +998,7 @@ export class Api<
      * @name ListBooks
      * @summary Get a list of books
      * @request GET:/api/books
+     * @secure
      */
     listBooks: (
       query?: {
@@ -961,6 +1032,7 @@ export class Api<
         path: `/api/books`,
         method: "GET",
         query: query,
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -992,11 +1064,13 @@ export class Api<
      * @name GetBook
      * @summary Get book details by ID
      * @request GET:/api/books/{id}
+     * @secure
      */
     getBook: (id: number, params: RequestParams = {}) =>
       this.request<BookWithAuthors, void>({
         path: `/api/books/${id}`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -1055,6 +1129,7 @@ export class Api<
      * @name ListAuthors
      * @summary Get a list of authors
      * @request GET:/api/authors
+     * @secure
      */
     listAuthors: (
       query?: {
@@ -1077,6 +1152,7 @@ export class Api<
         path: `/api/authors`,
         method: "GET",
         query: query,
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -1108,11 +1184,13 @@ export class Api<
      * @name GetAuthor
      * @summary Get author details by ID
      * @request GET:/api/authors/{id}
+     * @secure
      */
     getAuthor: (id: number, params: RequestParams = {}) =>
       this.request<AuthorWithBooks, void>({
         path: `/api/authors/${id}`,
         method: "GET",
+        secure: true,
         format: "json",
         ...params,
       }),
@@ -1158,6 +1236,133 @@ export class Api<
         void
       >({
         path: `/api/authors/${id}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description List articles (published-only unless an admin requests drafts).
+     *
+     * @tags Articles
+     * @name ListArticles
+     * @request GET:/api/articles
+     * @secure
+     */
+    listArticles: (
+      query?: {
+        /** Visibility filter; `draft`/`all` require an admin JWT. */
+        status?: ArticleReadStatus;
+        /** Filter by a single tag */
+        tag?: string;
+        /** Search in title and summary */
+        search?: string;
+        /**
+         * Maximum number of results (default 50)
+         * @format double
+         */
+        limit?: number;
+        /**
+         * Number of results to skip (default 0)
+         * @format double
+         */
+        offset?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListArticlesResponse, any>({
+        path: `/api/articles`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Create a new article (admin only).
+     *
+     * @tags Articles
+     * @name CreateArticle
+     * @request POST:/api/articles
+     * @secure
+     */
+    createArticle: (data: CreateArticleRequest, params: RequestParams = {}) =>
+      this.request<Article, void>({
+        path: `/api/articles`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Get an article by slug (published-only unless an admin requests drafts).
+     *
+     * @tags Articles
+     * @name GetArticle
+     * @request GET:/api/articles/{slug}
+     * @secure
+     */
+    getArticle: (
+      slug: string,
+      query?: {
+        /** Visibility filter; `draft`/`all` require an admin JWT. */
+        status?: ArticleReadStatus;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<Article, void>({
+        path: `/api/articles/${slug}`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Update an article by slug (admin only).
+     *
+     * @tags Articles
+     * @name UpdateArticle
+     * @request PUT:/api/articles/{slug}
+     * @secure
+     */
+    updateArticle: (
+      slug: string,
+      data: UpdateArticleRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<Article, void>({
+        path: `/api/articles/${slug}`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Delete an article by slug (admin only).
+     *
+     * @tags Articles
+     * @name DeleteArticle
+     * @request DELETE:/api/articles/{slug}
+     * @secure
+     */
+    deleteArticle: (slug: string, params: RequestParams = {}) =>
+      this.request<
+        {
+          success: boolean;
+        },
+        void
+      >({
+        path: `/api/articles/${slug}`,
         method: "DELETE",
         secure: true,
         format: "json",

@@ -20,7 +20,11 @@
         "EMDR",
         "reparenting",
         "Gottman",
-        "Kolk"
+        "Kolk",
+        "Résumé",
+        "résumé",
+        "Supabase",
+        "Resend"
     ],
     "ignorePaths": [
         "node_modules/**",
