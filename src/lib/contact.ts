@@ -7,11 +7,13 @@
 /**
  * Public-facing contact email used for the `mailto:` fallback link on the
  * contact page. This is intentionally a public address (NOT the server-only
- * `CONTACT_TO_EMAIL`), so it is safe to ship to the client.
+ * `CONTACT_TO_EMAIL`), so it is safe to ship to the client. The working contact
+ * form is the primary path; this is only the no-JS / send-down fallback.
  *
- * TODO(bryan): replace this placeholder with the real public contact address.
+ * Swap to an `@bryandebaun.dev` alias if you prefer a domain address over the
+ * personal inbox here.
  */
-export const CONTACT_EMAIL = 'hello@bryandebaun.dev';
+export const CONTACT_EMAIL = 'brn.dbn@gmail.com';
 
 /** Field length bounds, shared so client + server validation stay in sync. */
 export const NAME_MIN = 1;
