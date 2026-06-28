@@ -37,18 +37,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const payload = await res.json();
             const u = payload?.user;
             if (isUser(u)) {
-                // Map Supabase user to our User type
-                // Check user_metadata for admin role
-                const isAdmin =
-                    (
-                        u as Record<string, unknown> & {
-                            user_metadata?: { role?: string };
-                        }
-                    ).user_metadata?.role === 'admin';
+                // `isAdmin` is computed server-side from app_metadata by
+                // /api/auth/me — trust that, never re-derive from client-visible
+                // metadata (user_metadata is user-editable).
                 setUser({
                     id: u.id,
                     email: u.email,
-                    isAdmin,
+                    isAdmin: u.isAdmin === true,
                 });
             } else {
                 setUser(null);

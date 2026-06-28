@@ -39,7 +39,18 @@ export async function GET() {
             console.info('auth.me: success', { userId: user.id });
         }
 
-        return NextResponse.json({ user });
+        // Return a minimal projection rather than the raw Supabase user object,
+        // which carries app_metadata/user_metadata/identities/tokens the client
+        // has no need for. `isAdmin` is computed server-side from the SECURE
+        // app_metadata.role (admin-controlled) — never user_metadata, which is
+        // user-editable and must not be trusted for authorization. Mirrors the
+        // role source used by requireAdmin (src/lib/auth-guard.ts).
+        const isAdmin =
+            (user.app_metadata as Record<string, unknown> | undefined)?.role ===
+            'admin';
+        return NextResponse.json({
+            user: { id: user.id, email: user.email, isAdmin },
+        });
     } catch (e) {
         const error = e as Error;
         if (debug) {
