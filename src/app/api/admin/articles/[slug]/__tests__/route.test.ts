@@ -72,7 +72,7 @@ describe('PUT /api/admin/articles/[slug]', () => {
         expect(updateArticle).toHaveBeenCalledWith('cptsd', {
             status: 'published',
         });
-        expect(revalidatePath).toHaveBeenCalledWith('/philosophy/cptsd');
+        expect(revalidatePath).toHaveBeenCalledWith('/writing/cptsd');
     });
 
     it('revalidates both old and new slug on a rename', async () => {
@@ -84,8 +84,8 @@ describe('PUT /api/admin/articles/[slug]', () => {
         await route.PUT(req as unknown as NextRequest, {
             params: { slug: 'old' },
         });
-        expect(revalidatePath).toHaveBeenCalledWith('/philosophy/new');
-        expect(revalidatePath).toHaveBeenCalledWith('/philosophy/old');
+        expect(revalidatePath).toHaveBeenCalledWith('/writing/new');
+        expect(revalidatePath).toHaveBeenCalledWith('/writing/old');
     });
 
     it('surfaces a slug conflict as a 400 field error', async () => {
@@ -145,8 +145,8 @@ describe('DELETE /api/admin/articles/[slug]', () => {
         });
         expect((res as Response).status).toBe(204);
         expect(deleteArticle).toHaveBeenCalledWith('cptsd');
-        expect(revalidatePath).toHaveBeenCalledWith('/philosophy');
-        expect(revalidatePath).toHaveBeenCalledWith('/philosophy/cptsd');
+        expect(revalidatePath).toHaveBeenCalledWith('/writing');
+        expect(revalidatePath).toHaveBeenCalledWith('/writing/cptsd');
     });
 
     it('returns 401 when not authenticated', async () => {

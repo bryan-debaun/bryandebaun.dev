@@ -3,11 +3,11 @@ import { generateRSS } from '@/lib/rss';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bryandebaun.dev';
 
-// ISR: refresh the feed on the same cadence as the philosophy pages.
+// ISR: refresh the feed on the same cadence as the writing pages.
 export const revalidate = 300;
 
 /**
- * RSS feed for published philosophy articles, sourced from the MCP Articles
+ * RSS feed for published writing articles, sourced from the MCP Articles
  * API. The API returns only `published` articles for unauthenticated reads, so
  * no private filtering is required.
  */
@@ -15,7 +15,7 @@ export async function GET(): Promise<Response> {
     const articles = await listPublishedArticles();
     const items = articles.map((article) => ({
         title: article.title,
-        slug: `philosophy/${article.slug}`,
+        slug: `writing/${article.slug}`,
     }));
 
     const xml = generateRSS(SITE_URL, items);

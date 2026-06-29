@@ -24,7 +24,7 @@ export default async function Philosophy() {
                 <ul className="list-none pl-0">
                     {posts.map((p) => (
                         <li key={p.id}>
-                            <Link href={`/philosophy/${p.slug}`}>
+                            <Link href={`/writing/${p.slug}`}>
                                 {p.title}
                             </Link>
                             {p.summary ? (

@@ -33,10 +33,10 @@ describe('sitemap', () => {
         const { default: sitemap } = await import('@/app/sitemap');
         const entries = await sitemap();
         const urls = entries.map((e) => e.url);
-        expect(urls).toContain('https://bryandebaun.dev/philosophy');
-        expect(urls).toContain('https://bryandebaun.dev/philosophy/cptsd');
+        expect(urls).toContain('https://bryandebaun.dev/writing');
+        expect(urls).toContain('https://bryandebaun.dev/writing/cptsd');
         const cptsd = entries.find(
-            (e) => e.url === 'https://bryandebaun.dev/philosophy/cptsd',
+            (e) => e.url === 'https://bryandebaun.dev/writing/cptsd',
         );
         expect(cptsd?.lastModified).toEqual(
             new Date('2026-02-01T00:00:00.000Z'),
@@ -51,21 +51,21 @@ describe('sitemap', () => {
         expect(urls).toContain('https://bryandebaun.dev/about');
         expect(
             urls.some((u) =>
-                u.startsWith('https://bryandebaun.dev/philosophy/'),
+                u.startsWith('https://bryandebaun.dev/writing/'),
             ),
         ).toBe(false);
     });
 });
 
 describe('rss.xml route', () => {
-    it('renders published articles under the philosophy path', async () => {
+    it('renders published articles under the writing path', async () => {
         const { GET } = await import('@/app/rss.xml/route');
         const res = await GET();
         expect(res.headers.get('Content-Type')).toBe('application/xml');
         const xml = await res.text();
         expect(xml).toContain('<title>CPTSD</title>');
         expect(xml).toContain(
-            '<link>https://bryandebaun.dev/philosophy/cptsd</link>',
+            '<link>https://bryandebaun.dev/writing/cptsd</link>',
         );
     });
 
