@@ -59,6 +59,59 @@ function MarkdownAnchor({
 }
 
 /**
+ * A themed article SVG is one served from `/articles/…*.svg` that ships with a
+ * matching `…_dark.svg` sibling. We pair them automatically (no authoring
+ * marker) and CSS-swap by theme, so an `<img>` — which can't inherit
+ * `currentColor` — still tracks the site's manual light/dark toggle.
+ */
+function isThemedArticleSvg(src: string): boolean {
+    return /^\/articles\/.+\.svg$/iu.test(src) && !/_dark\.svg$/iu.test(src);
+}
+
+function MarkdownImage({
+    src,
+    alt,
+    title,
+    ...rest
+}: ComponentPropsWithoutRef<'img'>) {
+    if (typeof src === 'string' && isThemedArticleSvg(src)) {
+        const darkSrc = src.replace(/\.svg$/iu, '_dark.svg');
+        // Both variants carry the SAME alt; `display:none` removes the hidden
+        // one from the a11y tree, so exactly one alt is announced per theme.
+        return (
+            <>
+                {/* eslint-disable-next-line @next/next/no-img-element -- DB-authored content path; next/image needs known dimensions/loader we don't have here */}
+                <img
+                    src={src}
+                    alt={alt ?? ''}
+                    title={title}
+                    className="mx-auto block h-auto max-w-full dark:hidden"
+                    {...rest}
+                />
+                {/* eslint-disable-next-line @next/next/no-img-element -- see above */}
+                <img
+                    src={darkSrc}
+                    alt={alt ?? ''}
+                    title={title}
+                    className="mx-auto hidden h-auto max-w-full dark:block"
+                    {...rest}
+                />
+            </>
+        );
+    }
+    return (
+        // eslint-disable-next-line @next/next/no-img-element -- see above
+        <img
+            src={src}
+            alt={alt ?? ''}
+            title={title}
+            className="mx-auto h-auto max-w-full"
+            {...rest}
+        />
+    );
+}
+
+/**
  * Render a DB-sourced Markdown article body as React.
  *
  * Security: bodies come from the database, so we render via `react-markdown`
@@ -73,7 +126,7 @@ export default function ArticleBody({ body }: { body: string }) {
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeSanitize]}
-                components={{ a: MarkdownAnchor }}
+                components={{ a: MarkdownAnchor, img: MarkdownImage }}
             >
                 {content}
             </ReactMarkdown>
