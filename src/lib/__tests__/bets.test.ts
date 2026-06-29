@@ -127,15 +127,17 @@ describe('formatRecord', () => {
 });
 
 describe('parseBetLegs', () => {
-    it('narrows valid legs and drops malformed entries', () => {
+    it('narrows legs (odds optional) and drops entries missing event/selection', () => {
         const legs = parseBetLegs([
             { event: 'A', selection: 'X', oddsAmerican: -110, line: 2.5 },
             { event: 'B', selection: 'Y', oddsAmerican: 100 },
-            { event: 'bad', selection: 'no-odds' },
+            // same-game parlay leg with no per-leg odds — kept (#137)
+            { event: 'C', selection: 'no-odds' },
+            { selection: 'missing-event' },
             null,
             'nonsense',
         ]);
-        expect(legs).toHaveLength(2);
+        expect(legs).toHaveLength(3);
         expect(legs[0]).toEqual({
             event: 'A',
             selection: 'X',
@@ -143,6 +145,10 @@ describe('parseBetLegs', () => {
             line: 2.5,
         });
         expect(legs[1].line).toBeUndefined();
+        // odds-less leg is retained with undefined odds rather than dropped
+        expect(legs[2].event).toBe('C');
+        expect(legs[2].selection).toBe('no-odds');
+        expect(legs[2].oddsAmerican).toBeUndefined();
     });
     it('returns an empty array for non-array input', () => {
         expect(parseBetLegs(undefined)).toEqual([]);

@@ -225,15 +225,19 @@ export function parseBetLegs(legs: unknown): BetLeg[] {
     for (const raw of legs) {
         if (raw === null || typeof raw !== 'object') continue;
         const leg = raw as Record<string, unknown>;
+        // event + selection are required; per-leg odds are optional — same-game
+        // parlays often don't expose individual leg prices (see #137).
         if (
             typeof leg.event === 'string' &&
-            typeof leg.selection === 'string' &&
-            typeof leg.oddsAmerican === 'number'
+            typeof leg.selection === 'string'
         ) {
             result.push({
                 event: leg.event,
                 selection: leg.selection,
-                oddsAmerican: leg.oddsAmerican,
+                oddsAmerican:
+                    typeof leg.oddsAmerican === 'number'
+                        ? leg.oddsAmerican
+                        : undefined,
                 line:
                     typeof leg.line === 'number' ? leg.line : undefined,
             });
