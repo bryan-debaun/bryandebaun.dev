@@ -22,6 +22,27 @@ export enum ArticleStatus {
   Published = "published",
 }
 
+export enum BetSource {
+  INTUITION = "INTUITION",
+  AI_ASSISTED = "AI_ASSISTED",
+}
+
+export enum BetStatus {
+  PENDING = "PENDING",
+  WON = "WON",
+  LOST = "LOST",
+  PUSH = "PUSH",
+  VOID = "VOID",
+}
+
+export enum BetMarket {
+  Moneyline = "moneyline",
+  Spread = "spread",
+  Total = "total",
+  Prop = "prop",
+  Parlay = "parlay",
+}
+
 export enum ItemStatus {
   NOT_STARTED = "NOT_STARTED",
   IN_PROGRESS = "IN_PROGRESS",
@@ -297,6 +318,156 @@ export interface UpdateBookRequest {
   isbn?: string;
   publishedAt?: string;
   authorIds?: number[];
+}
+
+export interface Bet {
+  /** @format double */
+  id: number;
+  placedAt: string;
+  sport: string;
+  league?: string | null;
+  event: string;
+  market: BetMarket;
+  selection: string;
+  /** @format double */
+  line?: number | null;
+  /** @format double */
+  oddsAmerican: number;
+  /** @format double */
+  stake: number;
+  book: string;
+  status: BetStatus;
+  settledAt?: string | null;
+  /** @format double */
+  payout?: number | null;
+  source: BetSource;
+  aiModel?: string | null;
+  aiRationale?: string | null;
+  /** @format double */
+  aiEstProb?: number | null;
+  /** @format double */
+  aiEV?: number | null;
+  /** @format double */
+  closingLine?: number | null;
+  /** @format double */
+  closingOddsAmerican?: number | null;
+  legs?: any;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ListBetsResponse {
+  bets: Bet[];
+  /** @format double */
+  total: number;
+}
+
+export interface BetMetrics {
+  /** @format double */
+  count: number;
+  /** @format double */
+  pending: number;
+  /** @format double */
+  settled: number;
+  /** @format double */
+  wins: number;
+  /** @format double */
+  losses: number;
+  /** @format double */
+  pushes: number;
+  /** @format double */
+  voids: number;
+  /** @format double */
+  hitRate: number | null;
+  /** @format double */
+  staked: number;
+  /** @format double */
+  profit: number;
+  /** @format double */
+  roi: number | null;
+  /** @format double */
+  units: number | null;
+  /** @format double */
+  clvCount: number;
+  /** @format double */
+  avgClvPct: number | null;
+}
+
+export interface BetAnalyticsResponse {
+  overall: BetMetrics;
+  bySource: {
+    AI_ASSISTED: BetMetrics;
+    INTUITION: BetMetrics;
+  };
+}
+
+export interface BetLeg {
+  event: string;
+  selection: string;
+  /** @format double */
+  oddsAmerican: number;
+  /** @format double */
+  line?: number;
+}
+
+export interface CreateBetRequest {
+  sport: string;
+  event: string;
+  market: BetMarket;
+  selection: string;
+  /** @format double */
+  oddsAmerican: number;
+  /** @format double */
+  stake: number;
+  source: BetSource;
+  league?: string;
+  /** @format double */
+  line?: number;
+  book?: string;
+  placedAt?: string;
+  aiModel?: string;
+  aiRationale?: string;
+  /** @format double */
+  aiEstProb?: number;
+  /** @format double */
+  aiEV?: number;
+  legs?: BetLeg[];
+  notes?: string;
+}
+
+export interface UpdateBetRequest {
+  sport?: string;
+  league?: string;
+  event?: string;
+  market?: BetMarket;
+  selection?: string;
+  /** @format double */
+  line?: number;
+  /** @format double */
+  oddsAmerican?: number;
+  /** @format double */
+  stake?: number;
+  book?: string;
+  source?: BetSource;
+  aiModel?: string;
+  aiRationale?: string;
+  /** @format double */
+  aiEstProb?: number;
+  /** @format double */
+  aiEV?: number;
+  /** @format double */
+  closingLine?: number;
+  /** @format double */
+  closingOddsAmerican?: number;
+  legs?: BetLeg[];
+  notes?: string;
+}
+
+export interface SettleBetRequest {
+  status: "WON" | "LOST" | "PUSH" | "VOID";
+  /** @format double */
+  payout?: number;
 }
 
 /** Author with books */
@@ -1118,6 +1289,171 @@ export class Api<
         path: `/api/books/${id}`,
         method: "DELETE",
         secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description List bets with optional filters.
+     *
+     * @tags Bets
+     * @name ListBets
+     * @request GET:/api/bets
+     * @secure
+     */
+    listBets: (
+      query?: {
+        /** Filter by source (INTUITION | AI_ASSISTED) */
+        source?: BetSource;
+        /** Filter by status */
+        status?: BetStatus;
+        /** Filter by sport */
+        sport?: string;
+        /** Filter by market */
+        market?: BetMarket;
+        /** @format double */
+        limit?: number;
+        /** @format double */
+        offset?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListBetsResponse, any>({
+        path: `/api/bets`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Log a new bet (admin only).
+     *
+     * @tags Bets
+     * @name CreateBet
+     * @request POST:/api/bets
+     * @secure
+     */
+    createBet: (data: CreateBetRequest, params: RequestParams = {}) =>
+      this.request<Bet, void>({
+        path: `/api/bets`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Performance analytics (ROI, hit-rate, units, CLV) segmented by source — the intuition-vs-AI scoreboard. Declared before `{id}` to avoid a route clash.
+     *
+     * @tags Bets
+     * @name GetAnalytics
+     * @request GET:/api/bets/analytics
+     * @secure
+     */
+    getAnalytics: (
+      query?: {
+        source?: BetSource;
+        sport?: string;
+        market?: BetMarket;
+        from?: string;
+        to?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<BetAnalyticsResponse, any>({
+        path: `/api/bets/analytics`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Get a bet by ID.
+     *
+     * @tags Bets
+     * @name GetBet
+     * @request GET:/api/bets/{id}
+     * @secure
+     */
+    getBet: (id: number, params: RequestParams = {}) =>
+      this.request<Bet, void>({
+        path: `/api/bets/${id}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Update a bet by ID (admin only) — edit details or set closing line for CLV.
+     *
+     * @tags Bets
+     * @name UpdateBet
+     * @request PUT:/api/bets/{id}
+     * @secure
+     */
+    updateBet: (
+      id: number,
+      data: UpdateBetRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<Bet, void>({
+        path: `/api/bets/${id}`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Delete a bet by ID (admin only).
+     *
+     * @tags Bets
+     * @name DeleteBet
+     * @request DELETE:/api/bets/{id}
+     * @secure
+     */
+    deleteBet: (id: number, params: RequestParams = {}) =>
+      this.request<
+        {
+          success: boolean;
+        },
+        void
+      >({
+        path: `/api/bets/${id}`,
+        method: "DELETE",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Settle a bet outcome (admin only). Payout auto-computed on a win.
+     *
+     * @tags Bets
+     * @name SettleBet
+     * @request POST:/api/bets/{id}/settle
+     * @secure
+     */
+    settleBet: (
+      id: number,
+      data: SettleBetRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<Bet, void>({
+        path: `/api/bets/${id}/settle`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
