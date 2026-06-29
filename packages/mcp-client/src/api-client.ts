@@ -405,8 +405,11 @@ export interface BetAnalyticsResponse {
 export interface BetLeg {
   event: string;
   selection: string;
-  /** @format double */
-  oddsAmerican: number;
+  /**
+   * Optional: same-game parlays expose only the combined price, not per-leg odds (#137).
+   * @format double
+   */
+  oddsAmerican?: number;
   /** @format double */
   line?: number;
 }
