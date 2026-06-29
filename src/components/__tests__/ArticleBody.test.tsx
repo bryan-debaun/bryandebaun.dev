@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ArticleBody, { stripLeadingH1 } from '../ArticleBody';
+import ArticleBody, {
+    resolveThemedImage,
+    stripLeadingH1,
+} from '../ArticleBody';
 
 describe('stripLeadingH1', () => {
     it('removes a leading ATX H1 that duplicates the title', () => {
@@ -112,5 +115,83 @@ describe('ArticleBody rendering', () => {
         );
         // Already the dark file → treat as a plain single image.
         expect(container.querySelectorAll('img')).toHaveLength(1);
+    });
+
+    it('pairs an uploaded #themed image, deriving the dark sibling URL', () => {
+        const { container } = render(
+            <ArticleBody
+                body={
+                    '![diagram](https://storage.example.com/article-assets/2026/abc-123.svg#themed)'
+                }
+            />,
+        );
+        const imgs = Array.from(container.querySelectorAll('img'));
+        expect(imgs).toHaveLength(2);
+
+        const [light, dark] = imgs;
+        // The #themed marker is stripped — it never reaches a rendered src.
+        expect(light).toHaveAttribute(
+            'src',
+            'https://storage.example.com/article-assets/2026/abc-123.svg',
+        );
+        expect(dark).toHaveAttribute(
+            'src',
+            'https://storage.example.com/article-assets/2026/abc-123_dark.svg',
+        );
+        expect(light).toHaveAttribute('alt', 'diagram');
+        expect(dark).toHaveAttribute('alt', 'diagram');
+        expect(light.className).toContain('dark:hidden');
+        expect(dark.className).toContain('dark:block');
+        for (const img of imgs) {
+            expect(img.getAttribute('src')).not.toContain('#themed');
+        }
+    });
+
+    it('keeps a non-themed external image as a single img', () => {
+        const { container } = render(
+            <ArticleBody
+                body={'![logo](https://cdn.example.com/logo.svg)'}
+            />,
+        );
+        const imgs = Array.from(container.querySelectorAll('img'));
+        expect(imgs).toHaveLength(1);
+        expect(imgs[0]).toHaveAttribute(
+            'src',
+            'https://cdn.example.com/logo.svg',
+        );
+    });
+});
+
+describe('resolveThemedImage', () => {
+    it('returns a derived pair for an uploaded #themed url', () => {
+        expect(
+            resolveThemedImage('https://x/2026/abc.svg#themed'),
+        ).toEqual({
+            light: 'https://x/2026/abc.svg',
+            dark: 'https://x/2026/abc_dark.svg',
+        });
+    });
+
+    it('derives _dark before the extension for any ext', () => {
+        expect(resolveThemedImage('https://x/2026/abc.png#themed')).toEqual({
+            light: 'https://x/2026/abc.png',
+            dark: 'https://x/2026/abc_dark.png',
+        });
+    });
+
+    it('pairs a committed /articles svg without a marker', () => {
+        expect(resolveThemedImage('/articles/diagram.svg')).toEqual({
+            light: '/articles/diagram.svg',
+            dark: '/articles/diagram_dark.svg',
+        });
+    });
+
+    it('returns null for a plain non-themed image', () => {
+        expect(resolveThemedImage('/images/logo.svg')).toBeNull();
+        expect(resolveThemedImage('https://cdn/x.png')).toBeNull();
+    });
+
+    it('returns null for an already-_dark committed svg', () => {
+        expect(resolveThemedImage('/articles/diagram_dark.svg')).toBeNull();
     });
 });

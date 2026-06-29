@@ -70,6 +70,73 @@ describe('ArticleEditor image upload', () => {
         expect(body.value.trimEnd().endsWith('after')).toBe(true);
     });
 
+    it('uploads a light + dark pair once and inserts a #themed image', async () => {
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                url: 'https://storage.example.com/article-assets/2026/abc.svg',
+                darkUrl:
+                    'https://storage.example.com/article-assets/2026/abc_dark.svg',
+                themed: true,
+            }),
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        render(<ArticleEditor mode="create" />);
+
+        const light = new File(['l'], 'foo.svg', { type: 'image/svg+xml' });
+        const dark = new File(['d'], 'foo_dark.svg', { type: 'image/svg+xml' });
+        const input = document.querySelector(
+            'input[type="file"]',
+        ) as HTMLInputElement;
+        fireEvent.change(input, { target: { files: [light, dark] } });
+
+        await waitFor(() => {
+            expect(fetchMock).toHaveBeenCalledTimes(1);
+        });
+
+        // The single request carried BOTH files under file + dark.
+        const body = fetchMock.mock.calls[0][1].body as FormData;
+        expect((body.get('file') as File).name).toBe('foo.svg');
+        expect((body.get('dark') as File).name).toBe('foo_dark.svg');
+
+        await waitFor(() => {
+            expect(getBody().value).toContain(
+                '![foo](https://storage.example.com/article-assets/2026/abc.svg#themed)',
+            );
+        });
+    });
+
+    it('treats a lone image as a single upload (no #themed marker)', async () => {
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                url: 'https://storage.example.com/article-assets/2026/solo.png',
+            }),
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        render(<ArticleEditor mode="create" />);
+
+        const file = new File(['x'], 'solo.png', { type: 'image/png' });
+        const input = document.querySelector(
+            'input[type="file"]',
+        ) as HTMLInputElement;
+        fireEvent.change(input, { target: { files: [file] } });
+
+        await waitFor(() => {
+            const body = fetchMock.mock.calls[0][1].body as FormData;
+            expect(body.get('dark')).toBeNull();
+        });
+
+        await waitFor(() => {
+            expect(getBody().value).toContain(
+                '![solo](https://storage.example.com/article-assets/2026/solo.png)',
+            );
+        });
+        expect(getBody().value).not.toContain('#themed');
+    });
+
     it('surfaces the server error message and inserts nothing on failure', async () => {
         const fetchMock = vi.fn().mockResolvedValue({
             ok: false,
