@@ -9,7 +9,7 @@ import {
     BetSource,
 } from '@bryandebaun/mcp-client';
 import Select from '@/components/Select';
-import { MARKET_OPTIONS, SPORT_OPTIONS } from '@/lib/bets';
+import { BOOK_OPTIONS, MARKET_OPTIONS, SPORT_OPTIONS } from '@/lib/bets';
 
 /** A parlay leg as edited in the form (string-valued inputs + stable key). */
 interface LegInput {
@@ -58,7 +58,7 @@ export default function BetForm({
     const [stake, setStake] = useState(
         initialValues?.stake != null ? String(initialValues.stake) : '',
     );
-    const [book, setBook] = useState(initialValues?.book ?? '');
+    const [book, setBook] = useState(initialValues?.book ?? 'DraftKings');
     const [source, setSource] = useState<BetSource>(
         (initialValues?.source as BetSource) ?? BetSource.INTUITION,
     );
@@ -101,6 +101,10 @@ export default function BetForm({
         sport && !SPORT_OPTIONS.some((o) => o.value === sport)
             ? [{ value: sport, label: sport }, ...SPORT_OPTIONS]
             : SPORT_OPTIONS;
+    const bookOptions =
+        book && !BOOK_OPTIONS.some((o) => o.value === book)
+            ? [{ value: book, label: book }, ...BOOK_OPTIONS]
+            : BOOK_OPTIONS;
 
     const addLeg = () =>
         setLegs((prev) => [
@@ -605,12 +609,14 @@ export default function BetForm({
                         >
                             Book
                         </label>
-                        <input
+                        <Select
                             id="bet-book"
-                            type="text"
-                            className="mt-1 w-full form-input"
+                            ariaLabel="Book"
+                            className="mt-1"
+                            placeholder="Select book"
                             value={book ?? ''}
-                            onChange={(e) => setBook(e.target.value)}
+                            onValueChange={setBook}
+                            options={bookOptions}
                         />
                     </div>
 

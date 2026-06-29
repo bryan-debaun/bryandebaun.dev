@@ -43,6 +43,20 @@ export const SPORT_OPTIONS: { value: string; label: string }[] = [
 ];
 
 /**
+ * Sportsbooks offered in the bet UI. `Bet.book` is free-text in the DB (the
+ * server defaults it to "DraftKings"), so this is a curated frontend list — add
+ * an entry to support another book. The first entry is the form default.
+ */
+export const BOOK_OPTIONS: { value: string; label: string }[] = [
+    { value: 'DraftKings', label: 'DraftKings' },
+    { value: 'FanDuel', label: 'FanDuel' },
+    { value: 'BetMGM', label: 'BetMGM' },
+    { value: 'Caesars', label: 'Caesars' },
+    { value: 'ESPN BET', label: 'ESPN BET' },
+    { value: 'Fanatics', label: 'Fanatics' },
+];
+
+/**
  * Pure, side-effect-free formatting and derivation helpers for the admin Bets
  * dashboard. Everything here is unit-testable and performs no I/O — UI
  * components and route handlers import these so display logic stays consistent
