@@ -302,9 +302,18 @@ export default function BetForm({
                             className="block text-sm font-medium"
                         >
                             Event{' '}
-                            <span className="text-red-500" aria-hidden="true">
-                                *
-                            </span>
+                            {isParlay ? (
+                                <span className="text-[var(--color-norwegian-500)] font-normal">
+                                    (auto from legs)
+                                </span>
+                            ) : (
+                                <span
+                                    className="text-red-500"
+                                    aria-hidden="true"
+                                >
+                                    *
+                                </span>
+                            )}
                         </label>
                         <input
                             id="bet-event"
@@ -312,7 +321,10 @@ export default function BetForm({
                             className="mt-1 w-full form-input"
                             value={event}
                             onChange={(e) => setEvent(e.target.value)}
-                            required
+                            placeholder={
+                                isParlay ? 'e.g. World Cup 4-leg parlay' : ''
+                            }
+                            required={!isParlay}
                         />
                     </div>
 
@@ -344,12 +356,18 @@ export default function BetForm({
                                 className="block text-sm font-medium"
                             >
                                 Selection{' '}
-                                <span
-                                    className="text-red-500"
-                                    aria-hidden="true"
-                                >
-                                    *
-                                </span>
+                                {isParlay ? (
+                                    <span className="text-[var(--color-norwegian-500)] font-normal">
+                                        (auto)
+                                    </span>
+                                ) : (
+                                    <span
+                                        className="text-red-500"
+                                        aria-hidden="true"
+                                    >
+                                        *
+                                    </span>
+                                )}
                             </label>
                             <input
                                 id="bet-selection"
@@ -357,7 +375,7 @@ export default function BetForm({
                                 className="mt-1 w-full form-input"
                                 value={selection}
                                 onChange={(e) => setSelection(e.target.value)}
-                                required
+                                required={!isParlay}
                             />
                         </div>
                     </div>
