@@ -16,6 +16,11 @@ export default function AdminNav() {
                     </Link>
                 </li>
                 <li>
+                    <Link href="/admin/articles" className={linkClass}>
+                        Articles
+                    </Link>
+                </li>
+                <li>
                     <Link href="/admin/users" className={linkClass}>
                         Users
                     </Link>
