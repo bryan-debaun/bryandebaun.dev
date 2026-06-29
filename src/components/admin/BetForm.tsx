@@ -158,9 +158,20 @@ export default function BetForm({
             setError('Sport is required.');
             return;
         }
-        if (isParlay && parsedLegs.length < 2) {
+        // Legs are optional for a parlay — same-game parlays often don't expose
+        // per-leg odds. But if any leg fields are started, require >=2 complete
+        // legs (the backend requires odds per leg) so we never store half-entered
+        // legs.
+        const hasLegInput = legs.some(
+            (l) =>
+                l.event.trim() ||
+                l.selection.trim() ||
+                l.oddsAmerican.trim() ||
+                l.line.trim(),
+        );
+        if (isParlay && hasLegInput && parsedLegs.length < 2) {
             setError(
-                'A parlay needs at least 2 complete legs (event, selection, odds).',
+                'For parlay legs, complete at least 2 (each needs event, selection, odds) or clear them.',
             );
             return;
         }
@@ -458,9 +469,12 @@ export default function BetForm({
                                 Parlay legs
                             </legend>
                             <p className="text-xs text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300)]">
-                                Add each leg below. Put the combined odds and
-                                total stake in the fields above; event/selection
-                                auto-fill from the legs if left blank.
+                                Legs are optional — same-game parlays often
+                                don&apos;t show per-leg odds. If your book lists
+                                each price, add 2+ legs; otherwise just set the
+                                combined odds + total stake above and note the
+                                selections. Per-leg Line is only for
+                                totals/spreads (e.g. Over 2.5 → 2.5).
                             </p>
                             {legs.length === 0 ? (
                                 <p className="text-sm text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300)]">
