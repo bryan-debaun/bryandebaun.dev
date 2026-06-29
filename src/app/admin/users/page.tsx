@@ -13,10 +13,7 @@ export default async function AdminUsersPage() {
         <main className="p-6">
             <h1 className="text-2xl font-semibold mb-6">Admin</h1>
             <AdminNav />
-            <section>
-                <h2 className="text-xl font-semibold mb-4">
-                    Users &amp; Invites
-                </h2>
+            <section aria-label="Users & Invites">
                 <UsersAdmin />
             </section>
         </main>

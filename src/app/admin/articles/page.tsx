@@ -13,8 +13,7 @@ export default async function AdminArticlesPage() {
         <main className="p-6">
             <h1 className="text-2xl font-semibold mb-6">Admin</h1>
             <AdminNav />
-            <section>
-                <h2 className="text-xl font-semibold mb-4">Articles</h2>
+            <section aria-label="Articles">
                 <ArticlesAdmin />
             </section>
         </main>
