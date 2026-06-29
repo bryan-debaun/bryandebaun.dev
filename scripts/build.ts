@@ -16,16 +16,12 @@ export async function main(): Promise<void> {
     Object.assign(process.env as NodeJS.ProcessEnv, { NODE_ENV: 'production' });
 
     try {
-        // Verify that required devDependencies are present (contentlayer2, tsx, etc.) so the content build won't fail if devDependencies were skipped.
+        // Verify that required devDependencies are present (tsx, etc.) so the build won't fail if devDependencies were skipped.
         let code = await spawnCmd('pnpm', ['exec', 'tsx', 'scripts/check-dev-deps.ts']);
         if (code !== 0) process.exit(code);
 
-        code = await spawnCmd('pnpm', ['run', 'run-content']);
-        if (code !== 0) process.exit(code);
-
-        // Use pnpm exec to prefer the local next binary
-        // SPIKE #82: adopt Turbopack for the production build (compatible with the
-        // standalone Contentlayer2 content step; no custom webpack config to translate).
+        // Use pnpm exec to prefer the local next binary.
+        // SPIKE #82: Turbopack for the production build.
         code = await spawnCmd('pnpm', ['exec', 'next', 'build', '--turbopack']);
         process.exit(code);
     } catch (e) {

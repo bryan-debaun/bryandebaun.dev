@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { allPhilosophies } from 'contentlayer/generated';
-import { publicOnly } from '@/lib/content';
+import { listPublishedArticles } from '@/lib/services/articles';
+import { formatDate } from '@/lib/dates';
 
 export const metadata: Metadata = {
     title: 'Philosophy & Thoughts — Bryan DeBaun',
@@ -9,8 +9,12 @@ export const metadata: Metadata = {
         'Notes and reflections by Bryan DeBaun on philosophy, engineering, and the ideas that shape his thinking.',
 };
 
-export default function Philosophy() {
-    const posts = publicOnly(allPhilosophies);
+// ISR: revalidate the list periodically; instant updates arrive via the
+// secret-protected /api/revalidate route when an article is published.
+export const revalidate = 300;
+
+export default async function Philosophy() {
+    const posts = await listPublishedArticles();
     return (
         <div className="prose prose-norwegian dark:prose-invert">
             <h2>Philosophy & Thoughts</h2>
@@ -18,20 +22,28 @@ export default function Philosophy() {
                 <p>No notes yet.</p>
             ) : (
                 <ul className="list-none pl-0">
-                    {posts.map((p) => {
-                        const slugParts = p.slug.split('/');
-                        const shortSlug = slugParts[slugParts.length - 1];
-                        return (
-                            <li key={p._id}>
-                                <Link href={`/philosophy/${shortSlug}`}>
-                                    {p.title}
-                                </Link>
-                                {p.summary ? (
-                                    <div className="text-sm">{p.summary}</div>
-                                ) : null}
-                            </li>
-                        );
-                    })}
+                    {posts.map((p) => (
+                        <li key={p.id}>
+                            <Link href={`/philosophy/${p.slug}`}>
+                                {p.title}
+                            </Link>
+                            {p.summary ? (
+                                <div className="text-sm">{p.summary}</div>
+                            ) : null}
+                            {p.publishedAt ? (
+                                <div className="text-sm text-muted">
+                                    {formatDate(p.publishedAt, {
+                                        month: 'long',
+                                    })}
+                                </div>
+                            ) : null}
+                            {p.tags.length > 0 ? (
+                                <div className="text-sm text-muted">
+                                    {p.tags.join(' · ')}
+                                </div>
+                            ) : null}
+                        </li>
+                    ))}
                 </ul>
             )}
         </div>
