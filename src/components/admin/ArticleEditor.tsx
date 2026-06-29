@@ -29,6 +29,26 @@ function normalise(s: string) {
     return s.trim().toLowerCase();
 }
 
+/** Allowed image MIME types for upload (mirrors the server allowlist). */
+const ACCEPTED_IMAGE_TYPES = new Set([
+    'image/png',
+    'image/jpeg',
+    'image/webp',
+    'image/gif',
+    'image/avif',
+    'image/svg+xml',
+]);
+
+/**
+ * Derive a human-readable alt text from an uploaded filename: drop the
+ * extension and any directory parts, then turn separators into spaces.
+ */
+function altFromFilename(filename: string): string {
+    const base = filename.split(/[\\/]/).pop() ?? filename;
+    const noExt = base.replace(/\.[^.]+$/, '');
+    return noExt.replace(/[-_]+/g, ' ').trim();
+}
+
 /**
  * Shared admin article editor: form fields + a Markdown body editor with a live
  * preview rendered via the SAME {@link ArticleBody} component the public page
@@ -47,6 +67,10 @@ export default function ArticleEditor({ mode, article }: Props) {
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
     const [formError, setFormError] = useState<string | null>(null);
     const tagInputRef = useRef<HTMLInputElement>(null);
+    const bodyRef = useRef<HTMLTextAreaElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
 
     const isSaving = createMutation.isPending || updateMutation.isPending;
     const currentStatus = article?.status ?? ArticleStatus.Draft;
@@ -89,6 +113,102 @@ export default function ArticleEditor({ mode, article }: Props) {
             ...prev,
             tags: prev.tags.filter((_, i) => i !== index),
         }));
+    }
+
+    /**
+     * Insert a Markdown image at the body textarea's caret (or append at the
+     * end with surrounding newlines when the caret position is unknown), then
+     * refocus the textarea with the caret after the inserted snippet.
+     */
+    function insertImageMarkdown(url: string, alt: string) {
+        const snippet = `![${alt}](${url})`;
+        const textarea = bodyRef.current;
+
+        setValues((prev) => {
+            const body = prev.body;
+            const hasSelection =
+                textarea !== null &&
+                typeof textarea.selectionStart === 'number' &&
+                typeof textarea.selectionEnd === 'number';
+
+            if (!hasSelection) {
+                const prefix =
+                    body.length > 0 && !body.endsWith('\n') ? '\n' : '';
+                const nextBody = `${body}${prefix}${snippet}\n`;
+                return { ...prev, body: nextBody };
+            }
+
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const nextBody = body.slice(0, start) + snippet + body.slice(end);
+
+            // Restore focus + caret after React commits the new value.
+            const caret = start + snippet.length;
+            requestAnimationFrame(() => {
+                textarea.focus();
+                textarea.setSelectionRange(caret, caret);
+            });
+
+            return { ...prev, body: nextBody };
+        });
+    }
+
+    async function uploadImage(file: File) {
+        if (!ACCEPTED_IMAGE_TYPES.has(file.type)) {
+            setUploadError(
+                'Unsupported image type. Use PNG, JPEG, WebP, GIF, AVIF, or SVG.',
+            );
+            return;
+        }
+
+        setUploadError(null);
+        setIsUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch('/api/admin/upload', {
+                method: 'POST',
+                body: formData,
+            });
+            const json = (await res.json()) as { url?: string; error?: string };
+            if (!res.ok || !json.url) {
+                setUploadError(json.error ?? 'Failed to upload image.');
+                return;
+            }
+            insertImageMarkdown(json.url, altFromFilename(file.name));
+        } catch {
+            setUploadError('Failed to upload image. Please try again.');
+        } finally {
+            setIsUploading(false);
+        }
+    }
+
+    function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        // Reset so selecting the same file again re-triggers change.
+        e.target.value = '';
+        if (file) void uploadImage(file);
+    }
+
+    function handleBodyDrop(e: React.DragEvent<HTMLTextAreaElement>) {
+        const file = Array.from(e.dataTransfer.files).find((f) =>
+            f.type.startsWith('image/'),
+        );
+        if (file) {
+            e.preventDefault();
+            void uploadImage(file);
+        }
+    }
+
+    function handleBodyPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+        const item = Array.from(e.clipboardData.items).find((i) =>
+            i.type.startsWith('image/'),
+        );
+        const file = item?.getAsFile();
+        if (file) {
+            e.preventDefault();
+            void uploadImage(file);
+        }
     }
 
     function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -275,24 +395,59 @@ export default function ArticleEditor({ mode, article }: Props) {
                     </div>
 
                     <div>
-                        <label
-                            htmlFor="article-body"
-                            className="block text-sm font-medium"
-                        >
-                            Body (Markdown){' '}
-                            <span className="text-red-500" aria-hidden="true">
-                                *
-                            </span>
-                        </label>
+                        <div className="flex items-center justify-between gap-2">
+                            <label
+                                htmlFor="article-body"
+                                className="block text-sm font-medium"
+                            >
+                                Body (Markdown){' '}
+                                <span
+                                    className="text-red-500"
+                                    aria-hidden="true"
+                                >
+                                    *
+                                </span>
+                            </label>
+                            <button
+                                type="button"
+                                className="btn btn--outline min-h-0 px-3 py-1 text-xs"
+                                disabled={isUploading}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                {isUploading ? 'Uploading…' : 'Upload image'}
+                            </button>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+                        </div>
                         <textarea
                             id="article-body"
+                            ref={bodyRef}
                             className="mt-1 w-full form-input font-mono text-sm"
                             rows={20}
                             value={values.body}
                             onChange={(e) => setField('body', e.target.value)}
+                            onDrop={handleBodyDrop}
+                            onPaste={handleBodyPaste}
                             aria-invalid={Boolean(fieldErrors.body)}
                             spellCheck
                         />
+                        <p className="mt-1 text-xs text-[var(--color-norwegian-500)] dark:text-[var(--color-norwegian-400)]">
+                            Upload, drag-and-drop, or paste an image to insert
+                            it at the cursor.
+                        </p>
+                        {uploadError ? (
+                            <p
+                                className="mt-1 text-xs text-red-600"
+                                role="alert"
+                            >
+                                {uploadError}
+                            </p>
+                        ) : null}
                         {fieldErrors.body ? (
                             <p className="mt-1 text-xs text-red-600" role="alert">
                                 {fieldErrors.body}
