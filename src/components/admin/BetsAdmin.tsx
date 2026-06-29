@@ -189,12 +189,15 @@ export default function BetsAdmin(_props: Props) {
             {
                 id: 'event',
                 header: 'Event',
-                meta: {
-                    headerClassName: 'text-left',
-                    cellClassName: 'text-left whitespace-normal max-w-[14rem]',
+                meta: { headerClassName: 'text-left', cellClassName: 'text-left' },
+                cell: (info: CellContext<Bet, unknown>) => {
+                    const v = info.row.original.event;
+                    return (
+                        <span className="block max-w-[12rem] truncate" title={v}>
+                            {v}
+                        </span>
+                    );
                 },
-                cell: (info: CellContext<Bet, unknown>) =>
-                    info.row.original.event,
             },
             {
                 id: 'market',
@@ -205,15 +208,18 @@ export default function BetsAdmin(_props: Props) {
             {
                 id: 'selection',
                 header: 'Selection',
-                meta: {
-                    headerClassName: 'text-left',
-                    cellClassName: 'text-left whitespace-normal max-w-[12rem]',
-                },
+                meta: { headerClassName: 'text-left', cellClassName: 'text-left' },
                 cell: (info: CellContext<Bet, unknown>) => {
                     const b = info.row.original;
-                    return b.line != null
-                        ? `${b.selection} (${b.line > 0 ? '+' : ''}${b.line})`
-                        : b.selection;
+                    const v =
+                        b.line != null
+                            ? `${b.selection} (${b.line > 0 ? '+' : ''}${b.line})`
+                            : b.selection;
+                    return (
+                        <span className="block max-w-[18rem] truncate" title={v}>
+                            {v}
+                        </span>
+                    );
                 },
             },
             {
