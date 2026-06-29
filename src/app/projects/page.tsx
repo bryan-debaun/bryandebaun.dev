@@ -33,7 +33,7 @@ const curatedFallback: Repo[] = [
     {
         name: 'bryandebaun.dev',
         description:
-            'This website: Next.js + TypeScript + Tailwind + MDX (contentlayer2).',
+            'This website: Next.js + TypeScript + Tailwind, with DB-backed articles rendered from a remote API.',
         html_url: 'https://github.com/bryan-debaun/bryandebaun.dev',
         homepage: null,
         archived: false,

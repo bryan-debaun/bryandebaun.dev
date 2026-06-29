@@ -1,0 +1,93 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const listArticles = vi.fn();
+const getArticle = vi.fn();
+
+vi.mock('@/lib/mcp', () => ({
+    createApi: () => ({ api: { listArticles, getArticle } }),
+}));
+
+// Keep the real ArticleStatus/ArticleReadStatus enums so the service's
+// status comparisons behave as in production.
+vi.mock('@bryandebaun/mcp-client', async (importOriginal) => {
+    const actual =
+        await importOriginal<typeof import('@bryandebaun/mcp-client')>();
+    return actual;
+});
+
+import {
+    getArticleBySlug,
+    listPublishedArticles,
+} from '@/lib/services/articles';
+
+const published = {
+    id: 1,
+    slug: 'cptsd',
+    title: 'CPTSD',
+    body: '# CPTSD\n\nBody.',
+    status: 'published',
+    tags: ['mental-health'],
+    publishedAt: '2026-01-29T00:00:00.000Z',
+    createdAt: '2026-01-29T00:00:00.000Z',
+    updatedAt: '2026-01-29T00:00:00.000Z',
+};
+
+beforeEach(() => {
+    listArticles.mockReset();
+    getArticle.mockReset();
+});
+
+afterEach(() => {
+    vi.restoreAllMocks();
+});
+
+describe('listPublishedArticles', () => {
+    it('requests published-only and returns the articles', async () => {
+        listArticles.mockResolvedValue({
+            data: { articles: [published], total: 1 },
+        });
+        const result = await listPublishedArticles();
+        expect(listArticles).toHaveBeenCalledWith({ status: 'published' });
+        expect(result).toHaveLength(1);
+        expect(result[0].slug).toBe('cptsd');
+    });
+
+    it('returns an empty list when the API throws', async () => {
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+        listArticles.mockRejectedValue(new Error('network down'));
+        const result = await listPublishedArticles();
+        expect(result).toEqual([]);
+    });
+
+    it('returns an empty list when the payload is missing articles', async () => {
+        listArticles.mockResolvedValue({ data: {} });
+        const result = await listPublishedArticles();
+        expect(result).toEqual([]);
+    });
+});
+
+describe('getArticleBySlug', () => {
+    it('returns a published article', async () => {
+        getArticle.mockResolvedValue({ data: published });
+        const result = await getArticleBySlug('cptsd');
+        expect(getArticle).toHaveBeenCalledWith('cptsd', {
+            status: 'published',
+        });
+        expect(result?.slug).toBe('cptsd');
+    });
+
+    it('returns null for a non-published article (defensive)', async () => {
+        getArticle.mockResolvedValue({
+            data: { ...published, status: 'draft' },
+        });
+        const result = await getArticleBySlug('cptsd');
+        expect(result).toBeNull();
+    });
+
+    it('returns null when the API throws (e.g. 404)', async () => {
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+        getArticle.mockRejectedValue(new Error('not found'));
+        const result = await getArticleBySlug('missing');
+        expect(result).toBeNull();
+    });
+});

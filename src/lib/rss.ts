@@ -1,11 +1,16 @@
-import { publicOnly } from './content';
-
+/**
+ * Build an RSS 2.0 feed XML string from a list of items.
+ *
+ * Items are expected to be already-public (the philosophy feed sources
+ * `published` articles from the MCP Articles API, so there are no private
+ * entries to filter). Each item provides the full link path relative to the
+ * site root via `slug` (e.g. `philosophy/cptsd`).
+ */
 export function generateRSS(
     baseUrl: string,
-    items: Array<{ title: string; slug: string } & { private?: boolean }>,
+    items: Array<{ title: string; slug: string }>,
 ) {
-    const publicItems = publicOnly(items);
-    const itemsXml = publicItems
+    const itemsXml = items
         .map(
             (i) => `
   <item>

@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const required = ['contentlayer2', 'tsx', 'swagger-typescript-api'];
+const required = ['tsx', 'swagger-typescript-api'];
 const missing: string[] = [];
 for (const pkg of required) {
     const p = path.join(process.cwd(), 'node_modules', pkg);

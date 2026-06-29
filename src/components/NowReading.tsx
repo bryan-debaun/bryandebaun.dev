@@ -1,20 +1,31 @@
-import { allPhilosophies } from 'contentlayer/generated';
-import { publicOnly } from '@/lib/content';
+import { ItemStatus } from '@bryandebaun/mcp-client';
+import { listBooks } from '@/lib/services/books';
 import BookNote from './BookNote';
 
-export default function NowReading() {
-    const items = publicOnly(allPhilosophies).filter((p) => p.reading);
-    if (items.length === 0) return null;
+/**
+ * "Now Reading" — books currently in progress.
+ *
+ * Historically this read a `reading` field from file-based philosophy
+ * frontmatter (Contentlayer). The DB-backed Article model has no such field, so
+ * this now sources the same UX from the books API: any book whose status is
+ * `IN_PROGRESS`. Renders nothing when there are none (unchanged behavior).
+ */
+export default async function NowReading() {
+    const books = await listBooks();
+    const reading = books.filter((b) => b.status === ItemStatus.IN_PROGRESS);
+    if (reading.length === 0) return null;
     return (
         <section>
             <h3>Now Reading</h3>
             <ul className="list-none pl-0">
-                {items.map((p) => (
-                    <li key={p._id}>
-                        <BookNote reading={p.reading} />
-                        {p.title ? (
-                            <div className="text-sm">— {p.title}</div>
-                        ) : null}
+                {reading.map((b) => (
+                    <li key={b.id}>
+                        <BookNote
+                            reading={{
+                                title: b.title,
+                                author: b.authors?.[0]?.name,
+                            }}
+                        />
                     </li>
                 ))}
             </ul>
