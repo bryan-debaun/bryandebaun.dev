@@ -72,9 +72,13 @@ describe('ArticleBody rendering', () => {
         expect(container.querySelector('script')).toBeNull();
     });
 
-    it('renders GFM tables via remark-gfm', () => {
+    it('renders GFM tables via remark-gfm, wrapped for horizontal scroll', () => {
         render(<ArticleBody body={'| a | b |\n| - | - |\n| 1 | 2 |'} />);
-        expect(screen.getByRole('table')).toBeInTheDocument();
+        const table = screen.getByRole('table');
+        expect(table).toBeInTheDocument();
+        // Wide tables must not overflow the page — the table is wrapped in a
+        // horizontally scrollable container.
+        expect(table.parentElement?.className).toContain('overflow-x-auto');
     });
 
     it('pairs a themed /articles SVG with its _dark sibling and CSS-swaps', () => {
@@ -89,7 +93,7 @@ describe('ArticleBody rendering', () => {
         // Light variant: real alt, shown in light mode / hidden in dark.
         expect(light).toHaveAttribute('src', '/articles/xe_all_committed.svg');
         expect(light).toHaveAttribute('alt', 'All committed');
-        expect(light.className).toContain('dark:hidden');
+        expect(light.className).toContain('themed-img-light');
         // Dark variant: derived _dark src, same alt (display:none de-dupes the
         // a11y tree, so the alt is announced in dark mode too).
         expect(dark).toHaveAttribute(
@@ -97,7 +101,7 @@ describe('ArticleBody rendering', () => {
             '/articles/xe_all_committed_dark.svg',
         );
         expect(dark).toHaveAttribute('alt', 'All committed');
-        expect(dark.className).toContain('dark:block');
+        expect(dark.className).toContain('themed-img-dark');
     });
 
     it('does not pair non-/articles images (single img, no _dark swap)', () => {
@@ -140,8 +144,8 @@ describe('ArticleBody rendering', () => {
         );
         expect(light).toHaveAttribute('alt', 'diagram');
         expect(dark).toHaveAttribute('alt', 'diagram');
-        expect(light.className).toContain('dark:hidden');
-        expect(dark.className).toContain('dark:block');
+        expect(light.className).toContain('themed-img-light');
+        expect(dark.className).toContain('themed-img-dark');
         for (const img of imgs) {
             expect(img.getAttribute('src')).not.toContain('#themed');
         }
