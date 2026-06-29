@@ -300,6 +300,17 @@ a:focus-visible {
   text-decoration-thickness: 2px;
 }
 
+/* Links that opt out via `.no-underline` (e.g. whole-surface cards) stay
+   un-underlined at rest, on hover, AND on focus. This is unlayered and uses
+   class specificity so it beats the rule above AND any layered prose/utility
+   styling — under Tailwind v4 cascade layers the layered `no-underline` utility
+   alone loses to unlayered link rules. */
+a.no-underline,
+a.no-underline:hover,
+a.no-underline:focus-visible {
+  text-decoration: none;
+}
+
 .site-nav a:hover {
   color: var(--color-fjord-600);
 }
