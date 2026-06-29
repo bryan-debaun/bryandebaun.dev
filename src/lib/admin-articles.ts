@@ -18,7 +18,7 @@ export function isSlugConflictError(e: unknown): boolean {
 }
 
 /**
- * Revalidate the public philosophy paths affected by an article mutation.
+ * Revalidate the public writing paths affected by an article mutation.
  *
  * Takes `revalidatePath` as a parameter so this stays free of the
  * `next/cache` import (which can only run inside the server runtime), making it
@@ -31,9 +31,9 @@ export function revalidateArticlePaths(
     slug: string,
     previousSlug?: string,
 ): void {
-    revalidatePath('/philosophy');
-    revalidatePath(`/philosophy/${slug}`);
+    revalidatePath('/writing');
+    revalidatePath(`/writing/${slug}`);
     if (previousSlug && previousSlug !== slug) {
-        revalidatePath(`/philosophy/${previousSlug}`);
+        revalidatePath(`/writing/${previousSlug}`);
     }
 }

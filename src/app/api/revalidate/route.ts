@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server';
  * Secret-protected on-demand revalidation hook.
  *
  * The MCP server (or an admin tool) POSTs here after publishing/updating an
- * article so the philosophy list — and, if a slug is provided, the matching
+ * article so the writing list — and, if a slug is provided, the matching
  * detail page — refresh immediately instead of waiting for the ISR window.
  *
  * Security model:
@@ -41,9 +41,9 @@ export async function POST(req: NextRequest) {
         // Body is optional — a bare POST revalidates the list only.
     }
 
-    revalidatePath('/philosophy');
+    revalidatePath('/writing');
     if (slug) {
-        revalidatePath(`/philosophy/${slug}`);
+        revalidatePath(`/writing/${slug}`);
     }
 
     return NextResponse.json({ revalidated: true });

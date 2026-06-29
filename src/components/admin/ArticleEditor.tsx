@@ -328,7 +328,7 @@ export default function ArticleEditor({ mode, article }: Props) {
                             autoComplete="off"
                         />
                         <p className="mt-1 text-xs text-[var(--color-norwegian-500)] dark:text-[var(--color-norwegian-400)]">
-                            Lives at <code>/philosophy/{values.slug || '…'}</code>
+                            Lives at <code>/writing/{values.slug || '…'}</code>
                         </p>
                         {fieldErrors.slug ? (
                             <p className="mt-1 text-xs text-red-600" role="alert">

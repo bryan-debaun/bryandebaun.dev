@@ -183,11 +183,11 @@ export default function Header() {
                     <Link href="/projects" className="text-sm">
                         Projects
                     </Link>
-                    <Link href="/contact" className="text-sm">
-                        Contact
+                    <Link href="/media" className="text-sm">
+                        Media
                     </Link>
-                    <Link href="/resume" className="text-sm">
-                        Resume
+                    <Link href="/writing" className="text-sm">
+                        Writings
                     </Link>
                     <DarkModeToggle />
                     <AuthStatus />
@@ -263,20 +263,20 @@ export default function Header() {
                         Projects
                     </Link>
                     <Link
-                        href="/contact"
-                        id="mobile-nav-contact"
+                        href="/media"
+                        id="mobile-nav-media"
                         className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide"
                         role="menuitem"
                     >
-                        Contact
+                        Media
                     </Link>
                     <Link
-                        href="/resume"
-                        id="mobile-nav-resume"
+                        href="/writing"
+                        id="mobile-nav-writings"
                         className="inline-block px-3 py-3 rounded text-sm text-center uppercase font-semibold tracking-wide"
                         role="menuitem"
                     >
-                        Resume
+                        Writings
                     </Link>
                     <div className="px-3 py-2">
                         <AuthStatus />

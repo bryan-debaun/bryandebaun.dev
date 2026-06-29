@@ -23,7 +23,7 @@ type RouteContext = {
  *
  * Updates an article (title/body/summary/tags, `status` transitions such as
  * publish/unpublish, `publishedAt`, and `newSlug` renames). On success the
- * public philosophy paths are revalidated — both the old and the new slug when
+ * public writing paths are revalidated — both the old and the new slug when
  * a rename occurs — so publish/unpublish is reflected immediately.
  */
 export async function PUT(req: NextRequest, context: RouteContext) {
@@ -63,7 +63,7 @@ export async function PUT(req: NextRequest, context: RouteContext) {
 /**
  * DELETE /api/admin/articles/[slug]
  *
- * Deletes an article and revalidates the public philosophy paths so the
+ * Deletes an article and revalidates the public writing paths so the
  * removed article disappears from the index and 404s on its slug page.
  */
 export async function DELETE(_req: NextRequest, context: RouteContext) {

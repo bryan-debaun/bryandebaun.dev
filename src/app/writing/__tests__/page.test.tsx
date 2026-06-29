@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-const listPublishedArticles = vi.fn();
+const listRecentPublishedArticles = vi.fn();
 const getArticleBySlug = vi.fn();
 vi.mock('@/lib/services/articles', () => ({
-    listPublishedArticles: () => listPublishedArticles(),
+    listRecentPublishedArticles: () => listRecentPublishedArticles(),
     getArticleBySlug: (slug: string) => getArticleBySlug(slug),
 }));
 
@@ -29,7 +29,7 @@ const article = {
 };
 
 beforeEach(() => {
-    listPublishedArticles.mockReset();
+    listRecentPublishedArticles.mockReset();
     getArticleBySlug.mockReset();
     notFound.mockClear();
 });
@@ -38,30 +38,33 @@ afterEach(() => {
     vi.resetModules();
 });
 
-describe('Philosophy list page', () => {
-    it('renders a published article link and summary', async () => {
-        listPublishedArticles.mockResolvedValue([article]);
-        const { default: Philosophy } = await import('../page');
-        render(await Philosophy());
-        const link = screen.getByRole('link', { name: 'CPTSD — Thoughts' });
-        expect(link).toHaveAttribute('href', '/philosophy/cptsd');
+describe('Writing list page', () => {
+    it('renders a published article card with title and summary', async () => {
+        listRecentPublishedArticles.mockResolvedValue([article]);
+        const { default: Writing } = await import('../page');
+        render(await Writing());
+        const link = screen.getByRole('link', { name: /CPTSD — Thoughts/ });
+        expect(link).toHaveAttribute('href', '/writing/cptsd');
+        expect(
+            screen.getByRole('heading', { name: 'CPTSD — Thoughts' }),
+        ).toBeInTheDocument();
         expect(screen.getByText('A living document.')).toBeInTheDocument();
     });
 
     it('shows an empty state when there are no articles', async () => {
-        listPublishedArticles.mockResolvedValue([]);
-        const { default: Philosophy } = await import('../page');
-        render(await Philosophy());
+        listRecentPublishedArticles.mockResolvedValue([]);
+        const { default: Writing } = await import('../page');
+        render(await Writing());
         expect(screen.getByText('No notes yet.')).toBeInTheDocument();
     });
 });
 
-describe('Philosophy detail page', () => {
+describe('Writing detail page', () => {
     it('renders the title once and the article body', async () => {
         getArticleBySlug.mockResolvedValue(article);
-        const { default: PhilosophyPage } = await import('../[slug]/page');
+        const { default: WritingPage } = await import('../[slug]/page');
         render(
-            await PhilosophyPage({
+            await WritingPage({
                 params: Promise.resolve({ slug: 'cptsd' }),
             }),
         );
@@ -76,9 +79,9 @@ describe('Philosophy detail page', () => {
 
     it('calls notFound() when the article is missing', async () => {
         getArticleBySlug.mockResolvedValue(null);
-        const { default: PhilosophyPage } = await import('../[slug]/page');
+        const { default: WritingPage } = await import('../[slug]/page');
         await expect(
-            PhilosophyPage({ params: Promise.resolve({ slug: 'missing' }) }),
+            WritingPage({ params: Promise.resolve({ slug: 'missing' }) }),
         ).rejects.toThrow('NEXT_NOT_FOUND');
         expect(notFound).toHaveBeenCalled();
     });

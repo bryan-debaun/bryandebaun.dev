@@ -38,6 +38,30 @@ export async function listPublishedArticles(): Promise<Article[]> {
 }
 
 /**
+ * List the most-recent published articles, newest first.
+ *
+ * Sorts {@link listPublishedArticles} by `publishedAt` descending; articles
+ * without a `publishedAt` are treated as oldest and sorted last. Returns at
+ * most `limit` articles (default 5). Pure aside from the underlying fetch.
+ */
+export async function listRecentPublishedArticles(
+    limit = 5,
+): Promise<Article[]> {
+    const articles = await listPublishedArticles();
+    const sorted = [...articles].sort((a, b) => {
+        const aTime = a.publishedAt ? Date.parse(a.publishedAt) : Number.NaN;
+        const bTime = b.publishedAt ? Date.parse(b.publishedAt) : Number.NaN;
+        const aValid = !Number.isNaN(aTime);
+        const bValid = !Number.isNaN(bTime);
+        if (aValid && bValid) return bTime - aTime;
+        if (aValid) return -1;
+        if (bValid) return 1;
+        return 0;
+    });
+    return sorted.slice(0, limit);
+}
+
+/**
  * Fetch a single published article by slug. Returns `null` when the article is
  * missing, not published, or the API is unreachable — callers should render a
  * not-found state in that case.

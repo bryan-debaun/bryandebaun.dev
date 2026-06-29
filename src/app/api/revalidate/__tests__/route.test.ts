@@ -66,7 +66,7 @@ describe('POST /api/revalidate', () => {
         );
         expect(res.status).toBe(200);
         await expect(res.json()).resolves.toEqual({ revalidated: true });
-        expect(revalidatePath).toHaveBeenCalledWith('/philosophy');
+        expect(revalidatePath).toHaveBeenCalledWith('/writing');
         expect(revalidatePath).toHaveBeenCalledTimes(1);
     });
 
@@ -80,8 +80,8 @@ describe('POST /api/revalidate', () => {
             ),
         );
         expect(res.status).toBe(200);
-        expect(revalidatePath).toHaveBeenCalledWith('/philosophy');
-        expect(revalidatePath).toHaveBeenCalledWith('/philosophy/cptsd');
+        expect(revalidatePath).toHaveBeenCalledWith('/writing');
+        expect(revalidatePath).toHaveBeenCalledWith('/writing/cptsd');
     });
 
     it('accepts the secret via the ?secret= query param', async () => {
@@ -89,6 +89,6 @@ describe('POST /api/revalidate', () => {
         const { POST } = await import('../route');
         const res = await POST(makeReq({}, { query: `?secret=${SECRET}` }));
         expect(res.status).toBe(200);
-        expect(revalidatePath).toHaveBeenCalledWith('/philosophy');
+        expect(revalidatePath).toHaveBeenCalledWith('/writing');
     });
 });

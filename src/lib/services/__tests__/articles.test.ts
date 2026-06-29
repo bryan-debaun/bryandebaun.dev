@@ -18,6 +18,7 @@ vi.mock('@bryandebaun/mcp-client', async (importOriginal) => {
 import {
     getArticleBySlug,
     listPublishedArticles,
+    listRecentPublishedArticles,
 } from '@/lib/services/articles';
 
 const published = {
@@ -63,6 +64,71 @@ describe('listPublishedArticles', () => {
         listArticles.mockResolvedValue({ data: {} });
         const result = await listPublishedArticles();
         expect(result).toEqual([]);
+    });
+});
+
+describe('listRecentPublishedArticles', () => {
+    const make = (slug: string, publishedAt: string | null) => ({
+        ...published,
+        slug,
+        title: slug,
+        publishedAt,
+    });
+
+    it('sorts newest-first', async () => {
+        listArticles.mockResolvedValue({
+            data: {
+                articles: [
+                    make('old', '2024-01-01T00:00:00.000Z'),
+                    make('new', '2026-01-01T00:00:00.000Z'),
+                    make('mid', '2025-01-01T00:00:00.000Z'),
+                ],
+                total: 3,
+            },
+        });
+        const result = await listRecentPublishedArticles();
+        expect(result.map((a) => a.slug)).toEqual(['new', 'mid', 'old']);
+    });
+
+    it('caps the result at the limit (default 5)', async () => {
+        listArticles.mockResolvedValue({
+            data: {
+                articles: Array.from({ length: 8 }, (_, i) =>
+                    make(`a${i}`, `2026-01-0${i + 1}T00:00:00.000Z`),
+                ),
+                total: 8,
+            },
+        });
+        const result = await listRecentPublishedArticles();
+        expect(result).toHaveLength(5);
+    });
+
+    it('returns all when fewer than the limit', async () => {
+        listArticles.mockResolvedValue({
+            data: {
+                articles: [
+                    make('a', '2026-01-01T00:00:00.000Z'),
+                    make('b', '2026-01-02T00:00:00.000Z'),
+                ],
+                total: 2,
+            },
+        });
+        const result = await listRecentPublishedArticles();
+        expect(result).toHaveLength(2);
+    });
+
+    it('sorts articles without publishedAt last', async () => {
+        listArticles.mockResolvedValue({
+            data: {
+                articles: [
+                    make('no-date', null),
+                    make('dated', '2026-01-01T00:00:00.000Z'),
+                ],
+                total: 2,
+            },
+        });
+        const result = await listRecentPublishedArticles();
+        expect(result.map((a) => a.slug)).toEqual(['dated', 'no-date']);
     });
 });
 

@@ -41,7 +41,7 @@ export async function generateMetadata({
     const title = `${article.title} — Bryan DeBaun`;
     const description =
         article.summary ?? `${article.title} — a note by Bryan DeBaun.`;
-    const url = `${SITE_URL}/philosophy/${article.slug}`;
+    const url = `${SITE_URL}/writing/${article.slug}`;
 
     return {
         title,
@@ -70,7 +70,7 @@ export default async function PhilosophyPage({
         notFound();
     }
 
-    const url = `${SITE_URL}/philosophy/${article.slug}`;
+    const url = `${SITE_URL}/writing/${article.slug}`;
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',

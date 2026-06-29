@@ -55,7 +55,7 @@ export async function GET() {
  *
  * Creates a new article. A duplicate slug is surfaced as a clean 400 field
  * error so the editor can show it inline. On success we revalidate the public
- * philosophy paths so a freshly-published article appears without waiting out
+ * writing paths so a freshly-published article appears without waiting out
  * the ISR window.
  */
 export async function POST(req: NextRequest) {

@@ -88,7 +88,7 @@ export default function ResumePage() {
 
     // schema.org Person, embedded in a ProfilePage. Emitted as JSON-LD for
     // search engines / rich results. Mirrors the JSON-LD pattern used by the
-    // philosophy slug page.
+    // writing slug page.
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'ProfilePage',

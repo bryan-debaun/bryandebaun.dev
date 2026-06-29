@@ -20,16 +20,16 @@ describe('revalidateArticlePaths', () => {
     it('revalidates the index and the slug page', () => {
         const spy = vi.fn();
         revalidateArticlePaths(spy, 'cptsd');
-        expect(spy).toHaveBeenCalledWith('/philosophy');
-        expect(spy).toHaveBeenCalledWith('/philosophy/cptsd');
+        expect(spy).toHaveBeenCalledWith('/writing');
+        expect(spy).toHaveBeenCalledWith('/writing/cptsd');
         expect(spy).toHaveBeenCalledTimes(2);
     });
 
     it('also revalidates the previous slug on a rename', () => {
         const spy = vi.fn();
         revalidateArticlePaths(spy, 'new', 'old');
-        expect(spy).toHaveBeenCalledWith('/philosophy/new');
-        expect(spy).toHaveBeenCalledWith('/philosophy/old');
+        expect(spy).toHaveBeenCalledWith('/writing/new');
+        expect(spy).toHaveBeenCalledWith('/writing/old');
     });
 
     it('does not double-revalidate when the slug is unchanged', () => {
