@@ -73,4 +73,44 @@ describe('ArticleBody rendering', () => {
         render(<ArticleBody body={'| a | b |\n| - | - |\n| 1 | 2 |'} />);
         expect(screen.getByRole('table')).toBeInTheDocument();
     });
+
+    it('pairs a themed /articles SVG with its _dark sibling and CSS-swaps', () => {
+        const { container } = render(
+            <ArticleBody body={'![All committed](/articles/xe_all_committed.svg)'} />,
+        );
+        const imgs = Array.from(container.querySelectorAll('img'));
+        expect(imgs).toHaveLength(2);
+
+        const light = imgs[0];
+        const dark = imgs[1];
+        // Light variant: real alt, shown in light mode / hidden in dark.
+        expect(light).toHaveAttribute('src', '/articles/xe_all_committed.svg');
+        expect(light).toHaveAttribute('alt', 'All committed');
+        expect(light.className).toContain('dark:hidden');
+        // Dark variant: derived _dark src, same alt (display:none de-dupes the
+        // a11y tree, so the alt is announced in dark mode too).
+        expect(dark).toHaveAttribute(
+            'src',
+            '/articles/xe_all_committed_dark.svg',
+        );
+        expect(dark).toHaveAttribute('alt', 'All committed');
+        expect(dark.className).toContain('dark:block');
+    });
+
+    it('does not pair non-/articles images (single img, no _dark swap)', () => {
+        const { container } = render(
+            <ArticleBody body={'![logo](/images/logo.svg)'} />,
+        );
+        const imgs = Array.from(container.querySelectorAll('img'));
+        expect(imgs).toHaveLength(1);
+        expect(imgs[0]).toHaveAttribute('src', '/images/logo.svg');
+    });
+
+    it('does not double-pair an already-_dark src', () => {
+        const { container } = render(
+            <ArticleBody body={'![x](/articles/xe_all_committed_dark.svg)'} />,
+        );
+        // Already the dark file → treat as a plain single image.
+        expect(container.querySelectorAll('img')).toHaveLength(1);
+    });
 });
