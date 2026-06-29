@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { listPublishedArticles } from '@/lib/services/articles';
+import Card from '@/components/Card';
+import { listRecentPublishedArticles } from '@/lib/services/articles';
 import { formatDate } from '@/lib/dates';
 
 export const metadata: Metadata = {
@@ -14,34 +14,29 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function Philosophy() {
-    const posts = await listPublishedArticles();
+    const posts = await listRecentPublishedArticles();
     return (
         <div className="prose prose-norwegian dark:prose-invert">
             <h2>Philosophy & Thoughts</h2>
             {posts.length === 0 ? (
                 <p>No notes yet.</p>
             ) : (
-                <ul className="list-none pl-0">
+                <ul className="not-prose grid grid-cols-1 md:grid-cols-2 gap-4 list-none p-0">
                     {posts.map((p) => (
-                        <li key={p.id}>
-                            <Link href={`/writing/${p.slug}`}>
-                                {p.title}
-                            </Link>
-                            {p.summary ? (
-                                <div className="text-sm">{p.summary}</div>
-                            ) : null}
-                            {p.publishedAt ? (
-                                <div className="text-sm text-muted">
-                                    {formatDate(p.publishedAt, {
-                                        month: 'long',
-                                    })}
-                                </div>
-                            ) : null}
-                            {p.tags.length > 0 ? (
-                                <div className="text-sm text-muted">
-                                    {p.tags.join(' · ')}
-                                </div>
-                            ) : null}
+                        <li key={p.id} className="min-w-0">
+                            <Card
+                                href={`/writing/${p.slug}`}
+                                title={p.title}
+                                description={p.summary}
+                                chips={p.tags}
+                                meta={
+                                    p.publishedAt
+                                        ? formatDate(p.publishedAt, {
+                                              month: 'long',
+                                          })
+                                        : undefined
+                                }
+                            />
                         </li>
                     ))}
                 </ul>

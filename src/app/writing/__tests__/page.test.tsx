@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-const listPublishedArticles = vi.fn();
+const listRecentPublishedArticles = vi.fn();
 const getArticleBySlug = vi.fn();
 vi.mock('@/lib/services/articles', () => ({
-    listPublishedArticles: () => listPublishedArticles(),
+    listRecentPublishedArticles: () => listRecentPublishedArticles(),
     getArticleBySlug: (slug: string) => getArticleBySlug(slug),
 }));
 
@@ -29,7 +29,7 @@ const article = {
 };
 
 beforeEach(() => {
-    listPublishedArticles.mockReset();
+    listRecentPublishedArticles.mockReset();
     getArticleBySlug.mockReset();
     notFound.mockClear();
 });
@@ -39,17 +39,20 @@ afterEach(() => {
 });
 
 describe('Writing list page', () => {
-    it('renders a published article link and summary', async () => {
-        listPublishedArticles.mockResolvedValue([article]);
+    it('renders a published article card with title and summary', async () => {
+        listRecentPublishedArticles.mockResolvedValue([article]);
         const { default: Writing } = await import('../page');
         render(await Writing());
-        const link = screen.getByRole('link', { name: 'CPTSD — Thoughts' });
+        const link = screen.getByRole('link', { name: /CPTSD — Thoughts/ });
         expect(link).toHaveAttribute('href', '/writing/cptsd');
+        expect(
+            screen.getByRole('heading', { name: 'CPTSD — Thoughts' }),
+        ).toBeInTheDocument();
         expect(screen.getByText('A living document.')).toBeInTheDocument();
     });
 
     it('shows an empty state when there are no articles', async () => {
-        listPublishedArticles.mockResolvedValue([]);
+        listRecentPublishedArticles.mockResolvedValue([]);
         const { default: Writing } = await import('../page');
         render(await Writing());
         expect(screen.getByText('No notes yet.')).toBeInTheDocument();

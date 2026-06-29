@@ -23,12 +23,14 @@ describe('Projects page static checks', () => {
         expect(src).not.toContain('whitespace-nowrap');
     });
 
-    it('RepoCard handles overflow with min-w-0/truncate and clamps the description', () => {
+    it('Card handles overflow with min-w-0/truncate and clamps the description', () => {
+        // RepoCard now delegates its presentation to the generic Card
+        // component, so the overflow-handling classes live there.
         const filePath = path.resolve(
             process.cwd(),
             'src',
             'components',
-            'RepoCard.tsx',
+            'Card.tsx',
         );
         const src = readFileSync(filePath, 'utf8');
         expect(src).toContain('min-w-0');
