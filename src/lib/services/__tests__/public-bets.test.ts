@@ -90,11 +90,17 @@ const MONEY_BET_KEYS = ['stake', 'payout', 'notes', 'book'];
 const MONEY_METRIC_KEYS = ['staked', 'profit'];
 
 beforeEach(() => {
+    // The service short-circuits to empty/null unless the MCP env is present
+    // (`mcpConfigured()`). Stub it so these tests are environment-independent —
+    // CI has no MCP_* vars, which otherwise masks the mocked happy path.
+    vi.stubEnv('MCP_API_KEY', 'test-key');
+    vi.stubEnv('MCP_BASE_URL', 'https://mcp.test');
     listBets.mockReset();
     getAnalytics.mockReset();
 });
 
 afterEach(() => {
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
 });
 
