@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="300" viewBox="0 0 700 300" role="img" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>Two players check out</title>
+  <desc>Nine effort bars stay above the expected bar while two collapse near zero. The straight average now dips just below the bar, and the weakest-link mean falls far further still.</desc>
+  <text x="120" y="30" font-size="15" font-weight="500" fill="#2C2C2A">Two players check out</text>
+
+  <line x1="120" y1="93.9" x2="500" y2="93.9" stroke="#B4B2A9" stroke-width="1" stroke-dasharray="2 4"/>
+  <text x="112" y="97" font-size="12" fill="#5F5E5A" text-anchor="end">Expected bar (1.0)</text>
+
+  <rect x="120.0" y="79.2" width="29.1" height="160.8" rx="3" fill="#1D9E75" opacity="0.85"/>
+  <rect x="155.1" y="79.2" width="29.1" height="160.8" rx="3" fill="#1D9E75" opacity="0.85"/>
+  <rect x="190.2" y="79.2" width="29.1" height="160.8" rx="3" fill="#1D9E75" opacity="0.85"/>
+  <rect x="225.3" y="79.2" width="29.1" height="160.8" rx="3" fill="#1D9E75" opacity="0.85"/>
+  <rect x="260.4" y="79.2" width="29.1" height="160.8" rx="3" fill="#1D9E75" opacity="0.85"/>
+  <rect x="295.5" y="79.2" width="29.1" height="160.8" rx="3" fill="#1D9E75" opacity="0.85"/>
+  <rect x="330.5" y="79.2" width="29.1" height="160.8" rx="3" fill="#1D9E75" opacity="0.85"/>
+  <rect x="365.6" y="79.2" width="29.1" height="160.8" rx="3" fill="#1D9E75" opacity="0.85"/>
+  <rect x="400.7" y="79.2" width="29.1" height="160.8" rx="3" fill="#1D9E75" opacity="0.85"/>
+  <rect x="435.8" y="218.1" width="29.1" height="21.9" rx="3" fill="#D85A30" opacity="0.9"/>
+  <rect x="470.9" y="218.1" width="29.1" height="21.9" rx="3" fill="#D85A30" opacity="0.9"/>
+
+  <line x1="120" y1="240" x2="500" y2="240" stroke="#888780" stroke-width="1"/>
+
+  <line x1="120" y1="104.5" x2="500" y2="104.5" stroke="#888780" stroke-width="2" stroke-dasharray="6 4"/>
+  <line x1="120" y1="165.3" x2="500" y2="165.3" stroke="#534AB7" stroke-width="2"/>
+
+  <text x="516" y="102" font-size="12" fill="#5F5E5A">Average 0.93</text>
+  <text x="516" y="169" font-size="12" fill="#534AB7">Weakest-link 0.51</text>
+  <text x="467" y="205" font-size="12" fill="#993C1D" text-anchor="middle">two quit</text>
+
+  <text x="120" y="278" font-size="12" fill="#5F5E5A">A second player goes. The average finally dips under the bar; the weakest-link mean craters.</text>
+</svg>

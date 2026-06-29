@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="300" viewBox="0 0 700 300" role="img" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>What xE measures: actual effort against the moving bar (dark)</title>
+  <desc>Across a match, the expected-effort line bends with the game state while the actual-effort line runs above it early, then drops below it once the team is in control. The gap above the bar is shaded teal as over-expected, the gap below is shaded coral as the deficit xE flags.</desc>
+  <text x="60" y="30" font-size="15" font-weight="500" fill="#E8E6DD">What xE measures: the gap to the bar</text>
+
+  <polygon points="60,77.4 143.3,74.2 226.7,83.8 310,87.0 330.8,97 310,95.0 226.7,98.2 143.3,96.6 60,99.8" fill="#1D9E75" opacity="0.30"/>
+  <polygon points="330.8,97 393.3,103.0 476.7,99.8 560,109.4 560,119.0 476.7,147.8 393.3,127.0 330.8,97" fill="#E0784A" opacity="0.30"/>
+
+  <polyline points="60,99.8 143.3,96.6 226.7,98.2 310,95.0 393.3,103.0 476.7,99.8 560,109.4" fill="none" stroke="#B4B2A9" stroke-width="2" stroke-dasharray="6 4"/>
+  <polyline points="60,77.4 143.3,74.2 226.7,83.8 310,87.0 393.3,127.0 476.7,147.8 560,119.0" fill="none" stroke="#E8E6DD" stroke-width="2.5"/>
+
+  <line x1="60" y1="215" x2="560" y2="215" stroke="#888780" stroke-width="1"/>
+  <text x="60" y="232" font-size="12" fill="#9C9A92" text-anchor="middle">0'</text>
+  <text x="310" y="232" font-size="12" fill="#9C9A92" text-anchor="middle">45'</text>
+  <text x="560" y="232" font-size="12" fill="#9C9A92" text-anchor="middle">90'</text>
+  <text x="52" y="60" font-size="12" fill="#888780" text-anchor="end">high</text>
+  <text x="52" y="212" font-size="12" fill="#888780" text-anchor="end">low</text>
+
+  <text x="150" y="66" font-size="12" fill="#5DCAA5" text-anchor="middle">over the bar</text>
+  <text x="455" y="116" font-size="12" fill="#F0997B" text-anchor="middle">under the bar</text>
+  <text x="455" y="130" font-size="12" fill="#F0997B" text-anchor="middle">(the deficit xE flags)</text>
+
+  <line x1="60" y1="251" x2="84" y2="251" stroke="#B4B2A9" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="90" y="255" font-size="12" fill="#9C9A92">Expected effort</text>
+  <line x1="210" y1="251" x2="234" y2="251" stroke="#E8E6DD" stroke-width="2.5"/>
+  <text x="240" y="255" font-size="12" fill="#9C9A92">Actual effort</text>
+
+  <text x="60" y="280" font-size="12" fill="#9C9A92">The bar moves with the game. xE is the gap between effort given and effort the moment asked for.</text>
+</svg>
