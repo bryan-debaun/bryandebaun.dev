@@ -50,9 +50,6 @@ next-env.d.ts
 # Lighthouse CI run artifacts (local/CI cache)
 /.lighthouseci/
 
-# contentlayer
-/.contentlayer
-
 # Local PR body files used for editing PRs locally
 .github/pr-bodies/
 

@@ -2,13 +2,21 @@ import { describe, it, expect } from 'vitest';
 import { generateRSS } from '../rss';
 
 describe('rss generation', () => {
-    it('does not include private items', () => {
-        const items = [
-            { slug: 'blog/h', title: 'Hello', private: false },
-            { slug: 'blog/x', title: 'Secret', private: true },
-        ];
-        const xml = generateRSS('https://example.com', items);
+    it('renders an item per entry with a title and link', () => {
+        const xml = generateRSS('https://example.com', [
+            { slug: 'philosophy/hello', title: 'Hello' },
+            { slug: 'philosophy/world', title: 'World' },
+        ]);
         expect(xml).toContain('<title>Hello</title>');
-        expect(xml).not.toContain('Secret');
+        expect(xml).toContain(
+            '<link>https://example.com/philosophy/hello</link>',
+        );
+        expect(xml).toContain('<title>World</title>');
+    });
+
+    it('produces a valid empty feed with no items', () => {
+        const xml = generateRSS('https://example.com', []);
+        expect(xml).toContain('<rss version="2.0">');
+        expect(xml).not.toContain('<item>');
     });
 });

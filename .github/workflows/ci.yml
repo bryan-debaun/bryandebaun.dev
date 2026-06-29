@@ -23,6 +23,4 @@ jobs:
       # suite excluded. Browser install lives in the a11y-visual workflow.
       - run: pnpm run build
       - run: pnpm test
-      - run: pnpm run run-content
-      - run: pnpm run test:content
       - run: pnpm run lint

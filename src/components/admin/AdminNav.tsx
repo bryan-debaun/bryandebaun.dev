@@ -2,7 +2,8 @@ import Link from 'next/link';
 
 /**
  * Small admin section navigation linking the admin sub-pages. Rendered at the
- * top of each admin page so an admin can move between Books, Bets, and Users.
+ * top of each admin page so an admin can move between Books, Articles, Bets, and
+ * Users.
  */
 export default function AdminNav() {
     const linkClass =
@@ -13,6 +14,11 @@ export default function AdminNav() {
                 <li>
                     <Link href="/admin" className={linkClass}>
                         Books
+                    </Link>
+                </li>
+                <li>
+                    <Link href="/admin/articles" className={linkClass}>
+                        Articles
                     </Link>
                 </li>
                 <li>

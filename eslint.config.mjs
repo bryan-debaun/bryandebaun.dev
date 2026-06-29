@@ -1,7 +1,6 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
-import * as mdx from "eslint-plugin-mdx";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -13,15 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    ".contentlayer/**",
     // Ignore generated package output (dist)
     "packages/*/dist/**",
   ]),
-  // MDX files: lint with eslint-plugin-mdx (only content folder)
-  {
-    ...mdx.configs.flat,
-    files: ["src/content/**/*.{md,mdx}"]
-  },
   // Allow CommonJS `require()` in scripts: they run with Node directly and using CJS is acceptable.
   {
     files: ["scripts/**/*.{ts,js,cjs,mjs}"],

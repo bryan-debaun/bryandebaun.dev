@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { allPhilosophies } from 'contentlayer/generated';
-import { publicOnly } from '@/lib/content';
+import { listPublishedArticles } from '@/lib/services/articles';
 
 /**
  * Base site URL. Mirrors the source used across the app (server-fetch, auth
@@ -23,23 +22,22 @@ const STATIC_PATHS = [
 /**
  * App Router sitemap. Next renders this `MetadataRoute.Sitemap` array to XML.
  *
- * Note: we build the array directly rather than reusing `generateSitemap`
- * (src/lib/sitemap.ts) because that helper returns a raw XML string, whereas
- * App Router expects a typed object array. We still mirror its privacy model by
- * filtering philosophy posts through the same `publicOnly` helper, so the
- * `private-example` note is excluded.
+ * Philosophy entries are sourced from the MCP Articles API and are inherently
+ * public-only (the API returns `published` articles for unauthenticated reads),
+ * so no `publicOnly` filtering is needed here anymore.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
         url: `${SITE_URL}${path}`,
     }));
 
-    const postEntries: MetadataRoute.Sitemap = publicOnly(allPhilosophies).map(
-        (post) => ({
-            url: `${SITE_URL}/${post.slug}`,
-            lastModified: post.date ? new Date(post.date) : undefined,
-        }),
-    );
+    const articles = await listPublishedArticles();
+    const articleEntries: MetadataRoute.Sitemap = articles.map((article) => ({
+        url: `${SITE_URL}/philosophy/${article.slug}`,
+        lastModified: article.updatedAt
+            ? new Date(article.updatedAt)
+            : undefined,
+    }));
 
-    return [...staticEntries, ...postEntries];
+    return [...staticEntries, ...articleEntries];
 }
