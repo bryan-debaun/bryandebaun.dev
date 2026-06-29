@@ -1,13 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     type Bet,
+    type BetLeg,
     type CreateBetRequest,
     BetMarket,
     BetSource,
 } from '@bryandebaun/mcp-client';
 import Select from '@/components/Select';
+
+/** A parlay leg as edited in the form (string-valued inputs + stable key). */
+interface LegInput {
+    id: number;
+    event: string;
+    selection: string;
+    oddsAmerican: string;
+    line: string;
+}
 
 type Props = {
     mode: 'create' | 'edit';
@@ -73,21 +83,98 @@ export default function BetForm({
     );
     const [notes, setNotes] = useState(initialValues?.notes ?? '');
 
+    const legIdRef = useRef(0);
+    const [legs, setLegs] = useState<LegInput[]>(() =>
+        Array.isArray(initialValues?.legs)
+            ? (initialValues?.legs as BetLeg[]).map((l) => ({
+                  id: legIdRef.current++,
+                  event: l.event ?? '',
+                  selection: l.selection ?? '',
+                  oddsAmerican:
+                      l.oddsAmerican != null ? String(l.oddsAmerican) : '',
+                  line: l.line != null ? String(l.line) : '',
+              }))
+            : [],
+    );
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const isAi = source === BetSource.AI_ASSISTED;
+    const isParlay = market === BetMarket.Parlay;
+
+    const addLeg = () =>
+        setLegs((prev) => [
+            ...prev,
+            {
+                id: legIdRef.current++,
+                event: '',
+                selection: '',
+                oddsAmerican: '',
+                line: '',
+            },
+        ]);
+    const removeLeg = (id: number) =>
+        setLegs((prev) => prev.filter((l) => l.id !== id));
+    const updateLeg = (id: number, key: keyof LegInput, value: string) =>
+        setLegs((prev) =>
+            prev.map((l) => (l.id === id ? { ...l, [key]: value } : l)),
+        );
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         const odds = numOrUndefined(oddsAmerican);
         const stakeNum = numOrUndefined(stake);
-        if (!sport.trim() || !event.trim() || !selection.trim()) {
-            setError('Sport, event, and selection are required.');
+
+        // Parse complete parlay legs (event + selection + valid odds).
+        const parsedLegs: BetLeg[] = legs
+            .map((l) => ({
+                event: l.event.trim(),
+                selection: l.selection.trim(),
+                oddsAmerican: numOrUndefined(l.oddsAmerican),
+                line: numOrUndefined(l.line),
+            }))
+            .filter(
+                (l) => l.event && l.selection && l.oddsAmerican !== undefined,
+            )
+            .map((l) => ({
+                event: l.event,
+                selection: l.selection,
+                oddsAmerican: l.oddsAmerican as number,
+                ...(l.line !== undefined ? { line: l.line } : {}),
+            }));
+
+        // For a parlay, derive event/selection from the legs when left blank so
+        // the user only has to fill the legs + combined odds + total stake.
+        const finalEvent =
+            isParlay && !event.trim() && parsedLegs.length
+                ? `${parsedLegs.length}-leg parlay`
+                : event.trim();
+        const finalSelection =
+            isParlay && !selection.trim() && parsedLegs.length
+                ? parsedLegs.map((l) => l.selection).join(' + ')
+                : selection.trim();
+
+        if (!sport.trim()) {
+            setError('Sport is required.');
+            return;
+        }
+        if (isParlay && parsedLegs.length < 2) {
+            setError(
+                'A parlay needs at least 2 complete legs (event, selection, odds).',
+            );
+            return;
+        }
+        if (!finalEvent || !finalSelection) {
+            setError('Event and selection are required.');
             return;
         }
         if (odds === undefined) {
-            setError('Valid American odds are required.');
+            setError(
+                isParlay
+                    ? 'Combined American odds are required.'
+                    : 'Valid American odds are required.',
+            );
             return;
         }
         if (stakeNum === undefined || stakeNum <= 0) {
@@ -100,15 +187,16 @@ export default function BetForm({
         try {
             const payload: CreateBetRequest = {
                 sport: sport.trim(),
-                event: event.trim(),
+                event: finalEvent,
                 market,
-                selection: selection.trim(),
+                selection: finalSelection,
                 oddsAmerican: odds,
                 stake: stakeNum,
                 source,
                 league: league.trim() || undefined,
-                line: numOrUndefined(line),
+                line: isParlay ? undefined : numOrUndefined(line),
                 book: book.trim() || undefined,
+                legs: isParlay && parsedLegs.length ? parsedLegs : undefined,
                 aiModel: isAi ? aiModel.trim() || undefined : undefined,
                 aiRationale: isAi ? aiRationale.trim() || undefined : undefined,
                 aiEstProb: isAi ? numOrUndefined(aiEstProb) : undefined,
@@ -274,29 +362,31 @@ export default function BetForm({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
-                        <div>
-                            <label
-                                htmlFor="bet-line"
-                                className="block text-sm font-medium"
-                            >
-                                Line
-                            </label>
-                            <input
-                                id="bet-line"
-                                type="number"
-                                step="any"
-                                className="mt-1 w-full form-input"
-                                value={line}
-                                onChange={(e) => setLine(e.target.value)}
-                            />
-                        </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {!isParlay ? (
+                            <div>
+                                <label
+                                    htmlFor="bet-line"
+                                    className="block text-sm font-medium"
+                                >
+                                    Line
+                                </label>
+                                <input
+                                    id="bet-line"
+                                    type="number"
+                                    step="any"
+                                    className="mt-1 w-full form-input"
+                                    value={line}
+                                    onChange={(e) => setLine(e.target.value)}
+                                />
+                            </div>
+                        ) : null}
                         <div>
                             <label
                                 htmlFor="bet-odds"
                                 className="block text-sm font-medium"
                             >
-                                Odds (US){' '}
+                                {isParlay ? 'Combined odds (US)' : 'Odds (US)'}{' '}
                                 <span
                                     className="text-red-500"
                                     aria-hidden="true"
@@ -313,7 +403,7 @@ export default function BetForm({
                                 onChange={(e) =>
                                     setOddsAmerican(e.target.value)
                                 }
-                                placeholder="-110"
+                                placeholder={isParlay ? '+650' : '-110'}
                                 required
                             />
                         </div>
@@ -322,7 +412,7 @@ export default function BetForm({
                                 htmlFor="bet-stake"
                                 className="block text-sm font-medium"
                             >
-                                Stake{' '}
+                                Stake ($){' '}
                                 <span
                                     className="text-red-500"
                                     aria-hidden="true"
@@ -338,10 +428,143 @@ export default function BetForm({
                                 className="mt-1 w-full form-input"
                                 value={stake}
                                 onChange={(e) => setStake(e.target.value)}
+                                placeholder="25.00"
                                 required
                             />
                         </div>
                     </div>
+
+                    {isParlay ? (
+                        <fieldset className="rounded-md border border-[var(--color-norwegian-300)] dark:border-[var(--color-norwegian-600)] p-3 space-y-3">
+                            <legend className="px-1 text-sm font-medium">
+                                Parlay legs
+                            </legend>
+                            <p className="text-xs text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300)]">
+                                Add each leg below. Put the combined odds and
+                                total stake in the fields above; event/selection
+                                auto-fill from the legs if left blank.
+                            </p>
+                            {legs.length === 0 ? (
+                                <p className="text-sm text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300)]">
+                                    No legs yet.
+                                </p>
+                            ) : null}
+                            {legs.map((leg, idx) => (
+                                <div
+                                    key={leg.id}
+                                    className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end"
+                                >
+                                    <div className="sm:col-span-4">
+                                        <label
+                                            htmlFor={`leg-event-${leg.id}`}
+                                            className="block text-xs font-medium"
+                                        >
+                                            Event
+                                        </label>
+                                        <input
+                                            id={`leg-event-${leg.id}`}
+                                            type="text"
+                                            className="mt-1 w-full form-input"
+                                            placeholder="Portugal vs Croatia"
+                                            value={leg.event}
+                                            onChange={(e) =>
+                                                updateLeg(
+                                                    leg.id,
+                                                    'event',
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                    <div className="sm:col-span-3">
+                                        <label
+                                            htmlFor={`leg-sel-${leg.id}`}
+                                            className="block text-xs font-medium"
+                                        >
+                                            Selection
+                                        </label>
+                                        <input
+                                            id={`leg-sel-${leg.id}`}
+                                            type="text"
+                                            className="mt-1 w-full form-input"
+                                            placeholder="Croatia ML"
+                                            value={leg.selection}
+                                            onChange={(e) =>
+                                                updateLeg(
+                                                    leg.id,
+                                                    'selection',
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                    <div className="sm:col-span-2">
+                                        <label
+                                            htmlFor={`leg-odds-${leg.id}`}
+                                            className="block text-xs font-medium"
+                                        >
+                                            Odds
+                                        </label>
+                                        <input
+                                            id={`leg-odds-${leg.id}`}
+                                            type="number"
+                                            step="1"
+                                            className="mt-1 w-full form-input"
+                                            placeholder="+370"
+                                            value={leg.oddsAmerican}
+                                            onChange={(e) =>
+                                                updateLeg(
+                                                    leg.id,
+                                                    'oddsAmerican',
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                    <div className="sm:col-span-2">
+                                        <label
+                                            htmlFor={`leg-line-${leg.id}`}
+                                            className="block text-xs font-medium"
+                                        >
+                                            Line
+                                        </label>
+                                        <input
+                                            id={`leg-line-${leg.id}`}
+                                            type="number"
+                                            step="any"
+                                            className="mt-1 w-full form-input"
+                                            placeholder="—"
+                                            value={leg.line}
+                                            onChange={(e) =>
+                                                updateLeg(
+                                                    leg.id,
+                                                    'line',
+                                                    e.target.value,
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                    <div className="sm:col-span-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => removeLeg(leg.id)}
+                                            aria-label={`Remove leg ${idx + 1}`}
+                                            className="btn w-full"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={addLeg}
+                                className="btn"
+                            >
+                                + Add leg
+                            </button>
+                        </fieldset>
+                    ) : null}
 
                     <div>
                         <label
