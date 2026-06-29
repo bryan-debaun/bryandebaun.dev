@@ -164,6 +164,14 @@ img.themed-img-dark {
   vertical-align: top;
 }
 
+/* Default alignment: the first column reads as row labels (left); value columns
+   are centered. Authors can still override per column with GFM alignment
+   (`:---:`), whose inline `text-align` wins over this rule. */
+.prose thead th:not(:first-child),
+.prose tbody td:not(:first-child) {
+  text-align: center;
+}
+
 .prose tbody tr:last-child td {
   border-bottom: 0;
 }
