@@ -113,8 +113,8 @@ describe('POST /api/admin/articles', () => {
         expect((res as Response).status).toBe(201);
         const json = await (res as Response).json();
         expect(json.slug).toBe('new-one');
-        expect(revalidatePath).toHaveBeenCalledWith('/philosophy');
-        expect(revalidatePath).toHaveBeenCalledWith('/philosophy/new-one');
+        expect(revalidatePath).toHaveBeenCalledWith('/writing');
+        expect(revalidatePath).toHaveBeenCalledWith('/writing/new-one');
     });
 
     it('surfaces a slug conflict as a 400 field error', async () => {

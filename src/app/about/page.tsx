@@ -46,6 +46,25 @@ export default function About() {
                 </Link>{' '}
                 page.
             </p>
+
+            <h3>Get in touch</h3>
+            <p>
+                Want to reach out? You can get in touch via the{' '}
+                <Link
+                    href="/contact"
+                    className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]"
+                >
+                    Contact
+                </Link>{' '}
+                page, or see my{' '}
+                <Link
+                    href="/resume"
+                    className="text-[var(--color-norwegian-700)] hover:underline dark:text-[var(--color-white)]"
+                >
+                    Resume
+                </Link>
+                .
+            </p>
         </div>
     );
 }
