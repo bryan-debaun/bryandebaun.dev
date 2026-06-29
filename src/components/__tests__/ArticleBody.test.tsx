@@ -72,9 +72,13 @@ describe('ArticleBody rendering', () => {
         expect(container.querySelector('script')).toBeNull();
     });
 
-    it('renders GFM tables via remark-gfm', () => {
+    it('renders GFM tables via remark-gfm, wrapped for horizontal scroll', () => {
         render(<ArticleBody body={'| a | b |\n| - | - |\n| 1 | 2 |'} />);
-        expect(screen.getByRole('table')).toBeInTheDocument();
+        const table = screen.getByRole('table');
+        expect(table).toBeInTheDocument();
+        // Wide tables must not overflow the page — the table is wrapped in a
+        // horizontally scrollable container.
+        expect(table.parentElement?.className).toContain('overflow-x-auto');
     });
 
     it('pairs a themed /articles SVG with its _dark sibling and CSS-swaps', () => {

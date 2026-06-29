@@ -136,6 +136,22 @@ function MarkdownImage({
 }
 
 /**
+ * Wrap GFM tables in a horizontally scrollable container so a wide table never
+ * overflows the page on small screens. The table itself is styled in
+ * `globals.css` (`.prose table`).
+ */
+function MarkdownTable({
+    node: _node,
+    ...props
+}: ComponentPropsWithoutRef<'table'> & { node?: unknown }) {
+    return (
+        <div className="overflow-x-auto">
+            <table {...props} />
+        </div>
+    );
+}
+
+/**
  * Render a DB-sourced Markdown article body as React.
  *
  * Security: bodies come from the database, so we render via `react-markdown`
@@ -150,7 +166,11 @@ export default function ArticleBody({ body }: { body: string }) {
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeSanitize]}
-                components={{ a: MarkdownAnchor, img: MarkdownImage }}
+                components={{
+                    a: MarkdownAnchor,
+                    img: MarkdownImage,
+                    table: MarkdownTable,
+                }}
             >
                 {content}
             </ReactMarkdown>

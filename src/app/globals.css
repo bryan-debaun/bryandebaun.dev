@@ -114,7 +114,7 @@ img {
   height: auto;
   display: block;
 }
-
+ 
 /* Themed article diagrams render BOTH a light and a dark <img> and swap by
    theme. The swap MUST live here (unlayered, class specificity) rather than via
    Tailwind `hidden`/`dark:*` utilities: those are layered, and under Tailwind v4
@@ -131,6 +131,59 @@ img.themed-img-dark {
 
 .dark img.themed-img-dark {
   display: block;
+}
+
+/* Markdown (GFM) tables inside article bodies. The admin/media data grids use
+   the dedicated <Table> component; this styles prose-authored tables only.
+   Written as unlayered, class-specificity rules so they win over Tailwind's
+   layered prose table defaults (and the bare browser defaults that were
+   leaving cells with no padding). A `table` wrapper in ArticleBody adds
+   horizontal scroll for wide tables. */
+.prose table {
+  width: auto;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.prose thead th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-norwegian-800);
+  background: var(--color-norwegian-50);
+  padding: 0.5rem 0.9rem;
+  border-bottom: 2px solid var(--color-norwegian-300);
+  white-space: nowrap;
+}
+
+.prose tbody td {
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid var(--color-norwegian-200);
+  vertical-align: top;
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.prose tbody tr:hover {
+  background: color-mix(in srgb, var(--color-norwegian-100) 55%, transparent);
+}
+
+.dark .prose thead th {
+  color: var(--color-norwegian-100);
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom-color: var(--color-norwegian-300-dark);
+}
+
+.dark .prose tbody td {
+  border-bottom-color: var(--color-norwegian-200-dark);
+}
+
+.dark .prose tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* Utility: allow a child container to full-bleed the viewport while
