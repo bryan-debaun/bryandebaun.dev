@@ -53,8 +53,8 @@ export default function Table<T>({
     });
 
     return (
-        <div className={className}>
-            <table className="min-w-full table-fixed">
+        <div className={`overflow-x-auto ${className ?? ''}`}>
+            <table className="min-w-full">
                 {caption ? (
                     <caption className="sr-only">{caption}</caption>
                 ) : null}

@@ -9,7 +9,13 @@ import {
     BetSource,
 } from '@bryandebaun/mcp-client';
 import Select from '@/components/Select';
-import { BOOK_OPTIONS, MARKET_OPTIONS, SPORT_OPTIONS } from '@/lib/bets';
+import {
+    BOOK_OPTIONS,
+    MARKET_OPTIONS,
+    SPORT_OPTIONS,
+    formatCurrency,
+    potentialReturn,
+} from '@/lib/bets';
 
 /** A parlay leg as edited in the form (string-valued inputs + stable key). */
 interface LegInput {
@@ -106,6 +112,12 @@ export default function BetForm({
             ? [{ value: book, label: book }, ...BOOK_OPTIONS]
             : BOOK_OPTIONS;
 
+    // Live, derived (never stored) payout — total return if the bet wins.
+    const payout = potentialReturn(
+        numOrUndefined(stake) ?? null,
+        numOrUndefined(oddsAmerican) ?? null,
+    );
+
     const addLeg = () =>
         setLegs((prev) => [
             ...prev,
@@ -130,6 +142,8 @@ export default function BetForm({
         const stakeNum = numOrUndefined(stake);
 
         // Parse complete parlay legs (event + selection + valid odds).
+        // Per-leg odds are optional (mcp-server #137) — same-game parlays don't
+        // expose them. A leg just needs event + selection.
         const parsedLegs: BetLeg[] = legs
             .map((l) => ({
                 event: l.event.trim(),
@@ -137,13 +151,13 @@ export default function BetForm({
                 oddsAmerican: numOrUndefined(l.oddsAmerican),
                 line: numOrUndefined(l.line),
             }))
-            .filter(
-                (l) => l.event && l.selection && l.oddsAmerican !== undefined,
-            )
+            .filter((l) => l.event && l.selection)
             .map((l) => ({
                 event: l.event,
                 selection: l.selection,
-                oddsAmerican: l.oddsAmerican as number,
+                ...(l.oddsAmerican !== undefined
+                    ? { oddsAmerican: l.oddsAmerican }
+                    : {}),
                 ...(l.line !== undefined ? { line: l.line } : {}),
             }));
 
@@ -175,7 +189,7 @@ export default function BetForm({
         );
         if (isParlay && hasLegInput && parsedLegs.length < 2) {
             setError(
-                'For parlay legs, complete at least 2 (each needs event, selection, odds) or clear them.',
+                'For parlay legs, complete at least 2 (each needs event + selection; odds optional) or clear them.',
             );
             return;
         }
@@ -395,7 +409,11 @@ export default function BetForm({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div
+                        className={`grid grid-cols-1 gap-3 items-end ${
+                            isParlay ? 'sm:grid-cols-2' : 'sm:grid-cols-3'
+                        }`}
+                    >
                         {!isParlay ? (
                             <div>
                                 <label
@@ -467,18 +485,32 @@ export default function BetForm({
                         </div>
                     </div>
 
+                    {payout !== null ? (
+                        <p className="text-sm text-[var(--color-norwegian-700)] dark:text-[var(--color-norwegian-200)]">
+                            {isParlay ? 'Parlay payout' : 'Potential payout'}:{' '}
+                            <strong>{formatCurrency(payout)}</strong>{' '}
+                            <span className="text-[var(--color-norwegian-500)]">
+                                (to win{' '}
+                                {formatCurrency(
+                                    payout - (numOrUndefined(stake) ?? 0),
+                                )}
+                                )
+                            </span>
+                        </p>
+                    ) : null}
+
                     {isParlay ? (
                         <fieldset className="rounded-md border border-[var(--color-norwegian-300)] dark:border-[var(--color-norwegian-600)] p-3 space-y-3">
                             <legend className="px-1 text-sm font-medium">
                                 Parlay legs
                             </legend>
                             <p className="text-xs text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300)]">
-                                Legs are optional — same-game parlays often
-                                don&apos;t show per-leg odds. If your book lists
-                                each price, add 2+ legs; otherwise just set the
-                                combined odds + total stake above and note the
-                                selections. Per-leg Line is only for
-                                totals/spreads (e.g. Over 2.5 → 2.5).
+                                Add 2+ legs (event + selection required;
+                                per-leg <strong>odds optional</strong> — leave
+                                blank for same-game parlays that don&apos;t show
+                                them). Combined odds + total stake go above.
+                                Per-leg Line is only for totals/spreads (e.g.
+                                Over 2.5 → 2.5).
                             </p>
                             {legs.length === 0 ? (
                                 <p className="text-sm text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300)]">

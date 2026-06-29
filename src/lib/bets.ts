@@ -105,6 +105,29 @@ export function americanToDecimal(
 }
 
 /**
+ * Total payout (stake + profit) if the bet wins, derived from stake + American
+ * odds — e.g. $10 at +180 → $28.00. Returns `null` for invalid input. This is
+ * computed for display, never stored (the DB `payout` is the *actual* settled
+ * amount).
+ */
+export function potentialReturn(
+    stake: number | null | undefined,
+    oddsAmerican: number | null | undefined,
+): number | null {
+    const dec = americanToDecimal(oddsAmerican);
+    if (
+        dec === null ||
+        stake === null ||
+        stake === undefined ||
+        Number.isNaN(stake) ||
+        stake <= 0
+    ) {
+        return null;
+    }
+    return stake * dec;
+}
+
+/**
  * Closing-line value (CLV) as a percentage: how much better/worse the odds you
  * took were versus the closing odds, expressed as the percentage change in
  * decimal payout. Positive means you beat the close (good).
@@ -202,15 +225,19 @@ export function parseBetLegs(legs: unknown): BetLeg[] {
     for (const raw of legs) {
         if (raw === null || typeof raw !== 'object') continue;
         const leg = raw as Record<string, unknown>;
+        // event + selection are required; per-leg odds are optional — same-game
+        // parlays often don't expose individual leg prices (see #137).
         if (
             typeof leg.event === 'string' &&
-            typeof leg.selection === 'string' &&
-            typeof leg.oddsAmerican === 'number'
+            typeof leg.selection === 'string'
         ) {
             result.push({
                 event: leg.event,
                 selection: leg.selection,
-                oddsAmerican: leg.oddsAmerican,
+                oddsAmerican:
+                    typeof leg.oddsAmerican === 'number'
+                        ? leg.oddsAmerican
+                        : undefined,
                 line:
                     typeof leg.line === 'number' ? leg.line : undefined,
             });

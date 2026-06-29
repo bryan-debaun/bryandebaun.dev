@@ -24,6 +24,7 @@ import {
     formatClvPercent,
     formatCurrency,
     marketLabel,
+    potentialReturn,
 } from '@/lib/bets';
 
 const SETTLE_OPTIONS: SettleBetRequest['status'][] = [
@@ -188,12 +189,15 @@ export default function BetsAdmin(_props: Props) {
             {
                 id: 'event',
                 header: 'Event',
-                meta: {
-                    headerClassName: 'text-left',
-                    cellClassName: 'text-left whitespace-normal max-w-[14rem]',
+                meta: { headerClassName: 'text-left', cellClassName: 'text-left' },
+                cell: (info: CellContext<Bet, unknown>) => {
+                    const v = info.row.original.event;
+                    return (
+                        <span className="block max-w-[12rem] truncate" title={v}>
+                            {v}
+                        </span>
+                    );
                 },
-                cell: (info: CellContext<Bet, unknown>) =>
-                    info.row.original.event,
             },
             {
                 id: 'market',
@@ -204,15 +208,18 @@ export default function BetsAdmin(_props: Props) {
             {
                 id: 'selection',
                 header: 'Selection',
-                meta: {
-                    headerClassName: 'text-left',
-                    cellClassName: 'text-left whitespace-normal max-w-[12rem]',
-                },
+                meta: { headerClassName: 'text-left', cellClassName: 'text-left' },
                 cell: (info: CellContext<Bet, unknown>) => {
                     const b = info.row.original;
-                    return b.line != null
-                        ? `${b.selection} (${b.line > 0 ? '+' : ''}${b.line})`
-                        : b.selection;
+                    const v =
+                        b.line != null
+                            ? `${b.selection} (${b.line > 0 ? '+' : ''}${b.line})`
+                            : b.selection;
+                    return (
+                        <span className="block max-w-[18rem] truncate" title={v}>
+                            {v}
+                        </span>
+                    );
                 },
             },
             {
@@ -244,8 +251,23 @@ export default function BetsAdmin(_props: Props) {
             {
                 id: 'payout',
                 header: 'Payout',
-                cell: (info: CellContext<Bet, unknown>) =>
-                    formatCurrency(info.row.original.payout),
+                cell: (info: CellContext<Bet, unknown>) => {
+                    const bet = info.row.original;
+                    // Settled bets show the actual payout; pending bets show the
+                    // estimated return (derived from stake + odds), marked with ~.
+                    if (bet.payout != null) return formatCurrency(bet.payout);
+                    const est = potentialReturn(bet.stake, bet.oddsAmerican);
+                    return est != null ? (
+                        <span
+                            className="italic text-[var(--color-norwegian-500)]"
+                            title="Estimated payout if this bet wins"
+                        >
+                            ~{formatCurrency(est)}
+                        </span>
+                    ) : (
+                        '—'
+                    );
+                },
             },
             {
                 id: 'clv',
