@@ -1,7 +1,12 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import BooksTable from '@/components/BooksTable';
+import PublicBets from '@/components/PublicBets';
 import Tabs from '@/components/Tabs';
+import {
+    getPublicBetAnalytics,
+    listPublicBets,
+} from '@/lib/services/public-bets';
 
 export const metadata: Metadata = {
     title: 'Media — Bryan DeBaun',
@@ -25,6 +30,11 @@ export default async function Page() {
         m.listBooks(),
     );
 
+    const [bets, betAnalytics] = await Promise.all([
+        listPublicBets(),
+        getPublicBetAnalytics(),
+    ]);
+
     const hasBooks = Boolean(books && books.length > 0);
 
     const allTabs: MediaTab[] = [
@@ -38,6 +48,11 @@ export default async function Page() {
                     No books to show just yet — check back soon.
                 </p>
             ),
+        },
+        {
+            id: 'bets',
+            label: 'Bets',
+            panel: <PublicBets bets={bets} analytics={betAnalytics} />,
         },
         {
             id: 'movies',
@@ -75,10 +90,9 @@ export default async function Page() {
         },
     ];
 
-    // Only render tabs that have content; empty "Coming soon" tabs stay hidden.
-    const tabs = allTabs
-        .filter((t) => !t.comingSoon)
-        .map(({ comingSoon: _comingSoon, ...t }) => t);
+    // Show all media-type tabs (Books + the "Coming soon" placeholders) so the
+    // planned categories are visible.
+    const tabs = allTabs.map(({ comingSoon: _comingSoon, ...t }) => t);
 
     return (
         <main className="p-6">
