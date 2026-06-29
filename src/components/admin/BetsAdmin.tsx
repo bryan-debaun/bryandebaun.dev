@@ -24,6 +24,7 @@ import {
     formatClvPercent,
     formatCurrency,
     marketLabel,
+    potentialReturn,
 } from '@/lib/bets';
 
 const SETTLE_OPTIONS: SettleBetRequest['status'][] = [
@@ -244,8 +245,23 @@ export default function BetsAdmin(_props: Props) {
             {
                 id: 'payout',
                 header: 'Payout',
-                cell: (info: CellContext<Bet, unknown>) =>
-                    formatCurrency(info.row.original.payout),
+                cell: (info: CellContext<Bet, unknown>) => {
+                    const bet = info.row.original;
+                    // Settled bets show the actual payout; pending bets show the
+                    // estimated return (derived from stake + odds), marked with ~.
+                    if (bet.payout != null) return formatCurrency(bet.payout);
+                    const est = potentialReturn(bet.stake, bet.oddsAmerican);
+                    return est != null ? (
+                        <span
+                            className="italic text-[var(--color-norwegian-500)]"
+                            title="Estimated payout if this bet wins"
+                        >
+                            ~{formatCurrency(est)}
+                        </span>
+                    ) : (
+                        '—'
+                    );
+                },
             },
             {
                 id: 'clv',

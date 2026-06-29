@@ -9,7 +9,13 @@ import {
     BetSource,
 } from '@bryandebaun/mcp-client';
 import Select from '@/components/Select';
-import { BOOK_OPTIONS, MARKET_OPTIONS, SPORT_OPTIONS } from '@/lib/bets';
+import {
+    BOOK_OPTIONS,
+    MARKET_OPTIONS,
+    SPORT_OPTIONS,
+    formatCurrency,
+    potentialReturn,
+} from '@/lib/bets';
 
 /** A parlay leg as edited in the form (string-valued inputs + stable key). */
 interface LegInput {
@@ -105,6 +111,12 @@ export default function BetForm({
         book && !BOOK_OPTIONS.some((o) => o.value === book)
             ? [{ value: book, label: book }, ...BOOK_OPTIONS]
             : BOOK_OPTIONS;
+
+    // Live, derived (never stored) payout — total return if the bet wins.
+    const payout = potentialReturn(
+        numOrUndefined(stake) ?? null,
+        numOrUndefined(oddsAmerican) ?? null,
+    );
 
     const addLeg = () =>
         setLegs((prev) => [
@@ -466,6 +478,20 @@ export default function BetForm({
                             />
                         </div>
                     </div>
+
+                    {payout !== null ? (
+                        <p className="text-sm text-[var(--color-norwegian-700)] dark:text-[var(--color-norwegian-200)]">
+                            {isParlay ? 'Parlay payout' : 'Potential payout'}:{' '}
+                            <strong>{formatCurrency(payout)}</strong>{' '}
+                            <span className="text-[var(--color-norwegian-500)]">
+                                (to win{' '}
+                                {formatCurrency(
+                                    payout - (numOrUndefined(stake) ?? 0),
+                                )}
+                                )
+                            </span>
+                        </p>
+                    ) : null}
 
                     {isParlay ? (
                         <fieldset className="rounded-md border border-[var(--color-norwegian-300)] dark:border-[var(--color-norwegian-600)] p-3 space-y-3">

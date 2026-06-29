@@ -105,6 +105,29 @@ export function americanToDecimal(
 }
 
 /**
+ * Total payout (stake + profit) if the bet wins, derived from stake + American
+ * odds — e.g. $10 at +180 → $28.00. Returns `null` for invalid input. This is
+ * computed for display, never stored (the DB `payout` is the *actual* settled
+ * amount).
+ */
+export function potentialReturn(
+    stake: number | null | undefined,
+    oddsAmerican: number | null | undefined,
+): number | null {
+    const dec = americanToDecimal(oddsAmerican);
+    if (
+        dec === null ||
+        stake === null ||
+        stake === undefined ||
+        Number.isNaN(stake) ||
+        stake <= 0
+    ) {
+        return null;
+    }
+    return stake * dec;
+}
+
+/**
  * Closing-line value (CLV) as a percentage: how much better/worse the odds you
  * took were versus the closing odds, expressed as the percentage change in
  * decimal payout. Positive means you beat the close (good).
