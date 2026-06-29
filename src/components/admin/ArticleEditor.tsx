@@ -49,6 +49,55 @@ function altFromFilename(filename: string): string {
     return noExt.replace(/[-_]+/g, ' ').trim();
 }
 
+/** Split a filename into its lower-cased extension and the basename sans it. */
+function splitName(filename: string): { base: string; ext: string } {
+    const name = filename.split(/[\\/]/).pop() ?? filename;
+    const dot = name.lastIndexOf('.');
+    if (dot <= 0) return { base: name, ext: '' };
+    return { base: name.slice(0, dot), ext: name.slice(dot + 1).toLowerCase() };
+}
+
+type ThemedPair = { light: File; dark: File };
+
+/**
+ * Partition selected files into themed light/dark pairs and unpaired singles.
+ *
+ * A pair is a `_dark`-suffixed file (case-insensitive on the suffix) matched to
+ * a sibling with the SAME basename sans `_dark` and the SAME extension — e.g.
+ * `foo.svg` + `foo_dark.svg`. A `_dark` file with no light sibling falls back
+ * to being uploaded as a single image.
+ */
+function partitionPairs(files: File[]): {
+    pairs: ThemedPair[];
+    singles: File[];
+} {
+    const byKey = new Map<string, File>();
+    for (const file of files) {
+        const { base, ext } = splitName(file.name);
+        byKey.set(`${base.toLowerCase()}.${ext}`, file);
+    }
+
+    const pairs: ThemedPair[] = [];
+    const used = new Set<File>();
+
+    for (const file of files) {
+        if (used.has(file)) continue;
+        const { base, ext } = splitName(file.name);
+        if (!/_dark$/iu.test(base)) continue;
+
+        const lightBase = base.slice(0, base.length - '_dark'.length);
+        const light = byKey.get(`${lightBase.toLowerCase()}.${ext}`);
+        if (light && light !== file && !used.has(light)) {
+            pairs.push({ light, dark: file });
+            used.add(light);
+            used.add(file);
+        }
+    }
+
+    const singles = files.filter((f) => !used.has(f));
+    return { pairs, singles };
+}
+
 /**
  * Shared admin article editor: form fields + a Markdown body editor with a live
  * preview rendered via the SAME {@link ArticleBody} component the public page
@@ -161,21 +210,71 @@ export default function ArticleEditor({ mode, article }: Props) {
             return;
         }
 
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/admin/upload', {
+            method: 'POST',
+            body: formData,
+        });
+        const json = (await res.json()) as { url?: string; error?: string };
+        if (!res.ok || !json.url) {
+            setUploadError(json.error ?? 'Failed to upload image.');
+            return;
+        }
+        insertImageMarkdown(json.url, altFromFilename(file.name));
+    }
+
+    /**
+     * Upload a themed light/dark pair in one request. On success, insert a
+     * single `#themed`-marked image (alt from the LIGHT filename) so the
+     * renderer derives + CSS-swaps the dark sibling.
+     */
+    async function uploadPair(light: File, dark: File) {
+        if (
+            !ACCEPTED_IMAGE_TYPES.has(light.type) ||
+            !ACCEPTED_IMAGE_TYPES.has(dark.type)
+        ) {
+            setUploadError(
+                'Unsupported image type. Use PNG, JPEG, WebP, GIF, AVIF, or SVG.',
+            );
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', light);
+        formData.append('dark', dark);
+        const res = await fetch('/api/admin/upload', {
+            method: 'POST',
+            body: formData,
+        });
+        const json = (await res.json()) as { url?: string; error?: string };
+        if (!res.ok || !json.url) {
+            setUploadError(json.error ?? 'Failed to upload image.');
+            return;
+        }
+        insertImageMarkdown(`${json.url}#themed`, altFromFilename(light.name));
+    }
+
+    /**
+     * Process a selection sequentially: detected light/dark pairs upload as one
+     * themed image each, remaining images as singles. Sequential awaits keep
+     * the inserted snippets in selection order at the caret.
+     */
+    async function processFiles(files: File[]) {
+        const images = files.filter((f) => f.type.startsWith('image/'));
+        if (images.length === 0) return;
+
+        const { pairs, singles } = partitionPairs(images);
+
         setUploadError(null);
         setIsUploading(true);
         try {
-            const formData = new FormData();
-            formData.append('file', file);
-            const res = await fetch('/api/admin/upload', {
-                method: 'POST',
-                body: formData,
-            });
-            const json = (await res.json()) as { url?: string; error?: string };
-            if (!res.ok || !json.url) {
-                setUploadError(json.error ?? 'Failed to upload image.');
-                return;
+            for (const pair of pairs) {
+                await uploadPair(pair.light, pair.dark);
             }
-            insertImageMarkdown(json.url, altFromFilename(file.name));
+            for (const single of singles) {
+                await uploadImage(single);
+            }
         } catch {
             setUploadError('Failed to upload image. Please try again.');
         } finally {
@@ -184,19 +283,19 @@ export default function ArticleEditor({ mode, article }: Props) {
     }
 
     function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const file = e.target.files?.[0];
-        // Reset so selecting the same file again re-triggers change.
+        const files = Array.from(e.target.files ?? []);
+        // Reset so selecting the same file(s) again re-triggers change.
         e.target.value = '';
-        if (file) void uploadImage(file);
+        if (files.length > 0) void processFiles(files);
     }
 
     function handleBodyDrop(e: React.DragEvent<HTMLTextAreaElement>) {
-        const file = Array.from(e.dataTransfer.files).find((f) =>
+        const files = Array.from(e.dataTransfer.files).filter((f) =>
             f.type.startsWith('image/'),
         );
-        if (file) {
+        if (files.length > 0) {
             e.preventDefault();
-            void uploadImage(file);
+            void processFiles(files);
         }
     }
 
@@ -420,6 +519,7 @@ export default function ArticleEditor({ mode, article }: Props) {
                                 ref={fileInputRef}
                                 type="file"
                                 accept="image/*"
+                                multiple
                                 className="hidden"
                                 onChange={handleFileChange}
                             />
@@ -438,7 +538,10 @@ export default function ArticleEditor({ mode, article }: Props) {
                         />
                         <p className="mt-1 text-xs text-[var(--color-norwegian-500)] dark:text-[var(--color-norwegian-400)]">
                             Upload, drag-and-drop, or paste an image to insert
-                            it at the cursor.
+                            it at the cursor. Select or drop a light + dark pair
+                            (e.g. <code>foo.svg</code> and{' '}
+                            <code>foo_dark.svg</code>) to insert one
+                            theme-swapping image.
                         </p>
                         {uploadError ? (
                             <p

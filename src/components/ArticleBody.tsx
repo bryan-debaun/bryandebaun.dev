@@ -59,13 +59,37 @@ function MarkdownAnchor({
 }
 
 /**
- * A themed article SVG is one served from `/articles/…*.svg` that ships with a
- * matching `…_dark.svg` sibling. We pair them automatically (no authoring
- * marker) and CSS-swap by theme, so an `<img>` — which can't inherit
- * `currentColor` — still tracks the site's manual light/dark toggle.
+ * Resolve a Markdown image `src` into a themed light/dark pair, or `null` when
+ * it should render as a single image.
+ *
+ * Two themed sources are recognised:
+ *  - An UPLOADED pair, flagged by a trailing `#themed` URL fragment. The editor
+ *    inserts `![alt](<lightUrl>#themed)` after uploading both variants; the
+ *    dark sibling URL is derived by inserting `_dark` before the extension.
+ *  - A COMMITTED diagram under `/articles/…*.svg` (the existing convention,
+ *    requiring no authoring marker), excluding sources that are already the
+ *    `…_dark.svg` variant.
+ *
+ * In both cases the dark URL is derived by inserting `_dark` immediately before
+ * the final extension (`…/uuid.svg` → `…/uuid_dark.svg`). We pair + CSS-swap by
+ * theme so an `<img>` — which can't inherit `currentColor` — still tracks the
+ * site's manual light/dark toggle. The `#themed` marker is stripped here and is
+ * NEVER present in a rendered `src`.
  */
-function isThemedArticleSvg(src: string): boolean {
-    return /^\/articles\/.+\.svg$/iu.test(src) && !/_dark\.svg$/iu.test(src);
+export function resolveThemedImage(
+    src: string,
+): { light: string; dark: string } | null {
+    const marked = /#themed$/iu.test(src);
+    const clean = src.replace(/#themed$/iu, '');
+
+    const isCommittedArticleSvg =
+        /^\/articles\/.+\.svg$/iu.test(clean) && !/_dark\.svg$/iu.test(clean);
+
+    if (!marked && !isCommittedArticleSvg) return null;
+
+    // Insert `_dark` before the final extension (generic over any `.ext`).
+    const dark = clean.replace(/(\.[a-z0-9]+)$/iu, '_dark$1');
+    return { light: clean, dark };
 }
 
 function MarkdownImage({
@@ -74,15 +98,15 @@ function MarkdownImage({
     title,
     ...rest
 }: ComponentPropsWithoutRef<'img'>) {
-    if (typeof src === 'string' && isThemedArticleSvg(src)) {
-        const darkSrc = src.replace(/\.svg$/iu, '_dark.svg');
+    const themed = typeof src === 'string' ? resolveThemedImage(src) : null;
+    if (themed) {
         // Both variants carry the SAME alt; `display:none` removes the hidden
         // one from the a11y tree, so exactly one alt is announced per theme.
         return (
             <>
                 {/* eslint-disable-next-line @next/next/no-img-element -- DB-authored content path; next/image needs known dimensions/loader we don't have here */}
                 <img
-                    src={src}
+                    src={themed.light}
                     alt={alt ?? ''}
                     title={title}
                     className="mx-auto block h-auto max-w-full dark:hidden"
@@ -90,7 +114,7 @@ function MarkdownImage({
                 />
                 {/* eslint-disable-next-line @next/next/no-img-element -- see above */}
                 <img
-                    src={darkSrc}
+                    src={themed.dark}
                     alt={alt ?? ''}
                     title={title}
                     className="mx-auto hidden h-auto max-w-full dark:block"

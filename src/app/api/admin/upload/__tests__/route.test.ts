@@ -21,24 +21,47 @@ const forbidden = new Response(JSON.stringify({ error: 'Forbidden' }), {
 
 /** Build a mocked service-role storage client and expose its spies. */
 function mockStorage(
-    uploadResult: { error: { message: string } | null } = { error: null },
+    uploadResult:
+        | { error: { message: string } | null }
+        | Array<{ error: { message: string } | null }> = { error: null },
 ) {
-    const upload = vi.fn().mockResolvedValue(uploadResult);
-    const getPublicUrl = vi.fn().mockReturnValue({
-        data: { publicUrl: 'https://storage.example.com/article-assets/key' },
+    const results = Array.isArray(uploadResult)
+        ? [...uploadResult]
+        : [uploadResult];
+    // Each call consumes the next queued result; the last result repeats so a
+    // single-arg caller behaves exactly as before.
+    const upload = vi.fn().mockImplementation(() => {
+        const next = results.length > 1 ? results.shift() : results[0];
+        return Promise.resolve(next ?? { error: null });
     });
-    const from = vi.fn().mockReturnValue({ upload, getPublicUrl });
+    const remove = vi.fn().mockResolvedValue({ error: null });
+    const getPublicUrl = vi.fn().mockImplementation((key: string) => ({
+        data: {
+            publicUrl: `https://storage.example.com/article-assets/${key}`,
+        },
+    }));
+    const from = vi.fn().mockReturnValue({ upload, remove, getPublicUrl });
     getAdminSupabaseMock.mockReturnValue({
         ok: true,
         client: { storage: { from } },
     });
-    return { upload, getPublicUrl, from };
+    return { upload, remove, getPublicUrl, from };
 }
 
 /** Build a NextRequest whose formData() yields the given file (or nothing). */
 function reqWithFile(file: File | null) {
     const formData = new FormData();
     if (file) formData.set('file', file);
+    return {
+        formData: vi.fn().mockResolvedValue(formData),
+    } as unknown as NextRequest;
+}
+
+/** Build a NextRequest carrying a light `file` plus a `dark` file (pair mode). */
+function reqWithPair(light: File, dark: File | null) {
+    const formData = new FormData();
+    formData.set('file', light);
+    if (dark) formData.set('dark', dark);
     return {
         formData: vi.fn().mockResolvedValue(formData),
     } as unknown as NextRequest;
@@ -108,7 +131,12 @@ describe('POST /api/admin/upload', () => {
         const res = await POST(reqWithFile(file));
         expect((res as Response).status).toBe(200);
         const json = await (res as Response).json();
-        expect(json.url).toBe('https://storage.example.com/article-assets/key');
+        expect(json.url).toMatch(
+            /^https:\/\/storage\.example\.com\/article-assets\/\d{4}\/[0-9a-f-]{36}\.jpg$/,
+        );
+        // Single mode never advertises a dark sibling.
+        expect(json.darkUrl).toBeUndefined();
+        expect(json.themed).toBeUndefined();
 
         expect(from).toHaveBeenCalledWith('article-assets');
         expect(upload).toHaveBeenCalledTimes(1);
@@ -131,5 +159,81 @@ describe('POST /api/admin/upload', () => {
         expect((res as Response).status).toBe(502);
         const json = await (res as Response).json();
         expect(json.error).toMatch(/article-assets/);
+    });
+
+    it('stores a themed pair under one uuid base and returns darkUrl + themed', async () => {
+        const { upload, remove } = mockStorage();
+        const { POST } = await import('../route');
+        const light = new File(['l'], 'foo.svg', { type: 'image/svg+xml' });
+        const dark = new File(['d'], 'foo_dark.svg', { type: 'image/svg+xml' });
+        const res = await POST(reqWithPair(light, dark));
+
+        expect((res as Response).status).toBe(200);
+        const json = await (res as Response).json();
+        expect(json.themed).toBe(true);
+        expect(json.url).toMatch(/\d{4}\/[0-9a-f-]{36}\.svg$/);
+        expect(json.darkUrl).toMatch(/\d{4}\/[0-9a-f-]{36}_dark\.svg$/);
+
+        expect(upload).toHaveBeenCalledTimes(2);
+        const lightKey = upload.mock.calls[0][0] as string;
+        const darkKey = upload.mock.calls[1][0] as string;
+        expect(lightKey).toMatch(/^\d{4}\/[0-9a-f-]{36}\.svg$/);
+        expect(darkKey).toMatch(/^\d{4}\/[0-9a-f-]{36}_dark\.svg$/);
+        // Same uuid base, dark key = light key with `_dark` before the ext.
+        expect(darkKey).toBe(lightKey.replace(/\.svg$/, '_dark.svg'));
+        expect(json.path).toBe(lightKey);
+        // Both uploaded → nothing to clean up.
+        expect(remove).not.toHaveBeenCalled();
+    });
+
+    it('rejects a pair whose light/dark MIME types differ (400, no upload)', async () => {
+        const { upload } = mockStorage();
+        const { POST } = await import('../route');
+        const light = new File(['l'], 'foo.svg', { type: 'image/svg+xml' });
+        const dark = new File(['d'], 'foo_dark.png', { type: 'image/png' });
+        const res = await POST(reqWithPair(light, dark));
+        expect((res as Response).status).toBe(400);
+        expect(upload).not.toHaveBeenCalled();
+    });
+
+    it('enforces size/type limits on the dark file too (400, no upload)', async () => {
+        const { upload } = mockStorage();
+        const { POST } = await import('../route');
+        const light = new File(['l'], 'foo.svg', { type: 'image/svg+xml' });
+        const bigDark = new File(
+            [new Uint8Array(5 * 1024 * 1024 + 1)],
+            'foo_dark.svg',
+            { type: 'image/svg+xml' },
+        );
+        const res = await POST(reqWithPair(light, bigDark));
+        expect((res as Response).status).toBe(400);
+        expect(upload).not.toHaveBeenCalled();
+    });
+
+    it('removes the orphaned light object when the dark upload fails (502)', async () => {
+        const { upload, remove } = mockStorage([
+            { error: null },
+            { error: { message: 'network blip' } },
+        ]);
+        const { POST } = await import('../route');
+        const light = new File(['l'], 'foo.svg', { type: 'image/svg+xml' });
+        const dark = new File(['d'], 'foo_dark.svg', { type: 'image/svg+xml' });
+        const res = await POST(reqWithPair(light, dark));
+
+        expect((res as Response).status).toBe(502);
+        expect(upload).toHaveBeenCalledTimes(2);
+        const lightKey = upload.mock.calls[0][0] as string;
+        // Best-effort cleanup of the half-pair.
+        expect(remove).toHaveBeenCalledWith([lightKey]);
+    });
+
+    it('does not touch storage for a pair request when not admin', async () => {
+        requireAdminMock.mockResolvedValueOnce(forbidden);
+        const { POST } = await import('../route');
+        const light = new File(['l'], 'foo.svg', { type: 'image/svg+xml' });
+        const dark = new File(['d'], 'foo_dark.svg', { type: 'image/svg+xml' });
+        const res = await POST(reqWithPair(light, dark));
+        expect((res as Response).status).toBe(403);
+        expect(getAdminSupabaseMock).not.toHaveBeenCalled();
     });
 });
