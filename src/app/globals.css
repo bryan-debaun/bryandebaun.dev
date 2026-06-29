@@ -175,10 +175,18 @@ small,
   font-size: var(--fs-small);
 }
 
+/* Default native-control rendering (legible <select> option popups, date
+   pickers, scrollbars). The pre-paint theme script sets html.dark/.light, which
+   override below so native UI follows the user's theme. */
+:root {
+  color-scheme: light;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: var(--color-norwegian-100);
     --foreground: var(--color-fg-dark);
+    color-scheme: dark;
   }
 }
 
@@ -186,12 +194,14 @@ small,
 html.dark {
   --background: var(--color-bg-dark);
   --foreground: var(--color-fg-dark);
+  color-scheme: dark;
 }
 
 /* Explicit light mode override so user choice wins over prefers-color-scheme */
 html.light {
   --background: var(--color-norwegian-100);
   --foreground: var(--foreground);
+  color-scheme: light;
 }
 
 /* Header and nav — accent Norwegian styling */
@@ -418,6 +428,8 @@ button,
 [role="button"],
 a,
 select,
+option,
+[role="option"],
 label[for],
 input[type="checkbox"],
 input[type="radio"],
@@ -770,6 +782,23 @@ html.dark .form-multiselect {
   background-color: rgba(255, 255, 255, 0.02);
   border-color: var(--color-norwegian-600);
   color: var(--tw-prose-invert-body);
+}
+
+/* Modern <select>: drop the native arrow and draw a themed chevron. Applies to
+   every select (including .form-input / .form-select selects) for consistency.
+   Option-popup legibility in dark mode comes from `color-scheme` (set above). */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23475569' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 1rem;
+  padding-right: 2rem;
+}
+
+html.dark select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23cbd5e1' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
 }
 
 html.dark .form-input::placeholder,
