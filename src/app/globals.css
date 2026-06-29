@@ -115,6 +115,24 @@ img {
   display: block;
 }
 
+/* Themed article diagrams render BOTH a light and a dark <img> and swap by
+   theme. The swap MUST live here (unlayered, class specificity) rather than via
+   Tailwind `hidden`/`dark:*` utilities: those are layered, and under Tailwind v4
+   cascade layers the unlayered `img { display: block }` rule above outranks
+   them — which would otherwise leave both variants visible. The light variant
+   keeps the global `display: block`; the dark variant is hidden until `.dark`. */
+img.themed-img-dark {
+  display: none;
+}
+
+.dark img.themed-img-light {
+  display: none;
+}
+
+.dark img.themed-img-dark {
+  display: block;
+}
+
 /* Utility: allow a child container to full-bleed the viewport while
    preserving site gutters. Use on pages that should use the entire width.
    Example: <div class="prose site-bleed max-w-none">...</div> */

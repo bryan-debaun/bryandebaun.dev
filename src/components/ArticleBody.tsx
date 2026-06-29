@@ -109,7 +109,7 @@ function MarkdownImage({
                     src={themed.light}
                     alt={alt ?? ''}
                     title={title}
-                    className="mx-auto block h-auto max-w-full dark:hidden"
+                    className="themed-img-light mx-auto h-auto max-w-full"
                     {...rest}
                 />
                 {/* eslint-disable-next-line @next/next/no-img-element -- see above */}
@@ -117,7 +117,7 @@ function MarkdownImage({
                     src={themed.dark}
                     alt={alt ?? ''}
                     title={title}
-                    className="mx-auto hidden h-auto max-w-full dark:block"
+                    className="themed-img-dark mx-auto h-auto max-w-full"
                     {...rest}
                 />
             </>
