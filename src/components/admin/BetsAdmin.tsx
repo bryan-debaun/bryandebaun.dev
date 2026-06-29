@@ -11,6 +11,7 @@ import {
     BetStatus,
 } from '@bryandebaun/mcp-client';
 import Table from '@/components/Table';
+import Select from '@/components/Select';
 import BetForm from '@/components/admin/BetForm';
 import BetAnalyticsPanel from '@/components/admin/BetAnalyticsPanel';
 import { useAdminBets } from '@/lib/hooks/useAdminBets';
@@ -322,92 +323,94 @@ export default function BetsAdmin(_props: Props) {
         <div>
             {/* Filters drive both analytics and the log. */}
             <div className="mb-6 flex flex-wrap items-end gap-3">
-                <div className="flex flex-col">
+                <div className="flex flex-col w-44">
                     <label htmlFor="filter-source" className="text-sm mb-1">
                         Source
                     </label>
-                    <select
+                    <Select
                         id="filter-source"
-                        className="form-input"
+                        ariaLabel="Source"
                         value={filters.source ?? ''}
-                        onChange={(e) => setFilter('source', e.target.value)}
-                    >
-                        <option value="">All</option>
-                        <option value={BetSource.INTUITION}>Intuition</option>
-                        <option value={BetSource.AI_ASSISTED}>
-                            AI-assisted
-                        </option>
-                    </select>
+                        onValueChange={(v) => setFilter('source', v)}
+                        options={[
+                            { value: '', label: 'All' },
+                            { value: BetSource.INTUITION, label: 'Intuition' },
+                            {
+                                value: BetSource.AI_ASSISTED,
+                                label: 'AI-assisted',
+                            },
+                        ]}
+                    />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col w-44">
                     <label htmlFor="filter-status" className="text-sm mb-1">
                         Status
                     </label>
-                    <select
+                    <Select
                         id="filter-status"
-                        className="form-input"
+                        ariaLabel="Status"
                         value={filters.status ?? ''}
-                        onChange={(e) => setFilter('status', e.target.value)}
-                    >
-                        <option value="">All</option>
-                        {Object.values(BetStatus).map((s) => (
-                            <option key={s} value={s}>
-                                {s}
-                            </option>
-                        ))}
-                    </select>
+                        onValueChange={(v) => setFilter('status', v)}
+                        options={[
+                            { value: '', label: 'All' },
+                            ...Object.values(BetStatus).map((s) => ({
+                                value: s,
+                                label: s,
+                            })),
+                        ]}
+                    />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col w-44">
                     <label htmlFor="filter-market" className="text-sm mb-1">
                         Market
                     </label>
-                    <select
+                    <Select
                         id="filter-market"
-                        className="form-input"
+                        ariaLabel="Market"
                         value={filters.market ?? ''}
-                        onChange={(e) => setFilter('market', e.target.value)}
-                    >
-                        <option value="">All</option>
-                        {Object.values(BetMarket).map((m) => (
-                            <option key={m} value={m}>
-                                {m}
-                            </option>
-                        ))}
-                    </select>
+                        onValueChange={(v) => setFilter('market', v)}
+                        options={[
+                            { value: '', label: 'All' },
+                            ...Object.values(BetMarket).map((m) => ({
+                                value: m,
+                                label: m,
+                            })),
+                        ]}
+                    />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col w-44">
                     <label htmlFor="filter-sport" className="text-sm mb-1">
                         Sport
                     </label>
                     <input
                         id="filter-sport"
                         type="text"
-                        className="form-input"
+                        className="form-input w-full"
                         placeholder="All"
                         value={filters.sport ?? ''}
                         onChange={(e) => setFilter('sport', e.target.value)}
                     />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col w-44">
                     <label htmlFor="filter-from" className="text-sm mb-1">
                         From
                     </label>
                     <input
                         id="filter-from"
                         type="date"
-                        className="form-input"
+                        className="form-input w-full"
                         value={filters.from ?? ''}
                         onChange={(e) => setFilter('from', e.target.value)}
                     />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col w-44">
                     <label htmlFor="filter-to" className="text-sm mb-1">
                         To
                     </label>
                     <input
                         id="filter-to"
                         type="date"
-                        className="form-input"
+                        className="form-input w-full"
                         value={filters.to ?? ''}
                         onChange={(e) => setFilter('to', e.target.value)}
                     />

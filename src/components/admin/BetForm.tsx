@@ -7,6 +7,7 @@ import {
     BetMarket,
     BetSource,
 } from '@bryandebaun/mcp-client';
+import Select from '@/components/Select';
 
 type Props = {
     mode: 'create' | 'edit';
@@ -235,20 +236,19 @@ export default function BetForm({
                             >
                                 Market
                             </label>
-                            <select
+                            <Select
                                 id="bet-market"
-                                className="mt-1 w-full form-input"
+                                ariaLabel="Market"
+                                className="mt-1 w-full"
                                 value={market}
-                                onChange={(e) =>
-                                    setMarket(e.target.value as BetMarket)
+                                onValueChange={(v) =>
+                                    setMarket(v as BetMarket)
                                 }
-                            >
-                                {MARKET_OPTIONS.map((m) => (
-                                    <option key={m.value} value={m.value}>
-                                        {m.label}
-                                    </option>
-                                ))}
-                            </select>
+                                options={MARKET_OPTIONS.map((m) => ({
+                                    value: m.value,
+                                    label: m.label,
+                                }))}
+                            />
                         </div>
                         <div>
                             <label
