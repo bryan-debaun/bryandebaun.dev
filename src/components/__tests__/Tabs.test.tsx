@@ -13,24 +13,21 @@ describe('Tabs component', () => {
         const tabA = screen.getByRole('tab', { name: 'A' });
         const tabB = screen.getByRole('tab', { name: 'B' });
 
-        // initial selection
+        // initial selection: A active (open folder tab), B/C inactive
         expect(tabA).toHaveAttribute('aria-selected', 'true');
+        expect(tabB).toHaveAttribute('aria-selected', 'false');
+        // active tab merges into the content box: bordered, no bottom border
         expect(tabA.className).toContain('border-b-0');
-        expect(tabA.className).toContain('rounded-b-none');
-        expect(tabA.className).toContain('shadow-sm');
-        expect(tabA.className).toContain('-mt-1');
-        expect(tabA.className).toContain('first:rounded-bl-none');
-        const tabC = screen.getByRole('tab', { name: 'C' });
-        expect(tabC.className).toContain('last:rounded-br-none');
-        expect(tabB.className).toContain('border');
-        expect(tabB.className).toContain('rounded-b-lg');
-        expect(tabB.className).toContain('shadow-sm');
+        expect(tabA.className).toContain('rounded-t-md');
+        // inactive tabs have no box (transparent border)
+        expect(tabB.className).toContain('border-transparent');
 
         // switch selection
         fireEvent.click(tabB);
         expect(tabB).toHaveAttribute('aria-selected', 'true');
+        expect(tabA).toHaveAttribute('aria-selected', 'false');
         expect(tabB.className).toContain('border-b-0');
-        expect(tabB.className).toContain('rounded-b-lg');
+        expect(tabA.className).toContain('border-transparent');
     });
 
     it('panel container has no border around content', () => {

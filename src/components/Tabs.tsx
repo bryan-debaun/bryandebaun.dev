@@ -42,34 +42,46 @@ export default function Tabs({
         }
     }
 
+    // Match the content panel's own border (e.g. BooksTable's box) so the active
+    // tab merges into it for an open-folder look, without adding a second box.
+    const borderColor =
+        'border-[var(--tw-prose-td-borders)] dark:border-[var(--tw-prose-invert-td-borders)]';
+
     return (
         <div>
             <div
                 role="tablist"
                 aria-orientation="horizontal"
-                className="flex mb-0 overflow-visible"
+                className="flex items-end gap-1"
             >
-                {tabs.map((t, i) => (
-                    <button
-                        key={t.id}
-                        id={`tab-${t.id}`}
-                        ref={(el) => {
-                            btnRefs.current[i] = el;
-                        }}
-                        role="tab"
-                        aria-selected={selected === i}
-                        aria-controls={`panel-${t.id}`}
-                        tabIndex={selected === i ? 0 : -1}
-                        className={`flex-1 text-center min-w-0 px-3 py-2 rounded-t-md rounded-b-lg first:rounded-l-lg last:rounded-r-lg first:rounded-bl-none last:rounded-br-none text-sm font-medium cursor-pointer transition-colors duration-150 border border-[var(--tw-prose-td-borders)] dark:border-[var(--tw-prose-invert-td-borders)] -ml-px first:ml-0 shadow-sm mb-[-6px] ${selected === i ? 'rounded-b-none border-b-0 z-30 -mt-1 shadow-md bg-white dark:bg-[var(--background)] text-[var(--color-norwegian-700)] dark:text-[var(--color-white)]' : 'rounded-b-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[var(--color-bg-dark)]'}`}
-                        onClick={() => setSelected(i)}
-                        onKeyDown={(e) => onKeyDown(e, i)}
-                    >
-                        {t.label}
-                    </button>
-                ))}
+                {tabs.map((t, i) => {
+                    const active = selected === i;
+                    return (
+                        <button
+                            key={t.id}
+                            id={`tab-${t.id}`}
+                            ref={(el) => {
+                                btnRefs.current[i] = el;
+                            }}
+                            role="tab"
+                            aria-selected={active}
+                            aria-controls={`panel-${t.id}`}
+                            tabIndex={active ? 0 : -1}
+                            className={`relative -mb-px rounded-t-md border px-4 py-2 text-sm font-medium cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fjord-600)] focus-visible:ring-inset ${
+                                active
+                                    ? `z-10 ${borderColor} border-b-0 bg-[var(--background)] text-[var(--color-norwegian-800)] dark:text-[var(--color-white)]`
+                                    : 'border-transparent text-[var(--color-norwegian-600)] dark:text-[var(--color-norwegian-300)] hover:bg-[var(--color-norwegian-100)] dark:hover:bg-white/5'
+                            }`}
+                            onClick={() => setSelected(i)}
+                            onKeyDown={(e) => onKeyDown(e, i)}
+                        >
+                            {t.label}
+                        </button>
+                    );
+                })}
             </div>
 
-            <div className="mt-0 p-4">
+            <div>
                 {tabs.map((t, i) => (
                     <div
                         key={t.id}
