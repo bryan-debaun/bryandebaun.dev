@@ -6,7 +6,6 @@ import {
     type Bet,
     type CreateBetRequest,
     type SettleBetRequest,
-    BetMarket,
     BetSource,
     BetStatus,
 } from '@bryandebaun/mcp-client';
@@ -17,11 +16,14 @@ import BetAnalyticsPanel from '@/components/admin/BetAnalyticsPanel';
 import { useAdminBets } from '@/lib/hooks/useAdminBets';
 import {
     type BetFilters,
+    MARKET_OPTIONS,
+    SPORT_OPTIONS,
     clvPercent,
     formatAmericanOdds,
     formatBetDate,
     formatClvPercent,
     formatCurrency,
+    marketLabel,
 } from '@/lib/bets';
 
 const SETTLE_OPTIONS: SettleBetRequest['status'][] = [
@@ -197,7 +199,7 @@ export default function BetsAdmin(_props: Props) {
                 id: 'market',
                 header: 'Market',
                 cell: (info: CellContext<Bet, unknown>) =>
-                    info.row.original.market,
+                    marketLabel(info.row.original.market),
             },
             {
                 id: 'selection',
@@ -371,10 +373,7 @@ export default function BetsAdmin(_props: Props) {
                         onValueChange={(v) => setFilter('market', v)}
                         options={[
                             { value: '', label: 'All' },
-                            ...Object.values(BetMarket).map((m) => ({
-                                value: m,
-                                label: m,
-                            })),
+                            ...MARKET_OPTIONS,
                         ]}
                     />
                 </div>
@@ -382,13 +381,12 @@ export default function BetsAdmin(_props: Props) {
                     <label htmlFor="filter-sport" className="text-sm mb-1">
                         Sport
                     </label>
-                    <input
+                    <Select
                         id="filter-sport"
-                        type="text"
-                        className="form-input w-full"
-                        placeholder="All"
+                        ariaLabel="Sport"
                         value={filters.sport ?? ''}
-                        onChange={(e) => setFilter('sport', e.target.value)}
+                        onValueChange={(v) => setFilter('sport', v)}
+                        options={[{ value: '', label: 'All' }, ...SPORT_OPTIONS]}
                     />
                 </div>
                 <div className="flex flex-col w-44">

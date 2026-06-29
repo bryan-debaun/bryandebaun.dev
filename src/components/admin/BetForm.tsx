@@ -9,6 +9,7 @@ import {
     BetSource,
 } from '@bryandebaun/mcp-client';
 import Select from '@/components/Select';
+import { MARKET_OPTIONS, SPORT_OPTIONS } from '@/lib/bets';
 
 /** A parlay leg as edited in the form (string-valued inputs + stable key). */
 interface LegInput {
@@ -25,14 +26,6 @@ type Props = {
     onSubmit: (data: CreateBetRequest) => Promise<void>;
     onCancel: () => void;
 };
-
-const MARKET_OPTIONS: { value: BetMarket; label: string }[] = [
-    { value: BetMarket.Moneyline, label: 'Moneyline' },
-    { value: BetMarket.Spread, label: 'Spread' },
-    { value: BetMarket.Total, label: 'Total' },
-    { value: BetMarket.Prop, label: 'Prop' },
-    { value: BetMarket.Parlay, label: 'Parlay' },
-];
 
 /** Parse a numeric input into a number, or undefined when blank/invalid. */
 function numOrUndefined(value: string): number | undefined {
@@ -102,6 +95,12 @@ export default function BetForm({
 
     const isAi = source === BetSource.AI_ASSISTED;
     const isParlay = market === BetMarket.Parlay;
+
+    // Keep an off-list sport (e.g. from an older bet) selectable when editing.
+    const sportOptions =
+        sport && !SPORT_OPTIONS.some((o) => o.value === sport)
+            ? [{ value: sport, label: sport }, ...SPORT_OPTIONS]
+            : SPORT_OPTIONS;
 
     const addLeg = () =>
         setLegs((prev) => [
@@ -270,13 +269,14 @@ export default function BetForm({
                                     *
                                 </span>
                             </label>
-                            <input
+                            <Select
                                 id="bet-sport"
-                                type="text"
-                                className="mt-1 w-full form-input"
+                                ariaLabel="Sport"
+                                className="mt-1"
+                                placeholder="Select sport"
                                 value={sport}
-                                onChange={(e) => setSport(e.target.value)}
-                                required
+                                onValueChange={setSport}
+                                options={sportOptions}
                             />
                         </div>
                         <div>
