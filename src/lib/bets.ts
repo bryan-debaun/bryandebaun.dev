@@ -1,11 +1,60 @@
-import type {
-    Bet,
-    BetLeg,
-    BetMetrics,
+import {
+    type Bet,
+    type BetLeg,
+    type BetMetrics,
     BetMarket,
-    BetSource,
-    BetStatus,
+    type BetSource,
+    type BetStatus,
 } from '@bryandebaun/mcp-client';
+
+/**
+ * Market options with display labels. The `BetMarket` enum values are lowercase
+ * (`moneyline`, `parlay`, …); these labels are the capitalized display form,
+ * shared by the form and the filters so they stay consistent.
+ */
+export const MARKET_OPTIONS: { value: BetMarket; label: string }[] = [
+    { value: BetMarket.Moneyline, label: 'Moneyline' },
+    { value: BetMarket.Spread, label: 'Spread' },
+    { value: BetMarket.Total, label: 'Total' },
+    { value: BetMarket.Prop, label: 'Prop' },
+    { value: BetMarket.Parlay, label: 'Parlay' },
+];
+
+const MARKET_LABELS = Object.fromEntries(
+    MARKET_OPTIONS.map((m) => [m.value, m.label]),
+) as Record<BetMarket, string>;
+
+/** Capitalized display label for a market value; falls back to the raw value. */
+export function marketLabel(
+    value: BetMarket | string | null | undefined,
+): string {
+    if (!value) return '—';
+    return MARKET_LABELS[value as BetMarket] ?? String(value);
+}
+
+/**
+ * Sports offered in the bet UI. `Bet.sport` is free-text in the DB, so this is a
+ * curated frontend list — add an entry here to support a new sport (no
+ * migration needed). Values are stored verbatim, so keep them stable.
+ */
+export const SPORT_OPTIONS: { value: string; label: string }[] = [
+    { value: 'Soccer', label: 'Soccer (Intl. Football)' },
+    { value: 'American Football', label: 'American Football' },
+];
+
+/**
+ * Sportsbooks offered in the bet UI. `Bet.book` is free-text in the DB (the
+ * server defaults it to "DraftKings"), so this is a curated frontend list — add
+ * an entry to support another book. The first entry is the form default.
+ */
+export const BOOK_OPTIONS: { value: string; label: string }[] = [
+    { value: 'DraftKings', label: 'DraftKings' },
+    { value: 'FanDuel', label: 'FanDuel' },
+    { value: 'BetMGM', label: 'BetMGM' },
+    { value: 'Caesars', label: 'Caesars' },
+    { value: 'ESPN BET', label: 'ESPN BET' },
+    { value: 'Fanatics', label: 'Fanatics' },
+];
 
 /**
  * Pure, side-effect-free formatting and derivation helpers for the admin Bets
