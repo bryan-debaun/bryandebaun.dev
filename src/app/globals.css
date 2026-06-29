@@ -143,7 +143,8 @@ img.themed-img-dark {
   width: auto;
   max-width: 100%;
   border-collapse: collapse;
-  margin: 1.5rem 0;
+  /* `auto` side margins center the content-width table in its column. */
+  margin: 1.5rem auto;
   font-size: 0.95rem;
   line-height: 1.45;
 }
