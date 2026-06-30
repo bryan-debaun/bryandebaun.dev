@@ -46,6 +46,10 @@ next-env.d.ts
 # generated MCP client artifacts (keep vendor/dist out of VCS)
 /packages/mcp-client/dist/*.js
 /packages/mcp-client/dist/*.d.ts
+# Transient OpenAPI spec re-downloaded by generate-mcp-client on every run
+# (intermediate fed to codegen — NOT a baseline; the committed client is). The
+# offline fallbacks (bad-mcp.swagger.json / bad-mcp.json) are intentionally kept.
+/artifacts/openapi/mcp-remote-spec.json
 
 # Lighthouse CI run artifacts (local/CI cache)
 /.lighthouseci/
