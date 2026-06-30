@@ -2,7 +2,7 @@
 
 Date: 2026-06-29
 
-Status: Proposed
+Status: Accepted (2026-06-29)
 
 ## Context
 
@@ -87,14 +87,22 @@ the email/password e2e suite**. Everything else is right-sized down.
 Adopt a **two-phase, additive** modernization that keeps every existing method
 working:
 
-- **Phase 1 — Social login (GitHub + Google) via Supabase OAuth.** Mature, GA,
-  no client bump. Add `signInWithOAuth` buttons on `/login` (and `/register`)
-  that redirect through the **existing** `/auth/callback`. **Recommended and
-  low-risk.**
-- **Phase 2 — Passkeys via Supabase-native experimental API**, **strictly
-  additive and behind the existing fallbacks**, gated by an env flag, and
-  shipped as its own `supabase-js ≥ 2.105.0` bump. Primarily to give the admin a
-  phishing-resistant factor — **never** the only way in.
+- **One combined effort, not phased across releases.** Social login and
+  passkeys ship together on a single feature branch (`feat/auth-modernization`)
+  to get maximum value from one setup pass. The **env flag** on passkeys is the
+  risk container: if the experimental API misbehaves mid-build, social login
+  still lands and passkeys toggle off — no separate later release needed.
+- **Social login (GitHub + Google) via Supabase OAuth.** Mature, GA, no client
+  bump. Add `signInWithOAuth` buttons on **both `/login` and `/register`**,
+  redirecting through the **existing** `/auth/callback`.
+- **Passkeys via Supabase-native experimental API** — **strictly additive and
+  behind the existing fallbacks**, gated by `NEXT_PUBLIC_ENABLE_PASSKEYS`, and
+  shipped with its own `supabase-js ≥ 2.105.0` bump (a discrete, reviewed commit
+  on the branch). **Offered to all users**, not admin-only — the code is
+  identical regardless of role, and the password/magic-link floor means a lost
+  passkey is never a lockout for anyone. Enrollment happens **post-sign-in**
+  (WebAuthn requires a session); passkey *sign-in* (`signInWithPasskey`) appears
+  on `/login` and `/register`.
 - **Keep email/password + magic-link permanently** as universal fallbacks and as
   the programmatic path for e2e. Nothing is removed.
 - **Identity-linking policy:** rely on Supabase's **automatic linking on
@@ -138,10 +146,9 @@ churns the API painfully, fall back to Option C (defer) — not B.
   the existing email/password identity and on both Google and GitHub (GitHub
   must have that address as a **verified** email). Signing in via any of them
   resolves to the **one** existing user — so `app_metadata.role: admin` is
-  preserved and admin access "just works" across methods. **Action item:**
-  confirm `brn.dbn@gmail.com` is a verified email on the GitHub account before
-  relying on GitHub linking; otherwise GitHub returns a different/again-verified
-  identity.
+  preserved and admin access "just works" across methods. **Confirmed
+  (2026-06-29):** `brn.dbn@gmail.com` is a verified email on the GitHub account,
+  so GitHub auto-links cleanly to the existing admin user.
 - **Security note:** auto-linking is only safe because Supabase refuses to link
   **unverified** emails (pre-account-takeover protection). The risk to avoid is a
   provider that returns an **unverified** email — Supabase won't auto-link it,
@@ -221,6 +228,11 @@ churns the API painfully, fall back to Option C (defer) — not B.
 
 ## Rollout / Rollback
 
+Both ship on the one `feat/auth-modernization` branch; the "phases" below are the
+**work order within that branch**, not separate releases. Social login is built
+and verified first (it can't fail), then the `supabase-js` bump and passkeys land
+behind the env flag.
+
 ### Phase 1 — Social login (GitHub + Google) — *low risk, do first*
 
 1. **Provider apps:** create a GitHub OAuth App and a Google OAuth client; set
@@ -272,22 +284,25 @@ churns the API painfully, fall back to Option C (defer) — not B.
 
 - [ ] ADR committed to `docs/adr/` capturing drivers/NFRs, per-capability
   options, identity-linking policy, anti-lockout strategy, CI/e2e impact,
-  phased rollout, and consequences.
-- [ ] Phase-1 (social login) implementation issue created and linked.
-- [ ] Phase-2 (passkeys) follow-up issue created and linked, noting the
-  `supabase-js ≥ 2.105.0` bump as its own step and the experimental risk.
+  rollout, and consequences.
+- [ ] Tracking issue created for the combined `feat/auth-modernization` effort,
+  with task groups for social login and passkeys (the latter noting the
+  `supabase-js ≥ 2.105.0` bump as its own commit and the experimental risk).
+- [ ] An e2e guard test remains that fails if email/password login ever breaks.
 
-## Open questions (for Bryan)
+## Resolved decisions (2026-06-29)
 
-1. **GitHub email:** is `brn.dbn@gmail.com` a **verified** email on the GitHub
-   account (required for clean auto-linking to the existing admin)?
-2. **Passkey scope:** admin-only for now, or offered to all users? (Recommend
-   admin-only initially — fewer support paths, the value is admin phishing
-   resistance.)
-3. **Phase-2 timing:** ship passkeys soon after Phase 1, or hold until the
-   Supabase experimental API stabilizes / graduates to GA?
-4. **`/register` exposure:** put social buttons on `/register` too, or keep
-   registration email/password-only and surface social only on `/login`?
+1. **GitHub email** — `brn.dbn@gmail.com` is **verified** on GitHub, so it
+   auto-links cleanly to the existing admin user. ✓
+2. **Passkey scope** — offered to **all users**, not admin-only. The
+   functionality is identical regardless of role, and the password + magic-link
+   floor means a lost passkey is never a lockout for anyone.
+3. **Timing** — social login and passkeys ship **together in one effort** (one
+   feature branch / setup pass), with the passkey **env flag** as the risk
+   container rather than a separate later phase.
+4. **`/register`** — social buttons appear on **both `/login` and `/register`**.
+   Passkey *enrollment* still happens post-sign-in (WebAuthn requires a confirmed
+   session); passkey *sign-in* can appear on both pages.
 
 ## Related
 
