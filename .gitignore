@@ -60,6 +60,9 @@ next-env.d.ts
 **/*handoff*.md
 **/*.ephemeral.md
 
+# Agent draft workspace (issue/PR bodies, validation scripts, notes — local only)
+/agent-artifacts/
+
 # a11y artifacts
 /artifacts/a11y/
 /gh_artifacts/
