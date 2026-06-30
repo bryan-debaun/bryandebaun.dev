@@ -3,6 +3,8 @@ import type React from 'react';
 import { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/lib/auth';
+import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
+import PasskeySignInButton from '@/components/auth/PasskeySignInButton';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -101,6 +103,16 @@ export default function LoginPage() {
                     </a>
                 </div>
             </form>
+            <div
+                className="my-6 flex items-center gap-3 text-sm text-[var(--color-norwegian-700)]"
+                aria-hidden="true"
+            >
+                <span className="h-px flex-1 bg-current opacity-30" />
+                <span>or</span>
+                <span className="h-px flex-1 bg-current opacity-30" />
+            </div>
+            <SocialAuthButtons />
+            <PasskeySignInButton next="/" />
         </div>
     );
 }

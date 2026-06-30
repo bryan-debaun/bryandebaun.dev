@@ -26,6 +26,12 @@ describe('Auth pages', () => {
         ).toBeInTheDocument();
     });
 
+    it('renders social login buttons on register', () => {
+        render(<RegisterPage />);
+        expect(screen.getByTestId('oauth-github')).toBeInTheDocument();
+        expect(screen.getByTestId('oauth-google')).toBeInTheDocument();
+    });
+
     it('renders login form', () => {
         render(<LoginPage />);
         expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
@@ -34,6 +40,12 @@ describe('Auth pages', () => {
             screen.getByRole('button', { name: /sign in/i }),
         ).toBeInTheDocument();
         expect(screen.getByText(/forgot password\?/i)).toBeInTheDocument();
+    });
+
+    it('renders social login buttons on login', () => {
+        render(<LoginPage />);
+        expect(screen.getByTestId('oauth-github')).toBeInTheDocument();
+        expect(screen.getByTestId('oauth-google')).toBeInTheDocument();
     });
 
     it('renders forgot-password form', () => {

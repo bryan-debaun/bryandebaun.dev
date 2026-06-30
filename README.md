@@ -15,6 +15,10 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Note: the `build` script enforces `NODE_ENV=production` to ensure consistent production builds even when a system-level `NODE_ENV` differs. Use `pnpm run dev` for development runs.
 
+### Authentication feature flags
+
+- `NEXT_PUBLIC_ENABLE_PASSKEYS` — set to `true` to enable the **experimental** passkey (WebAuthn) UI: a "Sign in with a passkey" button on `/login` and `/register`, plus passkey management (add / list / rename / delete) on `/account`. When unset (the default, including CI), all passkey UI is hidden and email/password, magic-link, and social login are unaffected. Passkeys are strictly additive and never a sole credential (see `docs/adr/0006-auth-modernization-social-passkeys.md`). The passkey ceremony only works on the production origin (`https://bryandebaun.dev`), not on `localhost` or preview deploys.
+
 ## Troubleshooting
 
 ### Missing devDependencies when NODE_ENV is set to `production`
