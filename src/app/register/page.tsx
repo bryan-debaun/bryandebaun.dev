@@ -3,6 +3,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
+import PasskeySignInButton from '@/components/auth/PasskeySignInButton';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -119,6 +120,7 @@ export default function RegisterPage() {
                 <span className="h-px flex-1 bg-current opacity-30" />
             </div>
             <SocialAuthButtons />
+            <PasskeySignInButton next="/" />
         </div>
     );
 }

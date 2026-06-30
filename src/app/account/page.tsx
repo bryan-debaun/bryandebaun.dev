@@ -2,6 +2,7 @@
 import { useContext } from 'react';
 import { AuthContext } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
+import PasskeyManager from '@/components/auth/PasskeyManager';
 
 export default function AccountPage() {
     const { user, logout, isAuthenticated } = useContext(AuthContext);
@@ -62,6 +63,7 @@ export default function AccountPage() {
                     Sign out
                 </button>
             </div>
+            <PasskeyManager />
         </div>
     );
 }

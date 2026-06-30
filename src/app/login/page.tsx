@@ -4,6 +4,7 @@ import { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/lib/auth';
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
+import PasskeySignInButton from '@/components/auth/PasskeySignInButton';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -111,6 +112,7 @@ export default function LoginPage() {
                 <span className="h-px flex-1 bg-current opacity-30" />
             </div>
             <SocialAuthButtons />
+            <PasskeySignInButton next="/" />
         </div>
     );
 }
