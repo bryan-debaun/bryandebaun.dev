@@ -951,10 +951,20 @@ body {
   margin-bottom: 1.25rem;
 }
 
+/* Résumé section headings — uppercase and tracked with a subtle rule, echoing
+   the classic single-column résumé look of the source document. The rule uses
+   color-mix on currentColor so it reads in both light and dark palettes. */
+.resume-page h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid color-mix(in oklab, currentColor 25%, transparent);
+  padding-bottom: 0.2rem;
+}
+
 /* ---------------------------------------------------------------------------
-   Print styles — primarily for the /resume page so it prints cleanly as a
-   fallback when the static public/resume.pdf is stale or missing. Chrome's
-   page.pdf() in scripts/generate-resume-pdf.ts also honours these rules.
+   Print styles — for the /resume page and the gated /resume/full render.
+   Chrome's page.pdf() in scripts/generate-resume-pdf.ts (ADR 0007) honours
+   these rules when generating the downloadable résumé PDF.
    --------------------------------------------------------------------------- */
 @media print {
 

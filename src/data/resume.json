@@ -1,87 +1,128 @@
 {
-    "_note": "SCAFFOLD — placeholder resume. This file is the single source of truth for /resume and public/resume.pdf (JSON Resume schema: https://jsonresume.org/schema/). Replace every value containing the word PLACEHOLDER with real content. While any PLACEHOLDER marker remains, the /resume page is served noindex (see src/lib/resume.ts → resumeHasPlaceholders). Regenerate the PDF afterward with `pnpm resume:pdf` (dev/prod server must be running).",
+    "_note": "Single source of truth for /resume and the gated full résumé PDF (JSON Resume schema: https://jsonresume.org/schema/, with a deliberate deviation — see below). Per ADR 0007, direct contact info lives under basics.privateContact (email, phone) and is rendered ONLY into the gated full résumé, never on the public /resume page or in its HTML/JSON-LD. The /resume page serves noindex while any value contains the word PLACEHOLDER (see src/lib/resume.ts → resumeHasPlaceholders). Regenerate the PDF with `pnpm resume:pdf` (dev/prod server must be running).",
     "basics": {
         "name": "Bryan DeBaun",
         "label": "Senior Software Engineer",
-        "email": "hello@bryandebaun.dev",
         "url": "https://bryandebaun.dev",
-        "summary": "PLACEHOLDER — replace in src/content/resume.json. A short professional summary (2–3 sentences) describing Bryan's focus on web platforms, cloud-native systems, and developer tooling.",
+        "summary": "Senior Software Engineer with 10+ years of experience designing and delivering scalable cloud-based solutions across healthcare, automotive, and agricultural sectors. Proven track record of migrating legacy systems to modern cloud architectures, leading cross-functional teams, and reducing operational incidents by up to 80%. Expert in the .NET ecosystem, AWS cloud services, and full-stack development, with a strong focus on system reliability, performance optimization, and mentoring junior engineers.",
         "location": {
-            "city": "PLACEHOLDER City",
-            "region": "PLACEHOLDER Region",
+            "city": "Merriam",
+            "region": "KS",
             "countryCode": "US"
         },
         "profiles": [
             {
+                "network": "LinkedIn",
+                "username": "bryan-debaun",
+                "url": "https://www.linkedin.com/in/bryan-debaun-4177b1117/"
+            },
+            {
                 "network": "GitHub",
                 "username": "bryan-debaun",
                 "url": "https://github.com/bryan-debaun"
-            },
-            {
-                "network": "LinkedIn",
-                "username": "PLACEHOLDER",
-                "url": "https://www.linkedin.com/in/PLACEHOLDER"
             }
-        ]
+        ],
+        "privateContact": {
+            "email": "brn.dbn@gmail.com",
+            "phone": "(913) 439-8525"
+        }
     },
     "work": [
         {
-            "name": "PLACEHOLDER Company",
+            "name": "Cox Automotive",
             "position": "Senior Software Engineer",
-            "url": "https://example.com",
-            "startDate": "2020-01-01",
-            "endDate": "",
-            "summary": "PLACEHOLDER — replace in src/content/resume.json. One-line description of the role and scope.",
+            "url": "https://www.coxautomotive.com",
+            "startDate": "2021-05-01",
+            "endDate": "2026-01-01",
             "highlights": [
-                "PLACEHOLDER — a measurable accomplishment with impact.",
-                "PLACEHOLDER — a second accomplishment or responsibility."
+                "Scaled the flagship Automated Marketing Platform to handle 300% growth in client base, processing millions of customer messages monthly while maintaining system stability and YoY profit growth through architectural improvements and performance optimization.",
+                "Led migration of multiple applications from on-premises to AWS cloud infrastructure, implementing serverless architectures using Lambda, Step Functions, S3, and DynamoDB while upgrading legacy systems from .NET Framework to .NET Core 3.1 and later .NET 6.",
+                "Reduced on-call incidents by 80% during high-volume periods by improving system resiliency, establishing comprehensive monitoring with New Relic, and creating detailed runbooks and documentation for on-call personnel.",
+                "Pioneered technical solutions including the platform's first Blazor-based front-end UI and an implementation of Kinesis Data Analytics for real-time data processing during payment service migrations.",
+                "Mentored junior developers and assumed Tech Lead responsibilities during leadership transitions, establishing code standards using ReSharper across repositories and conducting code reviews for cross-team pull requests.",
+                "Managed complex multi-system integrations across the AMP ecosystem (Automated Marketing, CRM, Texting, Reporting, Opportunities, Direct Mail), ensuring seamless communication and data flow between services.",
+                "Implemented comprehensive testing strategies including automated unit and integration tests using FluentAssertions (C#) and Chai.js (TypeScript/JavaScript), with BDD test plans using SpecFlow and Cucumber.js."
             ]
         },
         {
-            "name": "PLACEHOLDER Prior Company",
-            "position": "Software Engineer",
-            "url": "https://example.com",
-            "startDate": "2016-06-01",
-            "endDate": "2019-12-31",
-            "summary": "PLACEHOLDER — replace in src/content/resume.json.",
+            "name": "NIC",
+            "position": "Software Developer II",
+            "startDate": "2019-04-01",
+            "endDate": "2021-05-01",
             "highlights": [
-                "PLACEHOLDER — a measurable accomplishment with impact."
+                "Developed a multi-tenant prescription monitoring platform processing millions of opioid dispenses monthly across contracted states, helping combat the opioid crisis through real-time clinical alerting for MME thresholds, Multiple Provider Episodes, and Opioid Overlap events.",
+                "Architected the transition from a monolithic to a microservices architecture using Clean Architecture and Domain-Driven Design principles, implementing serverless Azure Functions to improve scalability and maintainability.",
+                "Integrated dynamic Power BI reporting and analytics into the core application, collaborating with external contractors to implement embedded reports with dynamic filtering and phased loading for improved user experience.",
+                "Managed CI/CD pipelines across two development teams using Azure DevOps, ensuring reliable automated builds, testing, and releases for multiple developers working simultaneously.",
+                "Contributed to the migration of prescription drug monitoring data into Azure Data Lake Storage Gen2, supporting ETL pipeline development and data normalization to improve data accessibility and analytical readiness.",
+                "Collaborated directly with clinicians and medical personnel to design and implement clinical decision support features, translating complex medical requirements into technical solutions."
+            ]
+        },
+        {
+            "name": "The Scoular Company",
+            "position": "Software Engineer",
+            "url": "https://www.scoular.com",
+            "startDate": "2015-06-01",
+            "endDate": "2019-03-01",
+            "highlights": [
+                "Modernized legacy applications for a 25% efficiency improvement by migrating from Access databases to SQL Server and rearchitecting obsolete systems using ASP.NET MVC patterns.",
+                "Built a customer-facing settlement portal serving 1,000+ external users, integrating with FileBound document storage to provide secure PDF access through an Azure-hosted ASP.NET Core application with Azure AD authentication.",
+                "Developed mobile-first APIs for agricultural business management, creating farmer-facing applications for field operations and trucking logistics using IdentityServer4 and ASP.NET Identity for secure authentication.",
+                "Automated the credit application workflow for the Credit department, replacing manual processes with a web application leveraging SQL views to interface with IBM database systems and streamline customer credit review.",
+                "Created real-time data APIs interfacing with the CTRM (Commodity Trading and Risk Management) system to enable business-critical decision making."
+            ]
+        },
+        {
+            "name": "K-State IT Helpdesk",
+            "position": "IT Helpdesk",
+            "startDate": "2013-12-01",
+            "endDate": "2015-03-01",
+            "highlights": [
+                "Supported the university-wide email migration from Pegasus to Microsoft Outlook for faculty, staff, and students, providing hands-on technical support and remote troubleshooting.",
+                "Provided tier-1 technical support for hardware and software issues, performing computer repairs, restorations, and remote software implementations."
             ]
         }
     ],
     "education": [
         {
-            "institution": "PLACEHOLDER University",
-            "url": "https://example.edu",
-            "area": "PLACEHOLDER Field of Study",
-            "studyType": "Bachelor of Science",
-            "startDate": "2012-09-01",
-            "endDate": "2016-05-31"
+            "institution": "Kansas State University",
+            "url": "https://www.k-state.edu",
+            "area": "Computer Science",
+            "studyType": "Coursework toward B.S.",
+            "startDate": "2013-09-01",
+            "endDate": "2016-05-01",
+            "note": "Left in junior year to accept a full-time software engineering offer."
         }
     ],
     "skills": [
         {
-            "name": "Languages",
-            "level": "Advanced",
-            "keywords": ["C#", "TypeScript", "JavaScript", "SQL"]
+            "name": "Languages & Frameworks",
+            "keywords": ["C#", ".NET Core", "ASP.NET", "TypeScript", "JavaScript", "Node.js", "Angular", "React", "Blazor"]
         },
         {
-            "name": "Frameworks & Platforms",
-            "level": "Advanced",
-            "keywords": ["ASP.NET Core", "Next.js", "React", "Node.js"]
+            "name": "Cloud & DevOps",
+            "keywords": ["AWS (Lambda, S3, DynamoDB, Step Functions, Kinesis, CloudFormation, CDK)", "Azure (Functions, DevOps, App Services)", "Terraform", "CI/CD", "GitHub Actions"]
         },
         {
-            "name": "Cloud & Infrastructure",
-            "level": "Intermediate",
-            "keywords": ["AWS", "Azure", "Docker", "CI/CD"]
+            "name": "Databases & Data",
+            "keywords": ["SQL Server", "DynamoDB", "Entity Framework Core", "Dapper", "Power BI"]
+        },
+        {
+            "name": "Testing & Quality",
+            "keywords": ["FluentAssertions", "Chai.js", "SpecFlow", "Cucumber.js", "ReSharper"]
+        },
+        {
+            "name": "Architecture & Design",
+            "keywords": ["Microservices", "Serverless Architecture", "Clean Architecture", "Domain-Driven Design", "RESTful APIs"]
+        },
+        {
+            "name": "Tools & Platforms",
+            "keywords": ["Git", "GitHub Enterprise", "New Relic", "IdentityServer4", "IIS", "AWS CDK"]
+        },
+        {
+            "name": "AI / Emerging Tech",
+            "keywords": ["GitHub Copilot", "GenAI integration", "MCP (Model Context Protocol)"]
         }
     ],
-    "projects": [
-        {
-            "name": "PLACEHOLDER Project",
-            "description": "PLACEHOLDER — replace in src/content/resume.json. A short description of a notable project and its outcome.",
-            "url": "https://example.com",
-            "keywords": ["PLACEHOLDER", "PLACEHOLDER"]
-        }
-    ]
+    "projects": []
 }

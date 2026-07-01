@@ -12,7 +12,6 @@ describe('getResume', () => {
 
         expect(resume.basics.name).toBe('Bryan DeBaun');
         expect(resume.basics.label).toBe('Senior Software Engineer');
-        expect(typeof resume.basics.email).toBe('string');
         expect(typeof resume.basics.url).toBe('string');
         expect(typeof resume.basics.summary).toBe('string');
         expect(Array.isArray(resume.basics.profiles)).toBe(true);
@@ -23,21 +22,32 @@ describe('getResume', () => {
         expect(Array.isArray(resume.projects)).toBe(true);
     });
 
-    it('exposes at least one sample entry per major section', () => {
+    it('exposes at least one entry in the populated sections', () => {
         const resume = getResume();
         expect(resume.work.length).toBeGreaterThan(0);
         expect(resume.education.length).toBeGreaterThan(0);
         expect(resume.skills.length).toBeGreaterThan(0);
         expect(resume.skills[0].keywords.length).toBeGreaterThan(0);
-        expect(resume.projects.length).toBeGreaterThan(0);
+    });
+
+    it('keeps direct contact info in privateContact, never flat on basics', () => {
+        // ADR 0007: email/phone must not be public-surface fields. They live
+        // under basics.privateContact so the /resume page cannot leak them.
+        const resume = getResume();
+        expect(resume.basics.privateContact?.email).toMatch(/@/);
+        expect(resume.basics.privateContact?.phone).toBeTruthy();
+        // The JSON must not carry a flat `email` on basics.
+        expect(
+            (resume.basics as Record<string, unknown>).email,
+        ).toBeUndefined();
     });
 });
 
 describe('resumeHasPlaceholders', () => {
-    it('detects placeholder content in the current scaffold', () => {
-        // The shipped scaffold still contains PLACEHOLDER markers, so the page
-        // should remain noindex until real content lands.
-        expect(resumeHasPlaceholders()).toBe(true);
+    it('reports no placeholders once real content has landed', () => {
+        // Real résumé content is populated (ADR 0007 Phase 0), so the page is
+        // indexable — resumeHasPlaceholders must be false for the shipped data.
+        expect(resumeHasPlaceholders()).toBe(false);
     });
 
     it('returns true when any field contains the placeholder marker', () => {
@@ -45,7 +55,6 @@ describe('resumeHasPlaceholders', () => {
             basics: {
                 name: 'Bryan DeBaun',
                 label: 'Senior Software Engineer',
-                email: 'hello@example.com',
                 url: 'https://example.com',
                 summary: `${PLACEHOLDER_MARKER} — replace me`,
                 profiles: [],
@@ -63,7 +72,6 @@ describe('resumeHasPlaceholders', () => {
             basics: {
                 name: 'Bryan DeBaun',
                 label: 'Senior Software Engineer',
-                email: 'hello@example.com',
                 url: 'https://example.com',
                 summary: 'A real summary with no markers.',
                 profiles: [
@@ -97,7 +105,6 @@ describe('resumeHasPlaceholders', () => {
             basics: {
                 name: 'Bryan DeBaun',
                 label: 'Senior Software Engineer',
-                email: 'hello@example.com',
                 url: 'https://example.com',
                 summary: 'A real summary with no markers.',
                 profiles: [],

@@ -20,7 +20,7 @@ const isPlaceholder = resumeHasPlaceholders(resume);
 export const metadata: Metadata = {
     title: 'Résumé — Bryan DeBaun',
     description:
-        'Résumé of Bryan DeBaun — Senior Software Engineer. View online or download a PDF.',
+        'Résumé of Bryan DeBaun — Senior Software Engineer. View online; a full PDF with contact details is available to signed-in users on request.',
     robots: isPlaceholder
         ? { index: false, follow: false }
         : { index: true, follow: true },
@@ -29,9 +29,7 @@ export const metadata: Metadata = {
 /** Format a JSON Resume date range, treating an empty endDate as "Present". */
 function formatRange(startDate: string, endDate?: string): string {
     const start = formatDate(startDate, { month: 'short' });
-    const end = endDate
-        ? formatDate(endDate, { month: 'short' })
-        : 'Present';
+    const end = endDate ? formatDate(endDate, { month: 'short' }) : 'Present';
     return `${start} — ${end}`;
 }
 
@@ -97,9 +95,26 @@ export default function ResumePage() {
             '@type': 'Person',
             name: basics.name,
             jobTitle: basics.label,
-            email: `mailto:${basics.email}`,
             url: basics.url,
             ...(basics.summary ? { description: basics.summary } : {}),
+            ...(basics.location
+                ? {
+                      address: {
+                          '@type': 'PostalAddress',
+                          ...(basics.location.city
+                              ? { addressLocality: basics.location.city }
+                              : {}),
+                          ...(basics.location.region
+                              ? { addressRegion: basics.location.region }
+                              : {}),
+                          ...(basics.location.countryCode
+                              ? { addressCountry: basics.location.countryCode }
+                              : {}),
+                      },
+                  }
+                : {}),
+            // NOTE: email/phone are intentionally excluded from JSON-LD — they
+            // live under basics.privateContact and never reach public HTML (ADR 0007).
             sameAs: basics.profiles.map((p) => p.url),
         },
     };
@@ -116,8 +131,17 @@ export default function ResumePage() {
             <header>
                 <h2 className="!mb-1">{basics.name}</h2>
                 <p className="lead !mt-0 text-center">{basics.label}</p>
+                {basics.location ? (
+                    <p className="text-sm text-muted text-center !mt-0 !mb-2">
+                        {[basics.location.city, basics.location.region]
+                            .filter(Boolean)
+                            .join(', ')}
+                    </p>
+                ) : null}
+                {/* Direct contact info (email/phone) is intentionally omitted
+                    from this public page — it lives only in the gated full
+                    résumé (ADR 0007). We show the site + public profile links. */}
                 <p className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm !mb-2">
-                    <a href={`mailto:${basics.email}`}>{basics.email}</a>
                     <a href={basics.url} rel="noopener noreferrer">
                         {basics.url.replace(/^https?:\/\//, '')}
                     </a>
@@ -126,24 +150,23 @@ export default function ResumePage() {
                     <ProfileLinks profiles={basics.profiles} />
                 </div>
 
-                {/* Download PDF — points at the statically generated asset.
-                    Generate/refresh it with `pnpm resume:pdf` (server running). */}
-                <p className="resume-actions flex justify-center !mt-4">
-                    <a
-                        href="/resume.pdf"
-                        className="btn btn--primary !no-underline"
-                        download
-                    >
-                        Download PDF
+                {/* The full résumé (with complete contact details) is available
+                    on request to signed-in users; the request UI lands in
+                    Phase 2 (#116). For now this routes to sign-in. */}
+                <div className="resume-actions flex flex-col items-center gap-1 !mt-4">
+                    <a href="/login" className="btn btn--primary !no-underline">
+                        Request full résumé (PDF)
                     </a>
-                </p>
+                    <span className="text-sm text-muted">
+                        Sign in to request a copy with full contact details.
+                    </span>
+                </div>
 
                 {isPlaceholder ? (
                     <p className="resume-placeholder-note text-sm text-muted text-center">
                         This résumé is a placeholder scaffold (noindex). Real
-                        content lands in{' '}
-                        <code>src/data/resume.json</code>; the PDF is
-                        generated via <code>pnpm resume:pdf</code>.
+                        content lands in <code>src/data/resume.json</code>; the
+                        PDF is generated via <code>pnpm resume:pdf</code>.
                     </p>
                 ) : null}
             </header>
@@ -197,6 +220,9 @@ export default function ResumePage() {
                                 {' · '}
                                 {formatRange(ed.startDate, ed.endDate)}
                             </p>
+                            {ed.note ? (
+                                <p className="text-sm !mt-1 !mb-0">{ed.note}</p>
+                            ) : null}
                         </div>
                     ))}
                 </section>
