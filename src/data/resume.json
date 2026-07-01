@@ -29,6 +29,15 @@
     },
     "work": [
         {
+            "name": "Ascend Learning",
+            "position": "Senior Software Engineer",
+            "url": "https://www.ascendlearning.com",
+            "startDate": "2026-02-01",
+            "endDate": "",
+            "summary": "Building cloud-native web applications in the education and professional-certification space.",
+            "highlights": []
+        },
+        {
             "name": "Cox Automotive",
             "position": "Senior Software Engineer",
             "url": "https://www.coxautomotive.com",
@@ -124,5 +133,18 @@
             "keywords": ["GitHub Copilot", "GenAI integration", "MCP (Model Context Protocol)"]
         }
     ],
-    "projects": []
+    "projects": [
+        {
+            "name": "bryandebaun.dev",
+            "description": "My personal website and reading-library UI — a Next.js 16 / React 19 / TypeScript / Tailwind v4 app with a Supabase-backed admin, passkey and social auth, and an automated accessibility + visual-regression test suite.",
+            "url": "https://bryandebaun.dev",
+            "keywords": ["Next.js", "React", "TypeScript", "Tailwind CSS", "Supabase"]
+        },
+        {
+            "name": "BAD MCP Server",
+            "description": "A Model Context Protocol (MCP) HTTP API that serves my books/authors/media data to the website and automates GitHub Issues/Projects across my repos — built with Node, TypeScript, Prisma, and tsoa.",
+            "url": "https://github.com/bryan-debaun/mcp-server",
+            "keywords": ["MCP", "TypeScript", "Node.js", "Prisma", "tsoa"]
+        }
+    ]
 }
