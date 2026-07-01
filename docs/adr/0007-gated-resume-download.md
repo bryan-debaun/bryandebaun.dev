@@ -226,11 +226,11 @@ Phases are the **build order**, mostly on one feature branch per phase.
 
 ## Acceptance criteria
 
-- [ ] ADR committed to `docs/adr/` capturing drivers, per-area options
+- [x] ADR committed to `docs/adr/` capturing drivers, per-area options
   (content storage, PDF generation, access gating), phasing, and open questions.
-- [ ] Issue breakdown created (frontend repo + a linked `mcp-server` backend
+- [x] Issue breakdown created (frontend repo + a linked `mcp-server` backend
   issue for `ResumeDownloadRequest`).
-- [ ] Open questions OQ-1…OQ-6 resolved and recorded.
+- [x] Open questions OQ-1…OQ-6 resolved and recorded.
 
 ## Related
 
@@ -242,5 +242,14 @@ Phases are the **build order**, mostly on one feature branch per phase.
   `scripts/generate-resume-pdf.ts`, `src/app/globals.css` (`@media print`),
   `src/lib/email.ts`, `src/lib/auth-guard.ts`, and a new `mcp-server`
   `ResumeDownloadRequest` resource.
+
+### Implementation issues
+
+- **Phase 0** — content + private contact fields + de-index: #114
+- **Phase 1** — full-PDF render + private Storage bucket + signed URL: #115
+- **Phase 2** — request → approve UI + quota + approval email: #116
+- **Phase 3** (deferred) — DB-backed content + admin editor: #117
+- **Backend** — `ResumeDownloadRequest` resource + endpoints:
+  `bryan-debaun/mcp-server` #139
 
 Author: Bryan DeBaun
