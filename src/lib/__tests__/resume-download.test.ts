@@ -16,6 +16,8 @@ import {
     getResumeDownloadSignedUrl,
     isValidResumeFullToken,
     RESUME_SIGNED_URL_TTL_SECONDS,
+    signResumeDownloadLink,
+    verifyResumeDownloadLink,
 } from '@/lib/resume-download';
 
 describe('isValidResumeFullToken', () => {
@@ -46,6 +48,92 @@ describe('isValidResumeFullToken', () => {
     it('is true only for an exact match', () => {
         process.env.RESUME_FULL_TOKEN = 'secret-value-123';
         expect(isValidResumeFullToken('secret-value-123')).toBe(true);
+    });
+});
+
+describe('signResumeDownloadLink / verifyResumeDownloadLink', () => {
+    const original = process.env.RESUME_DOWNLOAD_SECRET;
+    const futureIso = () => new Date(Date.now() + 60_000).toISOString();
+    const pastIso = () => new Date(Date.now() - 60_000).toISOString();
+
+    beforeEach(() => {
+        process.env.RESUME_DOWNLOAD_SECRET = 'hmac-secret-abc';
+    });
+    afterEach(() => {
+        if (original === undefined) delete process.env.RESUME_DOWNLOAD_SECRET;
+        else process.env.RESUME_DOWNLOAD_SECRET = original;
+    });
+
+    it('round-trips a valid token back to its request id', () => {
+        const token = signResumeDownloadLink({
+            requestId: 'req-123',
+            expiresAt: futureIso(),
+        });
+        expect(token).not.toBe('');
+        expect(verifyResumeDownloadLink(token)).toEqual({
+            ok: true,
+            requestId: 'req-123',
+        });
+    });
+
+    it('rejects a tampered payload (signature mismatch)', () => {
+        const token = signResumeDownloadLink({
+            requestId: 'req-123',
+            expiresAt: futureIso(),
+        });
+        const [, sig] = token.split('.');
+        // Swap in a different payload but keep the original signature.
+        const forgedPayload = Buffer.from(
+            JSON.stringify({ rid: 'req-999', exp: futureIso() }),
+        ).toString('base64url');
+        expect(verifyResumeDownloadLink(`${forgedPayload}.${sig}`)).toEqual({
+            ok: false,
+        });
+    });
+
+    it('rejects a token whose signature has been altered', () => {
+        const token = signResumeDownloadLink({
+            requestId: 'req-123',
+            expiresAt: futureIso(),
+        });
+        const [payload, sig] = token.split('.');
+        const flipped = sig.slice(0, -1) + (sig.endsWith('A') ? 'B' : 'A');
+        expect(verifyResumeDownloadLink(`${payload}.${flipped}`)).toEqual({
+            ok: false,
+        });
+    });
+
+    it('rejects an expired token', () => {
+        const token = signResumeDownloadLink({
+            requestId: 'req-123',
+            expiresAt: pastIso(),
+        });
+        expect(verifyResumeDownloadLink(token)).toEqual({ ok: false });
+    });
+
+    it('rejects malformed tokens', () => {
+        expect(verifyResumeDownloadLink('')).toEqual({ ok: false });
+        expect(verifyResumeDownloadLink(null)).toEqual({ ok: false });
+        expect(verifyResumeDownloadLink('no-dot-here')).toEqual({ ok: false });
+        expect(verifyResumeDownloadLink('a.b.c')).toEqual({ ok: false });
+    });
+
+    it('returns empty string / false when the secret is missing', () => {
+        delete process.env.RESUME_DOWNLOAD_SECRET;
+        expect(
+            signResumeDownloadLink({
+                requestId: 'req-123',
+                expiresAt: futureIso(),
+            }),
+        ).toBe('');
+        // A token signed while configured must not verify once the secret is gone.
+        process.env.RESUME_DOWNLOAD_SECRET = 'hmac-secret-abc';
+        const token = signResumeDownloadLink({
+            requestId: 'req-123',
+            expiresAt: futureIso(),
+        });
+        delete process.env.RESUME_DOWNLOAD_SECRET;
+        expect(verifyResumeDownloadLink(token)).toEqual({ ok: false });
     });
 });
 

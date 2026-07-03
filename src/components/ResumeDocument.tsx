@@ -71,9 +71,17 @@ export interface ResumeDocumentProps {
      * ONLY by the gated `/resume/full` render that feeds the downloadable PDF.
      * The public `/resume` page leaves it false so direct contact info never
      * reaches public HTML or JSON-LD (ADR 0007). When false, the header instead
-     * shows a "Request full résumé" call-to-action.
+     * shows the request call-to-action provided via `requestSlot`.
      */
     includePrivateContact?: boolean;
+    /**
+     * Optional call-to-action rendered in the header of the PUBLIC variant only
+     * (ignored when `includePrivateContact` is true). This is where the public
+     * `/resume` page injects the interactive `<ResumeRequestButton />` client
+     * component — passing it as a child keeps `ResumeDocument` a server
+     * component and keeps the request UI out of the `/resume/full` PDF render.
+     */
+    requestSlot?: React.ReactNode;
 }
 
 /**
@@ -85,6 +93,7 @@ export interface ResumeDocumentProps {
 export function ResumeDocument({
     resume,
     includePrivateContact = false,
+    requestSlot,
 }: ResumeDocumentProps) {
     const { basics, work, education, skills, projects } = resume;
     const privateContact = includePrivateContact
@@ -164,22 +173,12 @@ export function ResumeDocument({
                     <ProfileLinks profiles={basics.profiles} />
                 </div>
 
-                {includePrivateContact ? null : (
-                    /* The full résumé (with complete contact details) is
-                       available on request to signed-in users; the request UI
-                       lands in Phase 2 (#116). For now this routes to sign-in. */
-                    <div className="resume-actions flex flex-col items-center gap-1 !mt-4">
-                        <a
-                            href="/login"
-                            className="btn btn--primary !no-underline"
-                        >
-                            Request full résumé (PDF)
-                        </a>
-                        <span className="text-sm text-muted">
-                            Sign in to request a copy with full contact details.
-                        </span>
-                    </div>
-                )}
+                {/* The full résumé (with complete contact details) is available
+                    on request to verified signed-in users. The interactive
+                    request control is injected via `requestSlot` (a client
+                    component) so this document stays a server component and the
+                    request UI never reaches the `/resume/full` PDF render. */}
+                {includePrivateContact ? null : requestSlot}
             </header>
 
             {/* Summary */}

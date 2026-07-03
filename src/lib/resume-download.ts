@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { timingSafeEqual } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 
 /**
@@ -40,6 +40,88 @@ export function isValidResumeFullToken(
     const expected = process.env.RESUME_FULL_TOKEN?.trim();
     if (!expected || !token) return false;
     return safeEqual(token, expected);
+}
+
+/** URL-safe base64 encoding (RFC 4648 §5), no padding. */
+function base64url(input: Buffer | string): string {
+    return Buffer.from(input).toString('base64url');
+}
+
+/**
+ * Compute the HMAC-SHA256 signature (base64url) of `payload` under the
+ * server-only download secret. Returns `null` when the secret is unconfigured
+ * so callers can fail closed rather than mint an unsigned link.
+ */
+function signPayload(payload: string): string | null {
+    const secret = process.env.RESUME_DOWNLOAD_SECRET?.trim();
+    if (!secret) return null;
+    return base64url(createHmac('sha256', secret).update(payload).digest());
+}
+
+/**
+ * Mint a stateless, tamper-evident download-link token for an approved request.
+ *
+ * Shape: `base64url(JSON {rid, exp})` + "." + `base64url(HMAC-SHA256(payload))`.
+ * The token embeds the request id and the approval's `expiresAt` (ISO string);
+ * {@link verifyResumeDownloadLink} re-derives the HMAC and enforces expiry, so
+ * no server-side state is needed to validate a link. Returns an empty string
+ * when `RESUME_DOWNLOAD_SECRET` is unset (feature not configured); callers must
+ * treat that as "cannot issue a link".
+ */
+export function signResumeDownloadLink(input: {
+    requestId: string;
+    expiresAt: string;
+}): string {
+    const payload = base64url(
+        JSON.stringify({ rid: input.requestId, exp: input.expiresAt }),
+    );
+    const sig = signPayload(payload);
+    if (!sig) return '';
+    return `${payload}.${sig}`;
+}
+
+export type VerifyResumeDownloadLinkResult =
+    | { ok: true; requestId: string }
+    | { ok: false };
+
+/**
+ * Verify a token minted by {@link signResumeDownloadLink}. Returns the embedded
+ * request id only when ALL hold: the token is well-formed, the HMAC matches
+ * (constant-time), the secret is configured, and `exp` is a valid future ISO
+ * timestamp. Any failure returns `{ ok: false }` — the caller reveals nothing.
+ */
+export function verifyResumeDownloadLink(
+    token: string | null | undefined,
+): VerifyResumeDownloadLinkResult {
+    if (!token) return { ok: false };
+
+    const parts = token.split('.');
+    if (parts.length !== 2) return { ok: false };
+    const [payload, sig] = parts;
+    if (!payload || !sig) return { ok: false };
+
+    const expected = signPayload(payload);
+    if (!expected) return { ok: false };
+    if (!safeEqual(sig, expected)) return { ok: false };
+
+    let decoded: { rid?: unknown; exp?: unknown };
+    try {
+        decoded = JSON.parse(
+            Buffer.from(payload, 'base64url').toString('utf8'),
+        );
+    } catch {
+        return { ok: false };
+    }
+
+    const rid = decoded.rid;
+    const exp = decoded.exp;
+    if (typeof rid !== 'string' || !rid) return { ok: false };
+    if (typeof exp !== 'string' || !exp) return { ok: false };
+
+    const expMs = Date.parse(exp);
+    if (Number.isNaN(expMs) || expMs <= Date.now()) return { ok: false };
+
+    return { ok: true, requestId: rid };
 }
 
 export type ResumeDownloadUrlResult =

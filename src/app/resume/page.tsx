@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ResumeDocument } from '@/components/ResumeDocument';
+import ResumeRequestButton from '@/components/ResumeRequestButton';
 import { getResume, resumeHasPlaceholders } from '@/lib/resume';
 
 const resume = getResume();
@@ -20,6 +21,10 @@ export const metadata: Metadata = {
 };
 
 export default function ResumePage() {
-    // Public variant: no direct contact info (email/phone stay private — ADR 0007).
-    return <ResumeDocument resume={resume} />;
+    // Public variant: no direct contact info (email/phone stay private — ADR
+    // 0007). The interactive request form is passed as a client-component slot
+    // so this page can stay a server component.
+    return (
+        <ResumeDocument resume={resume} requestSlot={<ResumeRequestButton />} />
+    );
 }

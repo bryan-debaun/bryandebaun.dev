@@ -49,6 +49,14 @@ export enum ItemStatus {
   COMPLETED = "COMPLETED",
 }
 
+export enum ResumeDownloadStatus {
+  Pending = "pending",
+  Approved = "approved",
+  Denied = "denied",
+  Fulfilled = "fulfilled",
+  Expired = "expired",
+}
+
 export interface VideoGame {
   /** @format double */
   id: number;
@@ -179,6 +187,43 @@ export interface SeedResponse {
 export interface SeedRequest {
   code?: string;
   refreshToken?: string;
+}
+
+export interface ResumeDownloadRequest {
+  id: string;
+  userId: string;
+  userEmail: string;
+  reason?: string | null;
+  status: ResumeDownloadStatus;
+  adminNote?: string | null;
+  /** @format double */
+  downloadCount: number;
+  createdAt: string;
+  approvedAt?: string | null;
+  expiresAt?: string | null;
+}
+
+export interface CreateResumeDownloadRequestBody {
+  /** Optional note from the user explaining the request. */
+  reason?: string;
+}
+
+export interface ListResumeDownloadRequestsResponse {
+  requests: ResumeDownloadRequest[];
+  /** @format double */
+  total: number;
+  /** @format double */
+  limit: number;
+  /** @format double */
+  offset: number;
+}
+
+/** List filter; `all` returns every status. */
+export type ResumeDownloadReadStatus = ResumeDownloadStatus | "all";
+
+export interface AdminNoteBody {
+  /** Optional internal admin note. */
+  adminNote?: string;
 }
 
 export interface Movie {
@@ -941,6 +986,144 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Create a résumé-download request for the authenticated user. Enforces a per-user quota (max 3 in the trailing 30 days) → 429.
+     *
+     * @tags ResumeDownloadRequests
+     * @name CreateRequest
+     * @request POST:/api/resumeDownloadRequests
+     * @secure
+     */
+    createRequest: (
+      data: CreateResumeDownloadRequestBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ResumeDownloadRequest, void>({
+        path: `/api/resumeDownloadRequests`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description List résumé-download requests (admin).
+     *
+     * @tags ResumeDownloadRequests
+     * @name ListRequests
+     * @request GET:/api/resumeDownloadRequests
+     * @secure
+     */
+    listRequests: (
+      query?: {
+        /** Filter by stored status (default: all) */
+        status?: ResumeDownloadReadStatus;
+        /** Filter to a single user */
+        userId?: string;
+        /**
+         * Maximum number of results (default 50)
+         * @format double
+         */
+        limit?: number;
+        /**
+         * Number of results to skip (default 0)
+         * @format double
+         */
+        offset?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<ListResumeDownloadRequestsResponse, any>({
+        path: `/api/resumeDownloadRequests`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Get a résumé-download request by id (admin).
+     *
+     * @tags ResumeDownloadRequests
+     * @name GetRequest
+     * @request GET:/api/resumeDownloadRequests/{id}
+     * @secure
+     */
+    getRequest: (id: string, params: RequestParams = {}) =>
+      this.request<ResumeDownloadRequest, void>({
+        path: `/api/resumeDownloadRequests/${id}`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Approve a pending request (admin). Sets approvedAt and a 72h window.
+     *
+     * @tags ResumeDownloadRequests
+     * @name ApproveRequest
+     * @request PATCH:/api/resumeDownloadRequests/{id}/approve
+     * @secure
+     */
+    approveRequest: (
+      id: string,
+      data: AdminNoteBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ResumeDownloadRequest, void>({
+        path: `/api/resumeDownloadRequests/${id}/approve`,
+        method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Deny a pending request (admin).
+     *
+     * @tags ResumeDownloadRequests
+     * @name DenyRequest
+     * @request PATCH:/api/resumeDownloadRequests/{id}/deny
+     * @secure
+     */
+    denyRequest: (
+      id: string,
+      data: AdminNoteBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ResumeDownloadRequest, void>({
+        path: `/api/resumeDownloadRequests/${id}/deny`,
+        method: "PATCH",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Record a download against the caller's own approved request. Increments downloadCount and flips status to fulfilled; only valid within the window.
+     *
+     * @tags ResumeDownloadRequests
+     * @name FulfillRequest
+     * @request PATCH:/api/resumeDownloadRequests/{id}/fulfill
+     * @secure
+     */
+    fulfillRequest: (id: string, params: RequestParams = {}) =>
+      this.request<ResumeDownloadRequest, void>({
+        path: `/api/resumeDownloadRequests/${id}/fulfill`,
+        method: "PATCH",
+        secure: true,
         format: "json",
         ...params,
       }),
