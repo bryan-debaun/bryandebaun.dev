@@ -1,2 +1,12 @@
 packages:
   - "packages/*"
+
+# Supply-chain allowlist: only these dependencies may run install/build scripts.
+# pnpm 11 records per-package boolean decisions under `allowBuilds` here; the old
+# package.json `pnpm.onlyBuiltDependencies` field is no longer read
+# (see https://pnpm.io/settings). protobufjs (previously allowlisted) is omitted
+# because pnpm 11 does not flag it as having a pending build script.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
