@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { ResumeDocument } from '@/components/ResumeDocument';
 import { isCurrentUserAdmin } from '@/lib/auth-guard';
-import { getResume } from '@/lib/resume';
+import { getFullResume } from '@/lib/services/resume';
 import { isValidResumeFullToken } from '@/lib/resume-download';
 
 // Gated + dynamic: this variant reads a request header / auth session and
@@ -30,5 +30,12 @@ export default async function ResumeFullPage() {
         isValidResumeFullToken(token) || (await isCurrentUserAdmin());
     if (!allowed) notFound();
 
-    return <ResumeDocument resume={getResume()} includePrivateContact />;
+    // Full, contact-bearing render sourced from the MCP `Resume` singleton
+    // (ADR 0007 Phase 3). A null (MCP unreachable) is treated as not-found so
+    // the PDF generator / admin preview fails closed rather than rendering an
+    // empty document.
+    const resume = await getFullResume();
+    if (!resume) notFound();
+
+    return <ResumeDocument resume={resume} includePrivateContact />;
 }
