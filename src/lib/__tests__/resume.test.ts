@@ -38,7 +38,7 @@ describe('getResume', () => {
         expect(resume.basics.privateContact?.phone).toBeTruthy();
         // The JSON must not carry a flat `email` on basics.
         expect(
-            (resume.basics as Record<string, unknown>).email,
+            (resume.basics as unknown as Record<string, unknown>).email,
         ).toBeUndefined();
     });
 });

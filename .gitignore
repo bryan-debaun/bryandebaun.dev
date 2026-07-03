@@ -37,6 +37,14 @@ yarn-error.log*
 .env*
 !.env.example
 
+# Doppler encrypted fallback file (written by `doppler secrets download` with no
+# target path). Never commit it — use `pnpm env:pull` for a plaintext .env.local.
+doppler.json
+
+# Locally-generated contact-bearing résumé PDF (`pnpm resume:pdf --out …`).
+# Never commit — it's private and belongs only in the private Supabase bucket (ADR 0007).
+resume-full.pdf
+
 # vercel
 .vercel
 
