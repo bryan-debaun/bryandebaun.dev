@@ -1112,17 +1112,17 @@ export class Api<
       }),
 
     /**
-     * @description Record a download against the caller's own approved request. Increments downloadCount and flips status to fulfilled; only valid within the window.
+     * @description Record a download against an approved request and enforce the cap (#145). Server-to-server (API-key): the website's download route calls this before serving the PDF. Atomically increments downloadCount and flips status to fulfilled once the cap (3) is reached.
      *
      * @tags ResumeDownloadRequests
-     * @name FulfillRequest
-     * @request PATCH:/api/resumeDownloadRequests/{id}/fulfill
+     * @name RecordDownload
+     * @request POST:/api/resumeDownloadRequests/{id}/record-download
      * @secure
      */
-    fulfillRequest: (id: string, params: RequestParams = {}) =>
+    recordDownload: (id: string, params: RequestParams = {}) =>
       this.request<ResumeDownloadRequest, void>({
-        path: `/api/resumeDownloadRequests/${id}/fulfill`,
-        method: "PATCH",
+        path: `/api/resumeDownloadRequests/${id}/record-download`,
+        method: "POST",
         secure: true,
         format: "json",
         ...params,
