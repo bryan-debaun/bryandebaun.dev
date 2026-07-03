@@ -37,6 +37,10 @@ yarn-error.log*
 .env*
 !.env.example
 
+# Doppler encrypted fallback file (written by `doppler secrets download` with no
+# target path). Never commit it — use `pnpm env:pull` for a plaintext .env.local.
+doppler.json
+
 # vercel
 .vercel
 
