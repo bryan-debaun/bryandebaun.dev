@@ -45,6 +45,31 @@ export async function requireAdmin(): Promise<NextResponse | null> {
 }
 
 /**
+ * Boolean admin check for callers that must branch rather than
+ * redirect/respond — e.g. a page that should render a 404 (`notFound()`) for
+ * non-admins instead of redirecting. Reads the secure `app_metadata.role`.
+ *
+ * Never throws: if the Supabase client can't be constructed (unconfigured env)
+ * or the lookup fails, the caller is treated as not-admin.
+ */
+export async function isCurrentUserAdmin(): Promise<boolean> {
+    try {
+        const supabase = await createClient();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return false;
+        return (
+            roleFromAppMetadata(
+                user.app_metadata as Record<string, unknown> | undefined,
+            ) === 'admin'
+        );
+    } catch {
+        return false;
+    }
+}
+
+/**
  * Page-oriented admin guard: the `redirect()` analog of {@link requireAdmin}.
  *
  * Reads the role from the SECURE `app_metadata.role` (never user-editable
