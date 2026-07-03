@@ -234,3 +234,98 @@ export async function sendInviteEmail(
         return { ok: false, reason: 'send_failed', detail: error.message };
     }
 }
+
+/** Input for the gated-résumé approval email (ADR 0007 Phase 2). */
+export interface ResumeApprovalEmailInput {
+    /** Recipient email address (the approved requester). */
+    to: string;
+    /** Signed, time-limited download link (our `/api/resume/download?t=…`). */
+    downloadUrl: string;
+    /** ISO timestamp when the link expires (~72h out); shown in the copy. */
+    expiresAt: string;
+}
+
+/**
+ * Format an ISO timestamp for human-friendly display in the approval email.
+ * Falls back to the raw value if it can't be parsed so we never send an empty
+ * expiry line.
+ */
+function formatExpiry(expiresAt: string): string {
+    const ms = Date.parse(expiresAt);
+    if (Number.isNaN(ms)) return expiresAt;
+    return new Date(ms).toUTCString();
+}
+
+/**
+ * Send the "your résumé download is ready" email via Resend. Same env-gated,
+ * lazy, secret-safe pattern as {@link sendInviteEmail}: reuses `RESEND_API_KEY`
+ * and `CONTACT_FROM_EMAIL`, and returns `{ ok: false, reason: 'unconfigured' }`
+ * when Resend isn't configured so the approve route can still succeed and
+ * surface `emailSent: false`.
+ *
+ * The `downloadUrl` is a trusted, server-minted link, but it is still
+ * HTML-escaped before interpolation as defense-in-depth. Never logs the link.
+ */
+export async function sendResumeApprovalEmail(
+    input: ResumeApprovalEmailInput,
+): Promise<SendContactResult> {
+    const config = readInviteResendConfig();
+    if (!config) {
+        console.warn(
+            'email.sendResumeApprovalEmail: Resend is not configured (missing RESEND_API_KEY / CONTACT_FROM_EMAIL); skipping send.',
+        );
+        return { ok: false, reason: 'unconfigured' };
+    }
+
+    const to = sanitizeHeaderValue(input.to);
+    const safeUrl = escapeHtml(input.downloadUrl);
+    const expiry = formatExpiry(input.expiresAt);
+    const safeExpiry = escapeHtml(expiry);
+
+    try {
+        const resend = new Resend(config.apiKey);
+
+        const { error } = await resend.emails.send({
+            from: config.fromEmail,
+            to,
+            subject: 'Your résumé download is ready',
+            text: [
+                'Your request for the full résumé (PDF) has been approved.',
+                '',
+                'Download it here:',
+                input.downloadUrl,
+                '',
+                `This link expires in about 72 hours (on ${expiry}).`,
+            ].join('\n'),
+            html: [
+                '<div>',
+                '<p>Your request for the full <strong>résumé (PDF)</strong> has been approved.</p>',
+                `<p><a href="${safeUrl}">Download your résumé</a></p>`,
+                `<p style="color:#666;font-size:12px">This link expires in about 72 hours (on ${safeExpiry}).</p>`,
+                '<hr />',
+                '<p style="color:#666;font-size:12px">If the button does not work, copy and paste this URL into your browser:</p>',
+                `<p style="word-break:break-all;font-size:12px">${safeUrl}</p>`,
+                '</div>',
+            ].join(''),
+        });
+
+        if (error) {
+            console.error('email.sendResumeApprovalEmail: Resend send failed', {
+                name: error.name,
+            });
+            return {
+                ok: false,
+                reason: 'send_failed',
+                detail: error.name,
+            };
+        }
+
+        return { ok: true };
+    } catch (e) {
+        const error = e as Error;
+        console.error('email.sendResumeApprovalEmail: unexpected send error', {
+            message: error.message,
+        });
+        return { ok: false, reason: 'send_failed', detail: error.message };
+    }
+}

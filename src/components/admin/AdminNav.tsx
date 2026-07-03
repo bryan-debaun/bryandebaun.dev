@@ -29,6 +29,11 @@ const TABS: ReadonlyArray<{
         label: 'Users',
         isActive: (p) => p.startsWith('/admin/users'),
     },
+    {
+        href: '/admin/resume-requests',
+        label: 'Résumé requests',
+        isActive: (p) => p.startsWith('/admin/resume-requests'),
+    },
 ];
 
 export default function AdminNav() {

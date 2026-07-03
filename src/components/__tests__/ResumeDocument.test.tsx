@@ -29,20 +29,29 @@ const RESUME: Resume = {
 };
 
 describe('ResumeDocument', () => {
-    it('public variant hides email/phone and shows the request CTA', () => {
-        render(<ResumeDocument resume={RESUME} />);
+    it('public variant hides email/phone and renders the request slot', () => {
+        render(
+            <ResumeDocument
+                resume={RESUME}
+                requestSlot={<div data-testid="request-slot">request here</div>}
+            />,
+        );
 
         // Direct contact info must never appear in the public render (ADR 0007).
         expect(screen.queryByText('private@example.com')).toBeNull();
         expect(screen.queryByText('(913) 555-0100')).toBeNull();
 
-        expect(
-            screen.getByRole('link', { name: /request full résumé/i }),
-        ).toBeInTheDocument();
+        expect(screen.getByTestId('request-slot')).toBeInTheDocument();
     });
 
-    it('full variant renders email/phone as mailto/tel and drops the CTA', () => {
-        render(<ResumeDocument resume={RESUME} includePrivateContact />);
+    it('full variant renders email/phone as mailto/tel and drops the request slot', () => {
+        render(
+            <ResumeDocument
+                resume={RESUME}
+                includePrivateContact
+                requestSlot={<div data-testid="request-slot">request here</div>}
+            />,
+        );
 
         const email = screen.getByRole('link', {
             name: 'private@example.com',
@@ -52,8 +61,7 @@ describe('ResumeDocument', () => {
         const phone = screen.getByRole('link', { name: '(913) 555-0100' });
         expect(phone).toHaveAttribute('href', 'tel:9135550100');
 
-        expect(
-            screen.queryByRole('link', { name: /request full résumé/i }),
-        ).toBeNull();
+        // The request slot is public-only and must be absent from the gated PDF.
+        expect(screen.queryByTestId('request-slot')).toBeNull();
     });
 });
