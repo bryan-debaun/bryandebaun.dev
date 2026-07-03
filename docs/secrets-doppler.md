@@ -8,17 +8,17 @@ This repo's environment variables are managed in **[Doppler](https://www.doppler
 - **Two configs:** `dev` (local) and `prd` (production on Vercel).
 - **`NEXT_PUBLIC_*`** are build-time public values baked into the client bundle — Doppler
   injects them at build just like server-only vars.
-- `doppler.yaml` pins project `bryandebaun` / config `dev` so every machine
+- `doppler.yaml` pins project `bryandebaun-dev` / config `dev` so every machine
   auto-configures. `.env.example` documents every variable (placeholders only).
 
 ## One-time: create the project (owner, once)
 
-Create Doppler project **`bryandebaun`** (configs `dev`, `prd`), then bootstrap `dev`:
+Create Doppler project **`bryandebaun-dev`** (configs `dev`, `prd`), then bootstrap `dev`:
 
 ```powershell
-doppler login                          # browser auth
-doppler projects create bryandebaun    # or create it in the dashboard
-doppler setup                          # reads doppler.yaml → bryandebaun / dev
+doppler login                            # browser auth
+doppler projects create bryandebaun-dev  # or create it in the dashboard
+doppler setup                            # reads doppler.yaml → bryandebaun-dev / dev
 doppler secrets upload .env.local      # push local values into the dev config (one time)
 ```
 
@@ -29,7 +29,7 @@ Populate `prd` with production values in the dashboard (or `doppler secrets set
 
 ```powershell
 doppler login
-doppler setup            # auto-selects bryandebaun / dev from doppler.yaml
+doppler setup            # auto-selects bryandebaun-dev / dev from doppler.yaml
 doppler run -- pnpm dev  # injects secrets into the process
 ```
 

@@ -11,5 +11,5 @@
 #
 # Docs: https://docs.doppler.com/docs/cli  •  See docs/secrets-doppler.md
 setup:
-  project: bryandebaun
+  project: bryandebaun-dev
   config: dev
