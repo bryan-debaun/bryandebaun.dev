@@ -226,6 +226,39 @@ export interface AdminNoteBody {
   adminNote?: string;
 }
 
+/** JSON Resume private contact fields — never returned by the public GET. */
+export interface ResumePrivateContact {
+  email?: string;
+  phone?: string;
+  [key: string]: any;
+}
+
+export interface ResumeBasics {
+  name: string;
+  label?: string;
+  url?: string;
+  summary?: string;
+  /** JSON Resume private contact fields — never returned by the public GET. */
+  privateContact?: ResumePrivateContact;
+  [key: string]: any;
+}
+
+/** The JSON Resume document. Open-ended (index signatures) — JSON Resume is extensible. */
+export interface ResumeDocument {
+  basics: ResumeBasics;
+  work?: any[];
+  education?: any[];
+  skills?: any[];
+  projects?: any[];
+  [key: string]: any;
+}
+
+export interface ResumeResponse {
+  /** The JSON Resume document. Open-ended (index signatures) — JSON Resume is extensible. */
+  document: ResumeDocument;
+  updatedAt: string;
+}
+
 export interface Movie {
   /** @format double */
   id: number;
@@ -1123,6 +1156,59 @@ export class Api<
       this.request<ResumeDownloadRequest, void>({
         path: `/api/resumeDownloadRequests/${id}/record-download`,
         method: "POST",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Public résumé — private contact fields removed.
+     *
+     * @tags Resume
+     * @name GetResume
+     * @request GET:/api/resume
+     * @secure
+     */
+    getResume: (params: RequestParams = {}) =>
+      this.request<ResumeResponse, void>({
+        path: `/api/resume`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Replace the singleton résumé document (admin only).
+     *
+     * @tags Resume
+     * @name PutResume
+     * @request PUT:/api/resume
+     * @secure
+     */
+    putResume: (data: ResumeDocument, params: RequestParams = {}) =>
+      this.request<ResumeResponse, void>({
+        path: `/api/resume`,
+        method: "PUT",
+        body: data,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Full résumé including private contact. Server-to-server (API-key) or admin.
+     *
+     * @tags Resume
+     * @name GetResumeFull
+     * @request GET:/api/resume/full
+     * @secure
+     */
+    getResumeFull: (params: RequestParams = {}) =>
+      this.request<ResumeResponse, void>({
+        path: `/api/resume/full`,
+        method: "GET",
         secure: true,
         format: "json",
         ...params,
