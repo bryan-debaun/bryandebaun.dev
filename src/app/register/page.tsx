@@ -2,6 +2,8 @@
 import type React from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
+import PasskeySignInButton from '@/components/auth/PasskeySignInButton';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -109,6 +111,16 @@ export default function RegisterPage() {
                     </button>
                 </div>
             </form>
+            <div
+                className="my-6 flex items-center gap-3 text-sm text-[var(--color-norwegian-700)]"
+                aria-hidden="true"
+            >
+                <span className="h-px flex-1 bg-current opacity-30" />
+                <span>or</span>
+                <span className="h-px flex-1 bg-current opacity-30" />
+            </div>
+            <SocialAuthButtons />
+            <PasskeySignInButton next="/" />
         </div>
     );
 }
