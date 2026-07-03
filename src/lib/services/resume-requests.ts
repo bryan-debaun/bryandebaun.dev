@@ -71,3 +71,40 @@ export async function denyResumeRequest(
     const res = await api.api.denyRequest(id, body);
     return unwrapApiResponse<ResumeDownloadRequest>(res);
 }
+
+export type RecordDownloadResult =
+    | { ok: true; request: ResumeDownloadRequest }
+    | { ok: false; reason: 'denied' | 'error' };
+
+/**
+ * Record a download against an approved request and enforce the per-approval
+ * cap (#145). Server-to-server (API-key, no user token) — the public download
+ * route calls this before serving the PDF; the backend atomically increments
+ * `downloadCount` and flips `status` to `fulfilled` once the cap is hit.
+ *
+ * Returns a discriminated result rather than throwing:
+ *  - `denied` — the request is no longer serviceable (at cap, expired, denied,
+ *    or not found): any 4xx. The caller should refuse the download.
+ *  - `error` — a transient/server failure (5xx/network): the caller should
+ *    surface a retryable error and NOT serve, so downloads are only ever served
+ *    when they were successfully recorded.
+ */
+export async function recordResumeDownload(
+    id: string,
+): Promise<RecordDownloadResult> {
+    try {
+        const api = createApi();
+        const res = await api.api.recordDownload(id);
+        return {
+            ok: true,
+            request: unwrapApiResponse<ResumeDownloadRequest>(res),
+        };
+    } catch (e) {
+        const status = (e as { response?: { status?: number } })?.response
+            ?.status;
+        if (typeof status === 'number' && status >= 400 && status < 500) {
+            return { ok: false, reason: 'denied' };
+        }
+        return { ok: false, reason: 'error' };
+    }
+}
