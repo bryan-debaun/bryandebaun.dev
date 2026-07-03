@@ -30,6 +30,13 @@ const TABS: ReadonlyArray<{
         isActive: (p) => p.startsWith('/admin/users'),
     },
     {
+        href: '/admin/resume',
+        label: 'Résumé',
+        // Match the résumé editor without also matching `/admin/resume-requests`.
+        isActive: (p) =>
+            p === '/admin/resume' || p.startsWith('/admin/resume/'),
+    },
+    {
         href: '/admin/resume-requests',
         label: 'Résumé requests',
         isActive: (p) => p.startsWith('/admin/resume-requests'),

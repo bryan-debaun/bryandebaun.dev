@@ -1,25 +1,20 @@
 /**
- * Typed loader for the single-source resume document.
+ * Authoritative TypeScript types for the résumé document (JSON Resume schema
+ * subset — https://jsonresume.org/schema/ — for the fields the site renders).
  *
- * The resume lives at `src/data/resume.json` and follows the JSON Resume
- * schema (https://jsonresume.org/schema/) — we model only the subset of fields
- * the site renders. This module is the source of truth for both the `/resume`
- * page and the generated `public/resume.pdf`.
- *
- * To update the resume, edit `src/data/resume.json` (NOT this file), then
- * regenerate the PDF with `pnpm resume:pdf` while a dev/prod server is running.
+ * As of ADR 0007 Phase 3 the résumé CONTENT lives in the MCP `Resume`
+ * singleton, edited live via `/admin/resume`; the retired
+ * `src/data/resume.json` is gone. The generated client's `ResumeDocument` is
+ * loosely typed (`work?: any[]`, index signatures), so these types stay the
+ * source of truth and the service (`src/lib/services/resume.ts`) casts at the
+ * MCP boundary. Fetch content via that service, never from this module.
  *
  * Privacy note (ADR 0007): direct contact info (email, phone) lives under
  * `basics.privateContact` and is a deliberate deviation from the JSON Resume
  * schema (which puts them flat on `basics`). The public `/resume` page and its
  * JSON-LD MUST NOT render `privateContact`; those fields are for the gated full
- * résumé only.
+ * résumé only. The public MCP endpoint strips them server-side as well.
  */
-
-import resumeData from '@/data/resume.json';
-
-/** Marker string used to flag placeholder content that still needs replacing. */
-export const PLACEHOLDER_MARKER = 'PLACEHOLDER';
 
 export interface ResumeLocation {
     city?: string;
@@ -89,33 +84,11 @@ export interface ResumeProject {
 }
 
 export interface Resume {
-    /** Scaffold note explaining the file's purpose; not rendered. */
+    /** Optional scaffold/authoring note; not rendered. */
     _note?: string;
     basics: ResumeBasics;
     work: ResumeWork[];
     education: ResumeEducation[];
     skills: ResumeSkill[];
     projects: ResumeProject[];
-}
-
-/**
- * Returns the parsed resume document. The JSON is statically imported, so this
- * is synchronous and safe to call from a server component.
- */
-export function getResume(): Resume {
-    return resumeData as Resume;
-}
-
-/**
- * Returns true while the resume still contains placeholder content (any value
- * containing {@link PLACEHOLDER_MARKER}). The `/resume` page uses this to stay
- * `noindex` until real content lands; flip happens automatically once the last
- * PLACEHOLDER is removed from `src/data/resume.json`.
- *
- * The top-level `_note` field is intentionally excluded so the scaffold note
- * (which references the marker) does not keep the page noindex forever.
- */
-export function resumeHasPlaceholders(resume: Resume = getResume()): boolean {
-    const { _note, ...rest } = resume;
-    return JSON.stringify(rest).includes(PLACEHOLDER_MARKER);
 }

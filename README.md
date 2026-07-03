@@ -93,7 +93,7 @@ The philosophy routes use ISR (`export const revalidate = 300`). For instant upd
 
 1. **Page copy** (home, about, projects): edit the corresponding `src/app/**/page.tsx` on a branch off `main`.
 2. **Philosophy articles:** authored/published through the Articles API (admin editor — see issue #88), not via repo files.
-3. **Résumé:** edit `src/data/resume.json` only, then regenerate the PDF with `pnpm resume:pdf` (a dev/prod server must be running).
+3. **Résumé:** edit the content live in the admin editor at `/admin/resume` (content lives in the MCP `Resume` singleton — ADR 0007 Phase 3), then regenerate the gated PDF with `pnpm resume:pdf` (a dev/prod server must be running).
 4. **Lint before pushing:** `pnpm run lint` (ESLint) and `pnpm run content:checks` (remark + cspell + link-check for Markdown docs).
 5. **Open a PR.** CI runs build, lint, content checks, tests, and the a11y/visual suite. If `cspell` flags an intentional word, add it to `cspell.json`.
 
