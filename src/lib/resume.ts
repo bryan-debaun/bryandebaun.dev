@@ -8,6 +8,12 @@
  *
  * To update the resume, edit `src/data/resume.json` (NOT this file), then
  * regenerate the PDF with `pnpm resume:pdf` while a dev/prod server is running.
+ *
+ * Privacy note (ADR 0007): direct contact info (email, phone) lives under
+ * `basics.privateContact` and is a deliberate deviation from the JSON Resume
+ * schema (which puts them flat on `basics`). The public `/resume` page and its
+ * JSON-LD MUST NOT render `privateContact`; those fields are for the gated full
+ * résumé only.
  */
 
 import resumeData from '@/data/resume.json';
@@ -27,14 +33,24 @@ export interface ResumeProfile {
     url: string;
 }
 
+/**
+ * Private contact info — rendered ONLY into the gated full résumé (ADR 0007),
+ * never on the public `/resume` page or in its HTML/JSON-LD.
+ */
+export interface ResumePrivateContact {
+    email?: string;
+    phone?: string;
+}
+
 export interface ResumeBasics {
     name: string;
     label: string;
-    email: string;
     url: string;
     summary: string;
     location?: ResumeLocation;
     profiles: ResumeProfile[];
+    /** Private contact info — public surfaces must not read this. */
+    privateContact?: ResumePrivateContact;
 }
 
 export interface ResumeWork {
@@ -55,6 +71,8 @@ export interface ResumeEducation {
     studyType: string;
     startDate: string;
     endDate?: string;
+    /** Optional free-text note (e.g. context on an incomplete program). */
+    note?: string;
 }
 
 export interface ResumeSkill {
