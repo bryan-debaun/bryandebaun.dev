@@ -42,16 +42,16 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: steps.preflight.outputs.run == 'true'
 
       - name: Install pnpm
         if: steps.preflight.outputs.run == 'true'
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node
         if: steps.preflight.outputs.run == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -82,7 +82,7 @@ jobs:
 
       - name: Upload Playwright report/traces
         if: ${{ always() && steps.preflight.outputs.run == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: integration-report
           path: |
