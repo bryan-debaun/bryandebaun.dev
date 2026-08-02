@@ -26,18 +26,57 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Download OpenAPI spec (optional)
+      # This job cannot run without MCP_API_KEY, and on Dependabot PRs it will
+      # not have one.
+      #
+      # GitHub deliberately withholds *Actions* secrets from workflows triggered
+      # by Dependabot — a Dependabot PR runs with a separate, read-only token and
+      # its own `secrets.DEPENDABOT_*` scope. So `secrets.MCP_API_KEY` expands to
+      # an empty string, the generator hits the MCP server unauthenticated, gets
+      # something that is not a spec back, and dies with:
+      #
+      #   S2OError: Unsupported swagger/OpenAPI version: undefined
+      #
+      # which reads as "the generated client is broken" when the real cause is a
+      # missing credential. Left alone it makes this check permanently red on
+      # every single Dependabot PR — and a check that is always red is a check
+      # nobody reads, which defeats the point of running the bot at all.
+      #
+      # TO RESTORE FULL COVERAGE: add MCP_API_KEY under
+      #   Settings -> Secrets and variables -> Dependabot
+      # (that page is separate from the Actions one; adding it there does NOT
+      # add it here). Once it exists, this guard stops tripping on its own and
+      # Dependabot PRs get verified like any other.
+      - name: Check whether the MCP API key is available
+        id: key
+        env:
+          MCP_API_KEY: ${{ secrets.MCP_API_KEY }}
         run: |
-          mkdir -p artifacts/openapi
-          echo "Attempting to download OpenAPI spec to artifacts/openapi/bad-mcp.swagger.json"
-          curl --fail --silent --show-error --retry 5 --retry-delay 5 --max-time 60 -sS "$MCP_OPENAPI_URL" -o artifacts/openapi/bad-mcp.swagger.json || echo "Couldn't download spec; generator will try remote directly or fallback to committed spec."
+          if [ -z "$MCP_API_KEY" ]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=MCP client verification skipped::MCP_API_KEY is unavailable, so the generated client could not be regenerated or compared. On Dependabot PRs this is expected until the key is added under Settings > Secrets and variables > Dependabot. Anywhere else it means the Actions secret is missing."
+          else
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
 
+      # The "Download OpenAPI spec (optional)" step that used to sit here has
+      # been removed. It curled "$MCP_OPENAPI_URL", which was never passed into
+      # the step's environment, so the variable was always empty, the curl
+      # always failed, and every run printed "Couldn't download spec" before
+      # carrying on regardless. It did nothing except make a healthy log look
+      # like a broken one.
+      #
+      # Nothing is lost: scripts/generate-mcp-client.ts reads MCP_OPENAPI_URL
+      # itself and falls back to the public swagger.json, so the generator was
+      # already doing this download properly one step later.
       - name: Generate MCP client
+        if: steps.key.outputs.available == 'true'
         run: pnpm run generate:mcp-client
         env:
           MCP_API_KEY: ${{ secrets.MCP_API_KEY }}
 
       - name: Verify generated files are up-to-date
+        if: steps.key.outputs.available == 'true'
         run: |
           # Check for uncommitted changes to generated client
           if [ -n "$(git status --porcelain packages/mcp-client/src)" ]; then
