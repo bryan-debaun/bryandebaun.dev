@@ -1,0 +1,97 @@
+version: 2
+
+# Dependency updates + vulnerability alerts.
+#
+# Grouped and batched deliberately, following the same reasoning as the
+# mcp-server config: this is a solo project, and a dozen individual PRs a week
+# is how Dependabot gets muted. A muted bot is worse than none — it looks like
+# coverage while providing none. CI is the gate; majors are the only thing that
+# arrives alone and gets read.
+#
+# GROUP ORDER MATTERS. Dependabot assigns a dependency to the FIRST group whose
+# patterns match it, so every specific group below has to be declared ABOVE the
+# catch-all at the bottom. Move `minor-and-patch` up and it swallows everything.
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    labels:
+      - 'infra'
+      - 'type:chore'
+    groups:
+      # Next and its ESLint config are both pinned exact and must move in
+      # lockstep — eslint-config-next validates against a specific Next
+      # version. Split across two PRs, neither one is mergeable on its own.
+      # Majors included for the same reason.
+      next:
+        patterns:
+          - 'next'
+          - 'eslint-config-next'
+      # Same story: react and react-dom are pinned exact, and their @types have
+      # to match the runtime version or every component file lights up. One PR,
+      # all four packages, majors included.
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+      # The browser-test toolchain, kept OUT of the general minor/patch PR.
+      #
+      # A Playwright bump ships a new Chromium, which shifts pixel output and
+      # churns the a11y-visual baselines. An axe-core bump adds rules, which
+      # changes what the a11y suite reports. Both are expected churn — and that
+      # is exactly the problem: folded into a thirty-package PR, a REAL visual
+      # regression is indistinguishable from the baseline noise around it. On
+      # its own, the diff is reviewable and the regenerated screenshots are
+      # worth looking at.
+      browser-tests:
+        patterns:
+          - 'playwright'
+          - '@playwright/*'
+          - 'lighthouse'
+          - 'chrome-launcher'
+          - 'axe-core'
+          - 'vitest-axe'
+          - 'pixelmatch'
+          - '@types/pixelmatch'
+          - 'pngjs'
+          - '@types/pngjs'
+      # Everything else, minor and patch, in one PR. CI (lint + typecheck +
+      # unit + content checks) is the gate; reviewing these individually has no
+      # payoff.
+      minor-and-patch:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # @types/node tracks the Node major that CI and Vercel actually run, not
+      # npm's latest. Types AHEAD of the runtime are the dangerous direction:
+      # tsc accepts an API that does not exist on the deployed Node, every gate
+      # passes green, and it throws in production. The type layer is the only
+      # thing that could have known. Move this with the workflow node-version
+      # pins.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
+    # This is a pnpm workspace — the root lockfile covers packages/*, so one
+    # entry is enough. @bryandebaun/mcp-client is `workspace:*` and is not a
+    # registry dependency, so Dependabot leaves it alone; it is regenerated
+    # from the MCP server's OpenAPI schema, not versioned.
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels:
+      - 'infra'
+      - 'type:chore'
+    groups:
+      actions:
+        patterns:
+          - '*'
