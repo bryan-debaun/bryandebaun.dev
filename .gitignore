@@ -86,3 +86,6 @@ next-env.d.ts
 
 # Editor/backups created by normalization or tools
 **/*.bak
+
+# Playwright tests generated from features/ by playwright-bdd (#197)
+.features-gen/

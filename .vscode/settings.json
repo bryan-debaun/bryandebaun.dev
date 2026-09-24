@@ -5,5 +5,11 @@
     "emmet.includeLanguages": {
         "mdx": "html"
     },
-    "typescript.tsdk": "node_modules\\typescript\\lib"
+    "typescript.tsdk": "node_modules\\typescript\\lib",
+    "cucumber.features": [
+        "features/**/*.feature"
+    ],
+    "cucumber.glue": [
+        "features/steps/**/*.ts"
+    ]
 }

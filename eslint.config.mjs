@@ -67,7 +67,7 @@ const eslintConfig = defineConfig([
   },
   // Tests and scripts often require pragmatic casting (stubbing globals, playwright, etc.).
   {
-    files: ["**/__tests__/**", "tests/**/*.{ts,tsx}", "scripts/**/*.{ts,js,cjs,mjs}"],
+    files: ["**/__tests__/**", "tests/**/*.{ts,tsx}", "features/**/*.ts", "scripts/**/*.{ts,js,cjs,mjs}"],
     rules: {
       "no-restricted-syntax": "off",
       "@typescript-eslint/no-explicit-any": "off"
@@ -75,9 +75,10 @@ const eslintConfig = defineConfig([
   },
   // Playwright fixtures pass values to the runner via a `use()` callback. The
   // react-hooks plugin mistakes `use` for the React hook and flags valid
-  // fixture definitions; it does not apply to the integration suite.
+  // fixture definitions; it does not apply to the integration suite or the
+  // BDD steps built on its fixtures.
   {
-    files: ["tests/integration/**/*.{ts,tsx}"],
+    files: ["tests/integration/**/*.{ts,tsx}", "features/**/*.ts"],
     rules: {
       "react-hooks/rules-of-hooks": "off"
     }

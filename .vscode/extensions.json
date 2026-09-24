@@ -1,9 +1,10 @@
 {
-  "recommendations": [
-    "anthropic.claude-code",
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "bradlc.vscode-tailwindcss",
-    "ms-playwright.playwright"
-  ]
+    "recommendations": [
+        "anthropic.claude-code",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-playwright.playwright",
+        "CucumberOpen.cucumber-official"
+    ]
 }
