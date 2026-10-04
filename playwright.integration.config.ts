@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { defineConfig } from '@playwright/test';
+import { defineBddConfig } from 'playwright-bdd';
 
 /**
  * Integration / E2E test config (issue #84).
@@ -29,6 +30,16 @@ const baseURL =
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/u, '') ||
     'http://localhost:3000';
 
+// The BDD contract (issue #197): Gherkin features under `features/` compile
+// into Playwright tests in `.features-gen/` (gitignored; `bddgen` writes it
+// before every run). The steps bind to the same auth fixtures the specs use,
+// so a feature runs under this config's server, timeouts and secrets gate.
+const bddTestDir = defineBddConfig({
+    features: 'features/**/*.feature',
+    steps: 'features/steps/**/*.ts',
+    outputDir: '.features-gen',
+});
+
 export default defineConfig({
     testDir: 'tests/integration',
     testMatch: '**/*.spec.ts',
@@ -53,6 +64,14 @@ export default defineConfig({
             // API-only specs need no browser binary, but a single chromium
             // project keeps parity with the visual suite and allows future
             // UI-driven specs.
+            use: {},
+        },
+        {
+            name: 'bdd',
+            testDir: bddTestDir,
+            // Generated files are JavaScript; the top-level `*.spec.ts` match
+            // would skip them.
+            testMatch: '**/*.spec.js',
             use: {},
         },
     ],

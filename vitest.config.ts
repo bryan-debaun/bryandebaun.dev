@@ -18,7 +18,10 @@ export default defineConfig({
             '**/node_modules/**',
             '**/dist/**',
             'tests/visual/**',
-            'tests/integration/**'
+            'tests/integration/**',
+            // The BDD features and their generated Playwright specs (#197).
+            'features/**',
+            '.features-gen/**'
         ]
     }
 });

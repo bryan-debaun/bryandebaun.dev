@@ -53,6 +53,29 @@ contributors without secrets aren't blocked.
   trusts the Supabase admin JWT for writes (the #84 server-side blocker). Folds
   in the retired `agent-artifacts/probe-mcp-admin-auth.ts`.
 
+## Features (Gherkin)
+
+`features/*.feature` at the repo root state the guard contract as Gherkin
+(issue #197) and run under this same config through
+[playwright-bdd](https://github.com/vitalets/playwright-bdd): `bddgen` compiles
+them into `.features-gen/` (gitignored) and a second project, `bdd`, runs the
+result with the same server, timeouts and secrets gate as the specs. The steps
+in `features/steps/` bind to the `anonRequest` / `userRequest` fixtures above,
+so a feature is a spec written for a reader who is not a developer.
+
+```bash
+pnpm test:bdd           # generate + run only the feature project
+pnpm test:integration   # generate + run everything (CI does this)
+```
+
+- **`admin-guard.feature`** — the `auth-negative.spec.ts` contract as two
+  Scenario Outlines: anonymous → 401 and non-admin → 403 across the four
+  guarded routes. No writes; must always pass.
+
+A behaviour is not "enforced" until it appears in a feature file, so a new
+guard rule gets a scenario. The official Cucumber VS Code extension is
+recommended and pointed at the glue by `.vscode/settings.json`.
+
 ## Safety model — why this can write to prod
 
 Writes go to the **real** MCP server (no staging backend exists). Three layers
